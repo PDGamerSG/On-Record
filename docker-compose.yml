@@ -1,0 +1,16 @@
+# Start the local database with: docker compose up -d falkordb
+services:
+  falkordb:
+    image: falkordb/falkordb:v4.22.0
+    ports: ["127.0.0.1:6379:6379", "127.0.0.1:3000:3000"]
+    environment:
+      REDIS_ARGS: "--appendonly yes --appendfsync everysec"
+      FALKORDB_ARGS: "TIMEOUT_DEFAULT 5000 TIMEOUT_MAX 20000 MAX_QUEUED_QUERIES 500 RESULTSET_SIZE 10000"
+    volumes: ["falkordb_data:/var/lib/falkordb/data"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      retries: 20
+
+volumes:
+  falkordb_data:
