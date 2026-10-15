@@ -46,6 +46,12 @@ jobs:
       - name: Run Python lint
         run: uv run --project apps/api ruff check apps/api/wsw_brain apps/api/tests/test_graph_schema.py
 
+      - name: Show database diagnostics on failure
+        if: failure()
+        run: |
+          docker compose ps --all
+          docker compose logs --no-color --tail=200
+
       - name: Stop services
         if: always()
         run: docker compose down -v
