@@ -33,7 +33,7 @@ def test_transcribe_joins_text_and_returns_bounded_confidence() -> None:
     text, confidence = asr.transcribe(np.array([0.1, -0.2], dtype=np.float32))
 
     assert text == "Hello there team"
-    assert confidence == pytest.approx((np.exp(-0.1) + np.exp(-1.0) + np.exp(-0.3)) / 3)
+    assert confidence == pytest.approx((np.exp(-0.1) + np.exp(-0.3)) / 2)
     assert model.calls[0][1] == {"language": "en", "vad_filter": True}
 
 

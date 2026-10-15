@@ -49,8 +49,14 @@ class FasterWhisperASR:
             options["language"] = self.language
         segments, _info = self._get_model().transcribe(audio, **options)
         materialised = list(segments)
-        text = " ".join(segment.text.strip() for segment in materialised if segment.text.strip()).strip()
-        scores = [_segment_confidence(segment) for segment in materialised]
+        text_parts: list[str] = []
+        scores: list[float] = []
+        for segment in materialised:
+            part = segment.text.strip()
+            if part:
+                text_parts.append(part)
+                scores.append(_segment_confidence(segment))
+        text = " ".join(text_parts)
         confidence = float(np.mean(scores)) if scores else 0.0
         return text, confidence
 
