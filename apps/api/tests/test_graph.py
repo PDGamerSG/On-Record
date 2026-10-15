@@ -108,6 +108,13 @@ def seed(store: GraphStore, meeting_id: str = "m1", title: str = "Pricing sync",
 # ---- schema & lifecycle --------------------------------------------------------------------------------
 
 
+def test_constructor_rejects_missing_connection_or_graph_name() -> None:
+    with pytest.raises(ValueError, match="url"):
+        GraphStore("", "wsw_test")
+    with pytest.raises(ValueError, match="graph name"):
+        GraphStore("falkor://127.0.0.1:6379", "")
+
+
 def test_ping_reports_engine_version(store: GraphStore, graph_name: str) -> None:
     status = store.ping()
     assert status["ok"] is True
