@@ -25,7 +25,9 @@ from typing import Any
 
 class EventBus:
     def __init__(self, replay: int = 500) -> None:
-        self._subs: set[asyncio.Queue[dict[str, Any]]] = set()
+        if replay <= 0:
+            raise ValueError("replay must be positive")
+        self._subs: dict[asyncio.Queue[dict[str, Any]], str | None] = {}
         self._ids = itertools.count(1)
         self._replay: deque[dict[str, Any]] = deque(maxlen=replay)
         self._loop: asyncio.AbstractEventLoop | None = None
@@ -52,22 +54,24 @@ class EventBus:
 
     def _fanout(self, event: dict[str, Any]) -> None:
         self._replay.append(event)
-        for q in list(self._subs):
+        for q, meeting_id in list(self._subs.items()):
+            if meeting_id is not None and event["meeting_id"] != meeting_id:
+                continue
             try:
                 q.put_nowait(event)
             except asyncio.QueueFull:
                 pass  # slow consumer: drop; the client re-syncs over REST
 
-    def subscribe(self, since_id: int = 0) -> asyncio.Queue[dict[str, Any]]:
+    def subscribe(self, since_id: int = 0, meeting_id: str | None = None) -> asyncio.Queue[dict[str, Any]]:
         q: asyncio.Queue[dict[str, Any]] = asyncio.Queue(maxsize=2000)
         for e in self._replay:
-            if e["id"] > since_id:
+            if e["id"] > since_id and (meeting_id is None or e["meeting_id"] == meeting_id):
                 q.put_nowait(e)
-        self._subs.add(q)
+        self._subs[q] = meeting_id
         return q
 
     def unsubscribe(self, q: asyncio.Queue[dict[str, Any]]) -> None:
-        self._subs.discard(q)
+        self._subs.pop(q, None)
 
 
 bus = EventBus()
