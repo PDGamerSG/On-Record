@@ -24,3 +24,9 @@ def test_settings_reject_speaker_threshold_outside_probability_range(value: floa
 def test_settings_accept_probability_boundaries() -> None:
     assert Settings(WSW_SPEAKER_THRESHOLD=0).speaker_threshold == 0
     assert Settings(WSW_SPEAKER_THRESHOLD=1).speaker_threshold == 1
+
+
+@pytest.mark.parametrize("field", ["WSW_FALKORDB_URL", "WSW_GRAPH"])
+def test_settings_reject_empty_storage_identifiers(field: str) -> None:
+    with pytest.raises(ValidationError):
+        Settings(**{field: ""})
