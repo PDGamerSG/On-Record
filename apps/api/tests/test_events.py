@@ -50,6 +50,17 @@ def test_subscriber_filters_replay_after_an_event_id() -> None:
     assert queue.get_nowait()["type"] == "utterance.created"
 
 
+def test_meeting_filter_handles_legacy_events_without_meeting_id() -> None:
+    bus = EventBus()
+    bus._replay.append({"id": 1, "type": "listener.status", "ts": 0.0, "data": {}})
+
+    queue = bus.subscribe(meeting_id="m1")
+    bus.publish("utterance.created", {}, meeting_id="m1")
+
+    assert queue.qsize() == 1
+    assert queue.get_nowait()["type"] == "utterance.created"
+
+
 def test_subscribe_rejects_non_positive_replay_size() -> None:
     try:
         EventBus(replay=0)

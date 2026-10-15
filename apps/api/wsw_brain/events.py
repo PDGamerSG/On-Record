@@ -55,7 +55,7 @@ class EventBus:
     def _fanout(self, event: dict[str, Any]) -> None:
         self._replay.append(event)
         for q, meeting_id in list(self._subs.items()):
-            if meeting_id is not None and event["meeting_id"] != meeting_id:
+            if meeting_id is not None and event.get("meeting_id") != meeting_id:
                 continue
             try:
                 q.put_nowait(event)
@@ -65,7 +65,7 @@ class EventBus:
     def subscribe(self, since_id: int = 0, meeting_id: str | None = None) -> asyncio.Queue[dict[str, Any]]:
         q: asyncio.Queue[dict[str, Any]] = asyncio.Queue(maxsize=2000)
         for e in self._replay:
-            if e["id"] > since_id and (meeting_id is None or e["meeting_id"] == meeting_id):
+            if e["id"] > since_id and (meeting_id is None or e.get("meeting_id") == meeting_id):
                 q.put_nowait(e)
         self._subs[q] = meeting_id
         return q
