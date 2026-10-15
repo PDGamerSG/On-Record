@@ -7,3 +7,5 @@ The original project and its contributors retain credit for that implementation.
 The initial changes set the display name to On Record, keep demo seeding off in the example environment, and adapt the setup documentation to the files available here. Internal package names and environment variables retain the `wsw` names used by the source.
 
 The source documents Claude Code assistance. Codex assists this repository's staged import, integration checks, and documentation. Test results and performance figures reported by the source are not new measurements from On Record.
+
+The graph-schema branch imports `graph/cypher.py` and `graph/text.py` unchanged from that snapshot. Its package initializer exposes only the modules present here. The Compose file includes the source's database service, with ports bound to localhost; the application service comes later. The schema checks adapt the source's index assertions and add direct full-text/vector retrieval checks so they can run before `GraphStore` is imported.
