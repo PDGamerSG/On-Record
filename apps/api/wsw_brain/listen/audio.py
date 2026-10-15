@@ -186,10 +186,14 @@ class WavAppender:
     reader thread may call `duration_s` while the listener thread appends.
     """
 
-    def __init__(self, path: str | Path, sample_rate: int = SAMPLE_RATE) -> None:
+    def __init__(
+        self, path: str | Path, sample_rate: int = SAMPLE_RATE, max_duration_s: float | None = None
+    ) -> None:
         self.path = Path(path)
         self.path.parent.mkdir(parents=True, exist_ok=True)
         self.sample_rate = sample_rate
+        self.max_duration_s = max_duration_s
+        self._max_frames = None if max_duration_s is None else int(max_duration_s * sample_rate)
         self._lock = threading.Lock()
         self._frames = 0
         self._file = open(self.path, "wb")  # noqa: SIM115 (kept open for appends; closed in close())
@@ -217,6 +221,9 @@ class WavAppender:
         with self._lock:
             if self._writer is None:
                 raise RuntimeError(f"recording already closed: {self.path}")
+            incoming_frames = len(data) // 2
+            if self._max_frames is not None and self._frames + incoming_frames > self._max_frames:
+                raise AudioTooLong(f"{self.path.name} is longer than the {_hours(self.max_duration_s)} limit")
             self._writer.writeframes(data)
             self._file.flush()
             self._frames += len(data) // 2

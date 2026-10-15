@@ -98,3 +98,17 @@ def test_wav_appender_is_readable_while_growing(tmp_path: Path) -> None:
     assert recorder.frames == SAMPLE_RATE // 2
     with pytest.raises(RuntimeError, match="already closed"):
         recorder.append(np.zeros(1, dtype=np.float32))
+
+
+def test_wav_appender_rejects_chunks_over_duration_limit(tmp_path: Path) -> None:
+    path = tmp_path / "limited-recording.wav"
+    recorder = WavAppender(path, max_duration_s=2)
+    recorder.append(np.full(SAMPLE_RATE * 3 // 2, 0.25, dtype=np.float32))
+
+    with pytest.raises(AudioTooLong, match="longer than the 0:00:02 limit"):
+        recorder.append(np.zeros(SAMPLE_RATE, dtype=np.float32))
+
+    assert recorder.frames == SAMPLE_RATE * 3 // 2
+    recorder.close()
+    with wave.open(str(path), "rb") as reader:
+        assert reader.getnframes() == SAMPLE_RATE * 3 // 2
