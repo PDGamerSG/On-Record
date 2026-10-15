@@ -1,5 +1,6 @@
-"""Audio input helpers; model-backed listening arrives in a later feature."""
+"""Audio input and model-backed listening helpers."""
 
+from .asr import FasterWhisperASR
 from .audio import (
     AudioTooLong,
     WavAppender,
@@ -12,6 +13,7 @@ from .audio import (
 
 __all__ = [
     "AudioTooLong",
+    "FasterWhisperASR",
     "WavAppender",
     "decode_file",
     "float_to_pcm16",
