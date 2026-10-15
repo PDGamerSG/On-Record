@@ -16,8 +16,8 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=str(REPO_ROOT / ".env"), extra="ignore")
 
     # Storage
-    falkordb_url: str = Field("falkor://127.0.0.1:6379", alias="WSW_FALKORDB_URL")
-    graph: str = Field("wsw_demo", alias="WSW_GRAPH")
+    falkordb_url: str = Field("falkor://127.0.0.1:6379", min_length=1, alias="WSW_FALKORDB_URL")
+    graph: str = Field("wsw_demo", min_length=1, alias="WSW_GRAPH")
     data_dir: Path = Field(REPO_ROOT / "data", alias="WSW_DATA_DIR")
     models_dir: Path = Field(REPO_ROOT / "models", alias="WSW_MODELS_DIR")
 
@@ -36,7 +36,7 @@ class Settings(BaseSettings):
     # Embeddings: EmbeddingGemma-300m ONNX, or a deterministic hashing fallback.
     embedder: Literal["gemma", "hash"] = Field("gemma", alias="WSW_EMBEDDER")
     embed_repo: str = Field("onnx-community/embeddinggemma-300m-ONNX", alias="WSW_EMBED_REPO")
-    embed_dim: int = Field(768, alias="WSW_EMBED_DIM")
+    embed_dim: int = Field(768, gt=0, alias="WSW_EMBED_DIM")
 
     # Listener
     asr_model: str = Field("small", alias="WSW_ASR_MODEL")
@@ -44,11 +44,11 @@ class Settings(BaseSettings):
     asr_compute_type: str = Field("int8", alias="WSW_ASR_COMPUTE")
     asr_language: str | None = Field("en", alias="WSW_ASR_LANGUAGE")
     speaker_model: str = Field("speaker_embedding_en.onnx", alias="WSW_SPEAKER_MODEL")
-    speaker_threshold: float = Field(0.55, alias="WSW_SPEAKER_THRESHOLD")
-    max_utterance_s: float = Field(12.0, alias="WSW_MAX_UTTERANCE_S")
+    speaker_threshold: float = Field(0.55, ge=0, le=1, alias="WSW_SPEAKER_THRESHOLD")
+    max_utterance_s: float = Field(12.0, gt=0, alias="WSW_MAX_UTTERANCE_S")
 
     # Brain
-    extract_every: int = Field(6, alias="WSW_EXTRACT_EVERY")
+    extract_every: int = Field(6, gt=0, alias="WSW_EXTRACT_EVERY")
     seed_demo: bool = Field(True, alias="WSW_SEED_DEMO")
     cors_origins: str = Field("*", alias="WSW_CORS_ORIGINS")
 
