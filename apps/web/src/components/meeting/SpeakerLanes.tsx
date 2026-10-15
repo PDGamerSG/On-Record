@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent, type MouseEvent, type ReactNode } from "react";
-import { PencilSimpleIcon } from "@phosphor-icons/react";
+import { Pencil } from "lucide-react";
 import type { Speaker, Utterance } from "../../api/types";
 import { duration, speakerName, timecode } from "../../lib/format";
 import { minTrackPx, pct, rulerTicks } from "./timeline";
@@ -23,8 +23,6 @@ interface Props {
   /** Click on empty track or ruler; omitted when there is nothing to scrub. */
   onScrub?: (t: number) => void;
   onRename: (track: string, name: string) => Promise<unknown>;
-  /** False for meetings the API keeps read-only (the seeded demo meetings): names show without the rename key. */
-  canRename?: boolean;
   meta?: ReactNode;
   emptyText: string;
 }
@@ -38,7 +36,7 @@ function nearestByStart(list: Utterance[], t: number): Utterance | undefined {
 }
 
 export default function SpeakerLanes(props: Props) {
-  const { speakers, utterances, colours, domain, fresh, activeId, onPick, onScrub, onRename, canRename = true, meta, emptyText } = props;
+  const { speakers, utterances, colours, domain, fresh, activeId, onPick, onScrub, onRename, meta, emptyText } = props;
   const scrollRef = useRef<HTMLDivElement>(null);
   const tracksRef = useRef<HTMLDivElement>(null);
   const blockEls = useRef(new Map<string, HTMLButtonElement>());
@@ -177,7 +175,7 @@ export default function SpeakerLanes(props: Props) {
                   speaker={lane.speaker}
                   colour={lane.colour}
                   talkS={lane.talk}
-                  onRename={canRename ? onRename : null}
+                  onRename={onRename}
                   onError={setRenameError}
                 />
               ))}
@@ -226,7 +224,7 @@ interface LaneNameProps {
   speaker: Speaker;
   colour: number;
   talkS: number;
-  onRename: ((track: string, name: string) => Promise<unknown>) | null;
+  onRename: (track: string, name: string) => Promise<unknown>;
   onError: (msg: string | null) => void;
 }
 
@@ -242,7 +240,6 @@ function LaneName({ speaker, colour, talkS, onRename, onError }: LaneNameProps) 
     setEditing(false);
     const v = value?.trim() ?? "";
     if (!v || v === (speaker.name ?? "")) return;
-    if (!onRename) return;
     setSaving(true);
     try {
       await onRename(speaker.track, v);
@@ -256,15 +253,9 @@ function LaneName({ speaker, colour, talkS, onRename, onError }: LaneNameProps) 
 
   return (
     <div className={`lane-name spk spk-${colour}`}>
-      <span className="lane-avatar" aria-hidden="true">
-        {name.trim().charAt(0).toUpperCase() || "?"}
-      </span>
       <div className="lane-name-row">
-        {!onRename ? (
-          <span className="lane-name-btn lane-name-btn--fixed" title="Demo meetings are read-only">
-            <span className="lane-name-text">{name}</span>
-          </span>
-        ) : editing ? (
+        <span className="lane-swatch" aria-hidden="true" />
+        {editing ? (
           <input
             className="field lane-input"
             defaultValue={speaker.name ?? ""}
@@ -292,7 +283,7 @@ function LaneName({ speaker, colour, talkS, onRename, onError }: LaneNameProps) 
             }}
           >
             <span className="lane-name-text">{name}</span>
-            <PencilSimpleIcon aria-hidden="true" />
+            <Pencil aria-hidden="true" />
           </button>
         )}
       </div>

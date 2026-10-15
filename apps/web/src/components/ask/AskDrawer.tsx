@@ -1,7 +1,7 @@
 // The voice-first ask drawer. Opens on "wsw:ask-open", "/" or a "wsw:ask" {question} event.
 import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { matchPath, useLocation } from "react-router-dom";
-import { PlusIcon, PaperPlaneRightIcon, XIcon } from "@phosphor-icons/react";
+import { Plus, Send, X } from "lucide-react";
 import { api } from "../../api/client";
 import type { AskResult, ClientAction, Health } from "../../api/types";
 import { timecode } from "../../lib/format";
@@ -435,11 +435,11 @@ export default function AskDrawer() {
           <h2 id="ask-title">Ask</h2>
           <div className="ask-head__actions">
             <button type="button" className="btn btn--ghost" onClick={newConversation} disabled={!exchanges.length && !pending}>
-              <PlusIcon aria-hidden="true" />
+              <Plus aria-hidden="true" />
               New conversation
             </button>
             <button type="button" className="btn btn--ghost ask-icon-btn" aria-label="Close the ask panel" onClick={close}>
-              <XIcon aria-hidden="true" />
+              <X aria-hidden="true" />
             </button>
           </div>
         </header>
@@ -488,12 +488,15 @@ export default function AskDrawer() {
           ) : (
             <div className="ask-empty">
               <h3>Ask about your meetings</h3>
-              <p>Talk or type. Every answer cites who said it, and when.</p>
+              <p>
+                Hold the button and ask out loud, or type below. Answers quote who said it, with a timecode you can
+                play.
+              </p>
               {audioPath ? (
                 <p className="ask-prov">
                   {audioPath.startsWith("gemma4-audio")
-                    ? "Gemma 4 hears your voice directly."
-                    : "Whisper transcribes your voice, then Gemma 4 answers."}
+                    ? "Your voice goes straight to Gemma 4, which hears the question itself."
+                    : "Your voice is transcribed by Whisper, then Gemma 4 answers."}
                 </p>
               ) : null}
               <Suggestions onPick={askText} />
@@ -574,7 +577,7 @@ export default function AskDrawer() {
               enterKeyHint="send"
             />
             <button type="submit" className="btn btn--primary" disabled={!draft.trim()}>
-              <PaperPlaneRightIcon aria-hidden="true" />
+              <Send aria-hidden="true" />
               Ask
             </button>
           </form>
@@ -613,6 +616,6 @@ function statusText(
     case "armed":
       return { title: "Hands-free is listening", hint: "Ask your question. It sends when you pause." };
     case "idle":
-      return { title: "Hold to talk", hint: "Or tap to start, tap again to send." };
+      return { title: "Hold to talk", hint: "Or press once to start and again to send. Space works too." };
   }
 }

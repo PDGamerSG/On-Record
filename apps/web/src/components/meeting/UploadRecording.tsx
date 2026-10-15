@@ -1,6 +1,6 @@
 import { useRef, useState, type ChangeEvent } from "react";
 import { useNavigate } from "react-router-dom";
-import { CircleNotchIcon, UploadSimpleIcon } from "@phosphor-icons/react";
+import { LoaderCircle, Upload } from "lucide-react";
 import { api } from "../../api/client";
 
 function titleFromFile(name: string): string {
@@ -36,12 +36,12 @@ export default function UploadRecording() {
     <div className="upload">
       <div className="upload-row">
         <button type="button" className="btn" onClick={() => input.current?.click()} disabled={!!busyName}>
-          {busyName ? <CircleNotchIcon className="spin" aria-hidden="true" /> : <UploadSimpleIcon aria-hidden="true" />}
+          {busyName ? <LoaderCircle className="spin" aria-hidden="true" /> : <Upload aria-hidden="true" />}
           {busyName ? `Uploading ${busyName}` : "Upload a recording"}
         </button>
         <input ref={input} type="file" accept="audio/*" hidden onChange={(e) => void onFile(e)} />
         <label className="upload-pace" title="Lanes fill in as if the meeting were happening now. Off: processed as fast as possible.">
-          <input type="checkbox" className="check" checked={realtime} onChange={(e) => setRealtime(e.currentTarget.checked)} disabled={!!busyName} />
+          <input type="checkbox" checked={realtime} onChange={(e) => setRealtime(e.currentTarget.checked)} disabled={!!busyName} />
           Replay at real speed
         </label>
       </div>

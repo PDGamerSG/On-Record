@@ -1,4 +1,4 @@
-import { DownloadSimpleIcon, PauseIcon, PlayIcon } from "@phosphor-icons/react";
+import { Download, Pause, Play } from "lucide-react";
 import { timecode } from "../../lib/format";
 import type { AudioElementState } from "./useAudioElement";
 
@@ -18,19 +18,19 @@ export default function AudioTransport({ src, title, audio, fallbackDuration }: 
       <div className="transport-row">
         <button
           type="button"
-          className="transport-play"
+          className="btn btn--primary transport-play"
           onClick={audio.toggle}
           disabled={!!audio.error}
           aria-label={audio.playing ? "Pause recording" : "Play recording"}
         >
-          {audio.playing ? <PauseIcon weight="fill" aria-hidden="true" /> : <PlayIcon weight="fill" aria-hidden="true" />}
+          {audio.playing ? <Pause aria-hidden="true" /> : <Play aria-hidden="true" />}
         </button>
         <span className="transport-time tc">
-          <span className="transport-now">{timecode(audio.time)}</span>
-          <span className="transport-of"> / {timecode(total)}</span>
+          {timecode(audio.time)} / {timecode(total)}
         </span>
-        <a className="transport-dl" href={src} download={fileName} aria-label="Download audio" title="Download audio">
-          <DownloadSimpleIcon aria-hidden="true" />
+        <a className="btn btn--ghost transport-dl" href={src} download={fileName}>
+          <Download aria-hidden="true" />
+          Download audio
         </a>
       </div>
       <audio ref={audio.attach} className="transport-audio" src={src} preload="metadata" aria-label="Meeting recording" />

@@ -11,13 +11,13 @@
   align-items: baseline;
   justify-content: space-between;
   gap: var(--s-1) var(--s-4);
-  padding: 14px var(--s-5);
+  padding: var(--s-3) var(--s-4);
   border-bottom: 1px solid var(--line);
 }
 
 .ins-title {
   font-size: var(--fs-md);
-  font-weight: 620;
+  font-weight: 650;
 }
 
 .ins-hint {
@@ -35,37 +35,22 @@
 }
 
 .ins-section {
-  padding: var(--s-4) var(--s-5) var(--s-5);
+  padding: var(--s-4);
 }
 .ins-section + .ins-section {
   border-top: 1px solid var(--line);
 }
 
 .ins-h {
-  display: flex;
-  align-items: center;
-  gap: var(--s-2);
   margin-bottom: var(--s-3);
-  color: var(--ink-2);
-  font-size: var(--fs-xs);
-  font-weight: 600;
-  letter-spacing: 0.01em;
-}
-.ins-h svg {
-  width: 16px;
-  height: 16px;
-  color: var(--ink-3);
+  font-size: var(--fs-sm);
+  font-weight: 650;
 }
 
 .ins-n {
-  margin-left: auto;
-  padding: 0 7px;
-  border-radius: var(--r-round);
-  background: var(--surface-2);
+  margin-left: var(--s-1);
   color: var(--ink-2);
-  font-size: 11.5px;
-  font-weight: 560;
-  line-height: 20px;
+  font-weight: 500;
   font-variant-numeric: tabular-nums;
 }
 
@@ -77,17 +62,16 @@
 .ins-list {
   display: flex;
   flex-direction: column;
-  gap: var(--s-2);
+  gap: var(--s-3);
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
 .ins-item {
-  padding: var(--s-3) var(--s-3) 14px;
-  border: 1px solid var(--line);
-  border-radius: var(--r-ctl);
-  background: var(--surface);
+  padding: var(--s-2) var(--s-3) var(--s-3);
+  margin: 0 calc(-1 * var(--s-3));
+  border-radius: var(--r-chip);
 }
 .ins-item:focus-visible {
   outline-offset: 0;
@@ -106,9 +90,9 @@
 }
 
 .ins-text {
-  font-size: var(--fs-sm);
-  font-weight: 560;
-  line-height: 1.45;
+  font-size: var(--fs-md);
+  font-weight: 550;
+  line-height: 1.4;
 }
 .is-superseded .ins-text {
   color: var(--ink-2);
@@ -117,38 +101,16 @@
 .is-done .ins-text {
   color: var(--ink-2);
   text-decoration: line-through;
-  text-decoration-color: var(--ink-3);
+  text-decoration-color: var(--line-strong);
 }
 
 .ins-meta {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  gap: var(--s-1) var(--s-3);
-  margin-top: var(--s-2);
+  gap: var(--s-1) var(--s-4);
+  margin-top: var(--s-1);
   color: var(--ink-2);
   font-size: var(--fs-xs);
-}
-.ins-badge {
-  padding: 0 7px;
-  border: 1px solid var(--line-strong);
-  border-radius: var(--r-round);
-  color: var(--ink-3);
-  font-size: 11.5px;
-  font-weight: 560;
-  line-height: 18px;
-}
-.ins-badge.is-standing {
-  border-color: color-mix(in srgb, var(--ok) 30%, transparent);
-  background: var(--ok-soft);
-  color: var(--ok);
-}
-.ins-owner {
-  color: var(--ink);
-  font-weight: 600;
-}
-.ins-due {
-  color: var(--ink-2);
 }
 .ins-meta strong {
   color: var(--ink);
@@ -158,9 +120,6 @@
 .ins-indent {
   padding-left: 30px;
 }
-.ins-action.is-done {
-  background: var(--surface-sunk);
-}
 
 .ins-check {
   display: flex;
@@ -168,8 +127,13 @@
   gap: var(--s-3);
   cursor: pointer;
 }
-.ins-check .check {
-  margin-top: 2px;
+.ins-check input {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin: 2px 0 0;
+  accent-color: var(--ink);
+  cursor: pointer;
 }
 .ins-check input:disabled {
   cursor: progress;
@@ -184,19 +148,15 @@
 
 /* evidence: the quote the claim came from */
 .ins-ev {
-  margin: var(--s-3) 0 0;
-  padding: 2px 0 2px var(--s-3);
-  border-left: 2px solid color-mix(in srgb, var(--spk) 70%, transparent);
+  margin: var(--s-2) 0 0;
+  padding: var(--s-1) 0 var(--s-1) var(--s-3);
+  border-left: 2px solid var(--spk);
 }
 
 .ins-ev-quote {
-  display: -webkit-box;
   margin: 0;
-  overflow: hidden;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
   color: var(--ink-2);
-  font-size: 0.9375rem;
+  font-size: var(--fs-md);
   line-height: 1.45;
 }
 
@@ -220,12 +180,13 @@
   color: var(--ink);
 }
 .ins-ev-play svg {
-  width: 11px;
-  height: 11px;
-  color: var(--spk);
+  width: 12px;
+  height: 12px;
+  stroke-width: 1.75;
+  fill: currentColor;
 }
 .ins-ev-name {
-  color: var(--spk-text);
+  color: var(--ink);
   font-weight: 600;
 }
 
@@ -241,11 +202,11 @@
 .ins-chip {
   display: inline-flex;
   align-items: baseline;
-  gap: 6px;
-  padding: 3px 10px;
+  gap: var(--s-2);
+  padding: 2px var(--s-2);
   border: 1px solid var(--line);
-  border-radius: var(--r-round);
-  background: var(--surface);
+  border-radius: var(--r-chip);
+  background: var(--surface-2);
   font-size: var(--fs-sm);
 }
 .ins-chip.is-fresh {
@@ -258,7 +219,7 @@
     border-color: var(--focus);
   }
   100% {
-    background: var(--surface);
+    background: var(--surface-2);
   }
 }
 .ins-chip-n {

@@ -18,12 +18,7 @@ function TapeStrip({ entry, domain }: { entry: StripEntry; domain: number }) {
           ? "No speech recorded"
           : "Loading speaker timeline";
     return (
-      <div
-        className={`tape tape--blank${entry.status === "idle" || entry.status === "loading" ? " is-loading" : ""}`}
-        role="img"
-        aria-label={label}
-        title={entry.error ?? label}
-      />
+      <div className={`tape tape--blank${entry.status === "loading" ? " is-loading" : ""}`} role="img" aria-label={label} title={entry.error ?? label} />
     );
   }
 

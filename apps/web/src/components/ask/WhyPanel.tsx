@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { CheckIcon, CaretRightIcon, CopyIcon } from "@phosphor-icons/react";
+import { Check, ChevronRight, Copy } from "lucide-react";
 import { api } from "../../api/client";
 import type { AskResult, Subgraph } from "../../api/types";
 import { speakerName, timecode } from "../../lib/format";
@@ -14,7 +14,7 @@ export default function WhyPanel({ result }: { result: AskResult }) {
   return (
     <details className="ask-why" onToggle={(e) => setOpen(e.currentTarget.open)}>
       <summary>
-        <CaretRightIcon aria-hidden="true" className="ask-why__chev" />
+        <ChevronRight aria-hidden="true" className="ask-why__chev" />
         Why this answer
       </summary>
       {open ? <WhyBody result={result} /> : null}
@@ -102,7 +102,7 @@ function CypherBlock({ statements }: { statements: string[] }) {
       <div className="ask-why__head">
         <h4>Cypher that ran on FalkorDB</h4>
         <button type="button" className="btn btn--ghost ask-mini" onClick={() => copy(text)}>
-          {state === "copied" ? <CheckIcon aria-hidden="true" /> : <CopyIcon aria-hidden="true" />}
+          {state === "copied" ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}
           {state === "copied" ? "Copied" : state === "failed" ? "Copy blocked" : "Copy"}
         </button>
       </div>

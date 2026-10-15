@@ -1,22 +1,35 @@
-/* Meetings: the page header and empty/error states come from memoryPages.css (.mp-*). */
 .home {
   display: flex;
   flex-direction: column;
   gap: var(--s-8);
+  max-width: 1180px;
+  padding: var(--s-10) var(--s-12) var(--s-12);
 }
-.home > .mp-head {
-  margin-bottom: 0;
+
+.home-head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+
+.home-title {
+  font-size: var(--fs-4xl);
+  letter-spacing: -0.02em;
+  max-width: 24ch;
+}
+
+.home-tagline {
+  color: var(--ink-2);
+  font-size: var(--fs-lg);
+  max-width: var(--measure);
 }
 
 .home-actions {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  gap: var(--s-3);
-}
-/* the inline start form needs the full width under the title */
-.home-actions:has(.start) {
-  flex-basis: 100%;
+  align-items: flex-start;
+  gap: var(--s-3) var(--s-4);
+  margin-top: var(--s-3);
 }
 
 .home-error {
@@ -37,7 +50,6 @@
   border: 1px solid var(--line);
   border-radius: var(--r-panel);
   background: var(--surface);
-  box-shadow: var(--shadow-panel);
 }
 .start-label {
   font-size: var(--fs-sm);
@@ -75,61 +87,53 @@
   color: var(--ink-2);
   font-size: var(--fs-sm);
   cursor: pointer;
-  transition: color var(--t-fast) var(--ease-out);
 }
-.upload-pace:hover {
-  color: var(--ink);
+.upload-pace input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--ink);
 }
 
-/* graph totals: one tile per count */
+/* graph totals */
 .totals {
-  overflow: hidden;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-3) var(--s-8);
+  padding: var(--s-3) var(--s-4);
+  border: 1px solid var(--line);
+  border-radius: var(--r-panel);
+  background: var(--surface);
 }
 .totals-title {
-  padding: 14px var(--s-5);
-  border-bottom: 1px solid var(--line);
-  color: var(--ink-2);
-  font-size: var(--fs-xs);
-  font-weight: 600;
-  letter-spacing: 0;
+  font-size: var(--fs-sm);
+  font-weight: 650;
 }
 .totals-list {
-  display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2) var(--s-6);
   margin: 0;
 }
 .totals-item {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
-  min-width: 0;
-  padding: var(--s-5);
-}
-.totals-item + .totals-item {
-  border-left: 1px solid var(--line);
+  align-items: baseline;
+  gap: var(--s-2);
 }
 .totals-item dt {
   order: 2;
   color: var(--ink-2);
-  font-size: var(--fs-xs);
+  font-size: var(--fs-sm);
 }
 .totals-item dd {
   order: 1;
   margin: 0;
-  font-size: 1.875rem;
-  font-weight: 620;
-  line-height: 1.1;
+  font-size: var(--fs-lg);
+  font-weight: 650;
   font-variant-numeric: tabular-nums;
-  letter-spacing: -0.03em;
-}
-.totals-item dd.skel {
-  width: 3ch;
-  height: 1.15em;
-  margin: 0;
-  color: transparent;
 }
 .totals-error {
-  padding: var(--s-4) var(--s-5);
   color: var(--ink-2);
   font-size: var(--fs-sm);
 }
@@ -157,7 +161,7 @@
   gap: var(--s-1) var(--s-4);
 }
 .home-list-title {
-  font-size: var(--fs-lg);
+  font-size: var(--fs-xl);
 }
 .home-count {
   margin-left: var(--s-1);
@@ -182,15 +186,14 @@
   display: grid;
   grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
   align-items: center;
-  gap: var(--s-3) var(--s-8);
-  padding: var(--s-5);
-  transition: background var(--t-fast) var(--ease-out);
+  gap: var(--s-3) var(--s-6);
+  padding: var(--s-4);
 }
 .mrow + .mrow {
   border-top: 1px solid var(--line);
 }
 .mrow:hover {
-  background: var(--surface-sunk);
+  background: var(--surface-2);
 }
 
 .mrow-main {
@@ -210,11 +213,14 @@
 .mrow-title {
   color: var(--ink);
   font-size: var(--fs-md);
-  font-weight: 620;
+  font-weight: 650;
   text-decoration: none;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+.mrow-title:hover {
+  text-decoration: underline;
 }
 /* the whole row opens the meeting */
 .mrow-title::after {
@@ -237,7 +243,6 @@
   flex: none;
   align-items: center;
   gap: 6px;
-  color: var(--rec);
   font-size: var(--fs-xs);
   font-weight: 650;
 }
@@ -245,23 +250,9 @@
 .mrow-meta {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  gap: var(--s-1) var(--s-4);
+  gap: 0 var(--s-4);
   color: var(--ink-2);
   font-size: var(--fs-sm);
-}
-.mrow-num {
-  font-variant-numeric: tabular-nums;
-}
-.mrow-source {
-  flex: none;
-  padding: 0 8px;
-  border-radius: var(--r-round);
-  background: var(--surface-2);
-  color: var(--ink-2);
-  font-size: 11.5px;
-  font-weight: 560;
-  line-height: 20px;
 }
 
 .mrow-tape {
@@ -271,53 +262,60 @@
 .mrow--skeleton:hover {
   background: none;
 }
-.mrow--skeleton .mrow-main {
-  gap: var(--s-3);
-  padding: var(--s-1) 0;
+.skel {
+  display: block;
+  height: 14px;
+  border-radius: var(--r-chip);
+  background: var(--surface-sunk);
 }
 .skel--title {
-  width: 52%;
-  height: 14px;
+  width: 55%;
+  height: 16px;
 }
 .skel--meta {
-  width: 78%;
-  height: 10px;
+  width: 75%;
+  opacity: 0.7;
 }
 
-@media (max-width: 1023px) {
-  .totals-list {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-  .totals-item:nth-child(3n + 1) {
-    border-left: 0;
-  }
-  .totals-item:nth-child(n + 4) {
-    border-top: 1px solid var(--line);
-  }
+.home-message {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-3) var(--s-4);
+  padding: var(--s-6) var(--s-4);
+}
+.home-message p {
+  flex: 1 1 320px;
+  max-width: var(--measure);
+}
+.home-empty {
+  flex-direction: column;
+  align-items: flex-start;
+}
+.home-empty p {
+  flex: none;
+  color: var(--ink-2);
 }
 
 @media (max-width: 767px) {
   .home {
     gap: var(--s-6);
+    padding: var(--s-6) var(--s-4) var(--s-8);
   }
-  .home-actions {
-    flex-basis: 100%;
+  .home-title {
+    font-size: var(--fs-2xl);
   }
-  .totals-title {
-    padding: var(--s-3) var(--s-4);
+  .home-tagline {
+    font-size: var(--fs-md);
   }
-  .totals-item {
-    padding: var(--s-3);
+  .totals {
+    gap: var(--s-2) var(--s-4);
   }
-  .totals-item:nth-child(3n + 1) {
-    padding-left: var(--s-4);
-  }
-  .totals-item dd {
-    font-size: var(--fs-xl);
+  .totals-list {
+    gap: var(--s-1) var(--s-4);
   }
   .mrow {
     grid-template-columns: minmax(0, 1fr);
     gap: var(--s-3);
-    padding: var(--s-4);
   }
 }

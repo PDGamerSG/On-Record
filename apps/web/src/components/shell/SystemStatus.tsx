@@ -1,7 +1,6 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { api } from "../../api/client";
 import { hub, useBusEvents } from "../../api/events";
-import { isDemo } from "../../api/mode";
 import type { Health } from "../../api/types";
 
 const POLL_MS = 30_000;
@@ -112,20 +111,12 @@ function statusItems({ health, error, live, wasLive }: SystemState): StatusItem[
   return items;
 }
 
-function summary(items: StatusItem[]): { tone: Tone; label: string; short: string } {
-  if (isDemo()) return { tone: "ok", label: "Demo data. Show system details", short: "Demo data" };
+function summary(items: StatusItem[]): { tone: Tone; label: string } {
   const problems = items.filter((i) => i.tone === "warn");
-  if (problems.length) return { tone: "warn", label: `System status: ${problems.map((p) => p.text).join(", ")}`, short: problems.length === 1 ? problems[0].text : `${problems.length} issues` };
-  if (items.some((i) => i.tone === "pending")) return { tone: "pending", label: "System status: checking", short: "Connecting" };
-  return { tone: "ok", label: "System status: everything connected", short: "All systems live" };
+  if (problems.length) return { tone: "warn", label: `System status: ${problems.map((p) => p.text).join(", ")}` };
+  if (items.some((i) => i.tone === "pending")) return { tone: "pending", label: "System status: checking" };
+  return { tone: "ok", label: "System status: everything connected" };
 }
-
-/** In demo mode the bundled data stands in for the API, so say that plainly instead of listing services. */
-const DEMO_ITEMS: StatusItem[] = [
-  { key: "data", tone: "ok", text: "Two recorded meetings, bundled with the page" },
-  { key: "ask", tone: "ok", text: "Answers replay what Gemma 4 said on this data" },
-  { key: "api", tone: "pending", text: "Live capture and voice questions need the API" },
-];
 
 function Items({ items }: { items: StatusItem[] }) {
   return (
@@ -141,11 +132,20 @@ function Items({ items }: { items: StatusItem[] }) {
   );
 }
 
-/** One quiet chip in the top bar: a dot and a word, opening the full list of what's connected. */
-export function SystemStatus() {
-  const state = useSystemState();
-  const items = isDemo() ? DEMO_ITEMS : statusItems(state);
-  const { tone, label, short } = summary(items);
+/** Desktop: one slim line under the page. */
+export function StatusLine() {
+  const items = statusItems(useSystemState());
+  return (
+    <footer className="status-line" aria-label="System status">
+      <Items items={items} />
+    </footer>
+  );
+}
+
+/** Mobile: a single dot that opens the same details. */
+export function StatusDot() {
+  const items = statusItems(useSystemState());
+  const { tone, label } = summary(items);
   const [open, setOpen] = useState(false);
   const panelId = useId();
   const wrap = useRef<HTMLDivElement>(null);
@@ -177,10 +177,8 @@ export function SystemStatus() {
         onClick={() => setOpen((o) => !o)}
       >
         <span className="status-dot" aria-hidden="true" />
-        <span className="status-toggle-label">{short}</span>
       </button>
       <div id={panelId} className="status-pop" hidden={!open}>
-        <p className="status-pop-title">{isDemo() ? "You're viewing demo data" : "System"}</p>
         <Items items={items} />
       </div>
     </div>

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
-import { ArrowDownIcon, ArrowUpIcon, MagnifyingGlassIcon } from "@phosphor-icons/react";
+import { ArrowDown, ArrowUp, Search } from "lucide-react";
 import { api } from "../api/client";
 import type { Person, WhoKnows } from "../api/types";
 import { duration } from "../lib/format";
@@ -68,7 +68,10 @@ export default function PeoplePage() {
       <header className="mp-head">
         <div>
           <h1>People</h1>
-          <p className="mp-sub">Everyone heard across your meetings. Rename a speaker in a meeting to link them here.</p>
+          <p className="mp-sub">
+            Everyone the brain has heard, across meetings. Name a speaker in a meeting to link their voice to a person
+            here.
+          </p>
         </div>
       </header>
 
@@ -85,17 +88,7 @@ export default function PeoplePage() {
               </button>
             </div>
           ) : null}
-          {!people && !error ? (
-            <div className="pp-loading">
-              <p className="visually-hidden">Loading people…</p>
-              {[0, 1, 2, 3].map((i) => (
-                <div key={i} className="pp-loading__row" aria-hidden="true">
-                  <span className="skel" />
-                  <span className="skel" />
-                </div>
-              ))}
-            </div>
-          ) : null}
+          {!people && !error ? <p className="mp-state pp-pad">Loading people…</p> : null}
           {people && !people.length ? (
             <div className="mp-empty">
               <h2>Nobody yet</h2>
@@ -118,9 +111,9 @@ export default function PeoplePage() {
                           {c.label}
                           {sort.key === c.key ? (
                             sort.desc ? (
-                              <ArrowDownIcon aria-hidden="true" />
+                              <ArrowDown aria-hidden="true" />
                             ) : (
-                              <ArrowUpIcon aria-hidden="true" />
+                              <ArrowUp aria-hidden="true" />
                             )
                           ) : null}
                         </button>
@@ -208,7 +201,7 @@ function WhoKnowsPanel() {
           autoComplete="off"
         />
         <button type="submit" className="btn btn--primary" disabled={!topic.trim() || loading}>
-          <MagnifyingGlassIcon aria-hidden="true" />
+          <Search aria-hidden="true" />
           Find people
         </button>
       </form>

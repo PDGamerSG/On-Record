@@ -1,16 +1,42 @@
-import { useEffect, useRef, useState, type MouseEvent, type ReactNode } from "react";
-import { Link } from "react-router-dom";
-import { ListIcon, MicrophoneIcon } from "@phosphor-icons/react";
+import { useEffect, useState, type MouseEvent, type ReactNode } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { AudioLines, ListChecks, Mic, Network, Signpost, Users, type LucideIcon } from "lucide-react";
 import { brand } from "../../lib/brand";
-import { isDemo } from "../../api/mode";
-import { isTypingTarget, useFocusTrap } from "../ask/useFocusTrap";
 import ProductMark from "./ProductMark";
-import Sidebar from "./Sidebar";
-import { SystemStatus } from "./SystemStatus";
-import { openAsk, useMedia, useRailChoice, useSidebarData } from "./sidebarData";
+import { StatusDot, StatusLine } from "./SystemStatus";
 import "./AppShell.css";
 
-const SIDEBAR_ID = "app-sidebar";
+interface NavItem {
+  to: string;
+  label: string;
+  icon: LucideIcon;
+  match: (path: string) => boolean;
+}
+
+const NAV: NavItem[] = [
+  { to: "/", label: "Meetings", icon: AudioLines, match: (p) => p === "/" || p.startsWith("/m/") },
+  { to: "/commitments", label: "Commitments", icon: ListChecks, match: (p) => p.startsWith("/commitments") },
+  { to: "/decisions", label: "Decisions", icon: Signpost, match: (p) => p.startsWith("/decisions") },
+  { to: "/people", label: "People", icon: Users, match: (p) => p.startsWith("/people") },
+  { to: "/graph", label: "Graph", icon: Network, match: (p) => p.startsWith("/graph") },
+];
+
+const MOBILE_QUERY = "(max-width: 767px)";
+
+function useIsMobile(): boolean {
+  const [mobile, setMobile] = useState(() => typeof window !== "undefined" && window.matchMedia(MOBILE_QUERY).matches);
+  useEffect(() => {
+    const mq = window.matchMedia(MOBILE_QUERY);
+    const on = () => setMobile(mq.matches);
+    mq.addEventListener("change", on);
+    return () => mq.removeEventListener("change", on);
+  }, []);
+  return mobile;
+}
+
+function openAsk() {
+  window.dispatchEvent(new CustomEvent("wsw:ask-open"));
+}
 
 function skipToMain(e: MouseEvent<HTMLAnchorElement>) {
   const main = document.getElementById("main");
@@ -20,102 +46,48 @@ function skipToMain(e: MouseEvent<HTMLAnchorElement>) {
   main.scrollIntoView({ block: "start" });
 }
 
-/**
- * App frame: a sidebar on the left (sections, recent meetings, Ask) beside the page, which sits on its own inset panel.
- * Below 1100 px the sidebar folds to an icon rail; on phones it becomes a drawer behind a slim top bar.
- */
 export default function AppShell({ children }: { children: ReactNode }) {
-  const phone = useMedia("(max-width: 767px)");
-  const narrow = useMedia("(max-width: 1099px)");
-  const [railChoice, toggleRail] = useRailChoice();
-  const [menuOpen, setMenuOpen] = useState(false);
-  const drawerRef = useRef<HTMLDivElement>(null);
-  const { meetings, openItems, counts } = useSidebarData();
-
-  const drawerOpen = phone && menuOpen;
-  const rail = !phone && (narrow || railChoice);
-  const closeMenu = () => setMenuOpen(false);
-
-  // "[" folds and unfolds the sidebar, as in most editors; text fields keep the key.
-  useEffect(() => {
-    if (phone || narrow) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "[" || e.ctrlKey || e.metaKey || e.altKey || e.defaultPrevented || isTypingTarget(e.target)) return;
-      e.preventDefault();
-      toggleRail();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [phone, narrow, toggleRail]);
-
-  // The open drawer holds focus and the page stays put underneath it.
-  useFocusTrap(drawerRef, drawerOpen);
-  useEffect(() => {
-    if (!drawerOpen) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setMenuOpen(false);
-    };
-    const root = document.documentElement;
-    const before = root.style.overflow;
-    root.style.overflow = "hidden";
-    window.addEventListener("keydown", onKey);
-    return () => {
-      root.style.overflow = before;
-      window.removeEventListener("keydown", onKey);
-    };
-  }, [drawerOpen]);
+  const { pathname } = useLocation();
+  const mobile = useIsMobile();
 
   return (
-    <div className={`shell${rail ? " is-rail" : ""}${drawerOpen ? " is-menu-open" : ""}`}>
+    <div className="shell">
       <a href="#main" className="shell-skip" onClick={skipToMain}>
         Skip to main content
       </a>
-
-      {phone && (
-        <header className="shell-top">
-          <button
-            type="button"
-            className="side-icon shell-menu"
-            onClick={() => setMenuOpen(true)}
-            aria-label="Open menu"
-            aria-expanded={menuOpen}
-            aria-controls={SIDEBAR_ID}
-          >
-            <ListIcon aria-hidden="true" />
+      <nav className="shell-rail" aria-label="Main">
+        <Link to="/" className="shell-mark" aria-label={`${brand.short}, all meetings`}>
+          <ProductMark />
+          <span className="shell-mark-name" aria-hidden="true">
+            {brand.short}
+          </span>
+        </Link>
+        <ul className="shell-nav">
+          {NAV.map(({ to, label, icon: Icon, match }) => {
+            const active = match(pathname);
+            return (
+              <li key={to}>
+                <Link to={to} className={`shell-link${active ? " is-active" : ""}`} aria-current={active ? "page" : undefined}>
+                  <Icon aria-hidden="true" />
+                  <span className="shell-link-label">{label}</span>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+        <div className="shell-rail-foot">
+          <button type="button" className="shell-talk" onClick={openAsk} aria-label="Ask (press /)" aria-keyshortcuts="/" data-tip="Ask (press /)">
+            <Mic aria-hidden="true" />
           </button>
-          <Link to="/" className="side-brand" aria-label={`${brand.name} home`}>
-            <ProductMark size={26} />
-            <span className="side-brand-name">{brand.short}</span>
-          </Link>
-          {isDemo() && <span className="side-demo">Demo</span>}
-          <div className="shell-top-tools">
-            <SystemStatus />
-            <button type="button" className="shell-ask" onClick={openAsk} aria-keyshortcuts="/">
-              <MicrophoneIcon aria-hidden="true" weight="fill" />
-              <span>Ask</span>
-            </button>
-          </div>
-        </header>
-      )}
-
-      <div className="shell-side" ref={drawerRef} inert={phone && !menuOpen} role={drawerOpen ? "dialog" : undefined} aria-modal={drawerOpen || undefined} aria-label={drawerOpen ? "Menu" : undefined}>
-        <Sidebar
-          id={SIDEBAR_ID}
-          rail={rail}
-          canToggle={!phone && !narrow}
-          onToggle={toggleRail}
-          onClose={phone ? closeMenu : undefined}
-          onNavigate={closeMenu}
-          meetings={meetings}
-          openItems={openItems}
-          counts={counts}
-        />
+          {mobile && <StatusDot />}
+        </div>
+      </nav>
+      <div className="shell-main">
+        <main id="main" className="shell-content" tabIndex={-1}>
+          {children}
+        </main>
+        {!mobile && <StatusLine />}
       </div>
-      {phone && <div className="shell-scrim" onClick={closeMenu} aria-hidden="true" />}
-
-      <main id="main" className="shell-content" tabIndex={-1}>
-        {children}
-      </main>
     </div>
   );
 }

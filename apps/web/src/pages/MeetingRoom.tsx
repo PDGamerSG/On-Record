@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
-import { ArrowLeftIcon, CircleNotchIcon, DatabaseIcon, MicrophoneIcon, StopIcon, WarningCircleIcon } from "@phosphor-icons/react";
+import { ArrowLeft, CircleAlert, LoaderCircle, Mic, Square } from "lucide-react";
 import { api } from "../api/client";
-import { isDemo } from "../api/mode";
 import type { ActionItem, MeetingSummary, Utterance } from "../api/types";
 import { brand } from "../lib/brand";
 import { duration, speakerName, timecode, when } from "../lib/format";
@@ -35,8 +34,8 @@ function Room({ id }: { id: string }) {
     const notFound = error?.status === 404;
     return (
       <div className="room room--message">
-        <Link to="/meetings" className="room-back">
-          <ArrowLeftIcon aria-hidden="true" />
+        <Link to="/" className="room-back">
+          <ArrowLeft aria-hidden="true" />
           Meetings
         </Link>
         <div className="room-message panel" role="alert">
@@ -52,7 +51,7 @@ function Room({ id }: { id: string }) {
                 Try again
               </button>
             )}
-            <Link to="/meetings" className="btn">
+            <Link to="/" className="btn">
               Back to meetings
             </Link>
           </div>
@@ -69,13 +68,13 @@ function RoomLoading() {
       <div className="room-head">
         <span className="room-back room-back--muted">Meetings</span>
         <p className="room-loading" role="status">
-          <CircleNotchIcon className="spin" aria-hidden="true" />
+          <LoaderCircle className="spin" aria-hidden="true" />
           Loading the meeting
         </p>
       </div>
       <div className="lanes-skeleton panel" aria-hidden="true">
         {[0, 1, 2].map((i) => (
-          <span key={i} className="skel" />
+          <span key={i} />
         ))}
       </div>
     </div>
@@ -232,45 +231,40 @@ function RoomReady({ id, room, meeting }: { id: string; room: MeetingRoomApi; me
   return (
     <div className="room">
       <header className="room-head">
-        <Link to="/meetings" className="room-back">
-          <ArrowLeftIcon aria-hidden="true" />
+        <Link to="/" className="room-back">
+          <ArrowLeft aria-hidden="true" />
           Meetings
         </Link>
         <div className="room-titlebar">
-          <div className="room-titles">
-            <h1 className="room-title">{meeting.title || "Untitled meeting"}</h1>
-            <div className="room-status">
-              {live && !isUpload && <RecIndicator flowing={audioFlowing} elapsed={elapsed} capture={capturing ? capture : null} />}
-              {live && isUpload && (
-                <span className="room-state">
-                  <CircleNotchIcon className="spin" aria-hidden="true" />
-                  Processing, now at <span className="tc">{timecode(lastEnd)}</span>
-                </span>
-              )}
-              {!live && <span className="room-state">Ended</span>}
-              {startedAt > 0 && <span className="room-fact">{when(startedAt)}</span>}
-              {!live && <span className="room-fact">{duration(shownDuration)}</span>}
-              <span className="room-fact">
-                {state.speakers.length} {state.speakers.length === 1 ? "speaker" : "speakers"}
-              </span>
-              <span className="room-fact">{meeting.source === "upload" ? "Uploaded recording" : meeting.source === "demo" ? "Demo meeting" : "Recorded live"}</span>
-            </div>
-          </div>
-          <div className="room-side">
-            {hasPlayer && <AudioTransport src={api.audioUrl(id)} title={meeting.title} audio={audio} fallbackDuration={shownDuration} />}
-            <RoomActions
-              live={live}
-              canCapture={canCapture}
-              capture={capture}
-              ending={ending}
-              onStart={capture.start}
-              onEnd={endMeeting}
-            />
-          </div>
+          <h1 className="room-title">{meeting.title || "Untitled meeting"}</h1>
+          <RoomActions
+            live={live}
+            canCapture={canCapture}
+            capture={capture}
+            ending={ending}
+            onStart={capture.start}
+            onEnd={endMeeting}
+          />
+        </div>
+        <div className="room-status">
+          {live && !isUpload && <RecIndicator flowing={audioFlowing} elapsed={elapsed} capture={capturing ? capture : null} />}
+          {live && isUpload && (
+            <span className="room-state">
+              <LoaderCircle className="spin" aria-hidden="true" />
+              Processing the recording, now at <span className="tc">{timecode(lastEnd)}</span>
+            </span>
+          )}
+          {!live && <span className="room-state">Ended</span>}
+          {startedAt > 0 && <span>Started {when(startedAt)}</span>}
+          {!live && <span>{duration(shownDuration)} long</span>}
+          <span>
+            {state.speakers.length} {state.speakers.length === 1 ? "speaker" : "speakers"}
+          </span>
+          <span>{meeting.source === "upload" ? "Uploaded recording" : meeting.source === "demo" ? "Demo meeting" : "Recorded live"}</span>
         </div>
         {capture.error && (
           <div className="room-alert" role="alert">
-            <WarningCircleIcon aria-hidden="true" />
+            <CircleAlert aria-hidden="true" />
             <p>{capture.error.message}</p>
             {live && capture.error.kind !== "insecure" && capture.error.kind !== "unsupported" && (
               <button type="button" className="btn" onClick={capture.start} disabled={capture.phase === "starting"}>
@@ -281,10 +275,11 @@ function RoomReady({ id, room, meeting }: { id: string; room: MeetingRoomApi; me
         )}
         {endError && (
           <div className="room-alert" role="alert">
-            <WarningCircleIcon aria-hidden="true" />
+            <CircleAlert aria-hidden="true" />
             <p>{endError}</p>
           </div>
         )}
+        {hasPlayer && <AudioTransport src={api.audioUrl(id)} title={meeting.title} audio={audio} fallbackDuration={shownDuration} />}
       </header>
 
       <SpeakerLanes
@@ -300,7 +295,6 @@ function RoomReady({ id, room, meeting }: { id: string; room: MeetingRoomApi; me
         onPick={onPick}
         onScrub={canPlay ? onScrub : undefined}
         onRename={renameSpeaker}
-        canRename={meeting.source !== "demo" || isDemo()}
         meta={<GraphWrites state={state} live={live} captureLag={capture.status?.lagS ?? null} listenerFresh={listenerFresh} />}
         emptyText={
           live
@@ -361,7 +355,7 @@ function RoomActions({ live, canCapture, capture, ending, onStart, onEnd }: Room
     return (
       <div className="room-actions">
         <button type="button" className="btn btn--primary" disabled>
-          <CircleNotchIcon className="spin" aria-hidden="true" />
+          <LoaderCircle className="spin" aria-hidden="true" />
           Saving the meeting
         </button>
       </div>
@@ -371,7 +365,7 @@ function RoomActions({ live, canCapture, capture, ending, onStart, onEnd }: Room
     return (
       <div className="room-actions">
         <button type="button" className="btn btn--primary" onClick={onEnd}>
-          <StopIcon weight="fill" aria-hidden="true" />
+          <Square aria-hidden="true" />
           Stop and save
         </button>
       </div>
@@ -381,7 +375,7 @@ function RoomActions({ live, canCapture, capture, ending, onStart, onEnd }: Room
     <div className="room-actions">
       {canCapture && (
         <button type="button" className="btn btn--primary" onClick={onStart} disabled={capture.phase === "starting"}>
-          {capture.phase === "starting" ? <CircleNotchIcon className="spin" aria-hidden="true" /> : <MicrophoneIcon aria-hidden="true" />}
+          {capture.phase === "starting" ? <LoaderCircle className="spin" aria-hidden="true" /> : <Mic aria-hidden="true" />}
           {capture.phase === "starting" ? "Starting the microphone" : "Start capturing"}
         </button>
       )}
@@ -441,12 +435,9 @@ function GraphWrites({ state, live, captureLag, listenerFresh }: { state: RoomSt
   return (
     <dl className="writes">
       <div className="writes-item">
-        <dt>
-          <DatabaseIcon aria-hidden="true" />
-          In FalkorDB
-        </dt>
+        <dt>Written to FalkorDB</dt>
         <dd>
-          {n.toLocaleString()} {n === 1 ? "line" : "lines"}
+          {n.toLocaleString()} {n === 1 ? "utterance" : "utterances"}
         </dd>
       </div>
       {state.lastWrite && (

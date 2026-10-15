@@ -1,17 +1,13 @@
-/** The record glyph from the favicon: a black disc whose grooves carry speaker colours, one arc per voice. */
+/** The multitrack glyph from the favicon: three lanes of speaker blocks on navy. */
 export default function ProductMark({ size = 32 }: { size?: number }) {
   return (
     <svg className="mark" width={size} height={size} viewBox="0 0 32 32" aria-hidden="true" focusable="false">
-      <circle cx="16" cy="16" r="16" fill="#15171c" />
-      <circle cx="16" cy="16" r="13.6" fill="none" stroke="#ffffff" strokeOpacity="0.08" strokeWidth="0.75" />
-      <g fill="none" strokeLinecap="round" strokeWidth="2.4">
-        <path d="M16 4.5 A11.5 11.5 0 0 1 27.2 13.4" stroke="#6b95ff" />
-        <path d="M24.6 23.6 A11.5 11.5 0 0 1 9.2 25.3" stroke="#f2b53a" />
-        <path d="M8.2 11.1 A8.4 8.4 0 0 1 17.9 7.8" stroke="#2cc4a8" />
-        <path d="M23.9 17.9 A8.4 8.4 0 0 1 19.6 23.6" stroke="#ef72bf" />
-      </g>
-      <circle cx="16" cy="16" r="4.4" fill="#f6f5f2" />
-      <circle cx="16" cy="16" r="1.15" fill="#15171c" />
+      <rect width="32" height="32" rx="6" style={{ fill: "var(--ink)" }} />
+      <rect x="5" y="8" width="9" height="4" rx="1" style={{ fill: "var(--spk-0)" }} />
+      <rect x="16" y="8" width="11" height="4" rx="1" style={{ fill: "var(--spk-0)" }} />
+      <rect x="9" y="14" width="13" height="4" rx="1" style={{ fill: "var(--spk-1)" }} />
+      <rect x="5" y="20" width="6" height="4" rx="1" style={{ fill: "var(--spk-2)" }} />
+      <rect x="19" y="20" width="8" height="4" rx="1" style={{ fill: "var(--spk-2)" }} />
     </svg>
   );
 }

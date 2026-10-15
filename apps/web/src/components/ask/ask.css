@@ -4,15 +4,7 @@
   position: fixed;
   inset: 0;
   z-index: 60;
-  background: rgb(var(--shade) / 0.22);
-  backdrop-filter: blur(2px);
-  -webkit-backdrop-filter: blur(2px);
-  animation: ask-fade var(--t-med) var(--ease-out);
-}
-@keyframes ask-fade {
-  from {
-    opacity: 0;
-  }
+  background: color-mix(in srgb, var(--ink) 16%, transparent);
 }
 
 .ask-drawer {
@@ -28,7 +20,7 @@
   background: var(--surface);
   border-left: 1px solid var(--line);
   box-shadow: var(--shadow-float);
-  animation: ask-in var(--t-med) var(--ease-out);
+  animation: ask-in var(--t-med) var(--ease);
 }
 .ask-drawer:focus {
   outline: none;
@@ -62,18 +54,13 @@
   justify-content: center;
 }
 
-/* scope: a two-way segmented control built on native radios, styled like the page filters */
+/* scope: a two-way segmented control built on native radios */
 .ask-scope {
   display: flex;
-  gap: 2px;
-  width: fit-content;
-  max-width: calc(100% - 2 * var(--s-5));
-  min-width: 0;
-  margin: 0 var(--s-5) var(--s-4);
-  padding: 3px;
+  margin: 0;
+  padding: 0 var(--s-5) var(--s-3);
   border: 0;
-  border-radius: var(--r-ctl);
-  background: var(--surface-3);
+  min-width: 0;
 }
 .ask-seg {
   position: relative;
@@ -93,31 +80,32 @@
 .ask-seg span {
   display: block;
   min-width: 0;
-  max-width: 24ch;
-  padding: 3px var(--s-3);
-  border: 1px solid transparent;
-  border-radius: var(--r-chip);
+  max-width: 22ch;
+  padding: var(--s-1) var(--s-3);
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
   color: var(--ink-2);
   font-size: var(--fs-sm);
   font-weight: 550;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  transition:
-    background var(--t-fast) var(--ease-out),
-    color var(--t-fast) var(--ease-out);
 }
-.ask-seg:hover span {
-  color: var(--ink);
+.ask-seg:first-of-type span {
+  border-radius: var(--r-chip) 0 0 var(--r-chip);
+}
+.ask-seg:last-of-type span {
+  border-left: 0;
+  border-radius: 0 var(--r-chip) var(--r-chip) 0;
 }
 .ask-seg input:checked + span {
-  background: var(--surface);
-  box-shadow: 0 1px 2px rgb(var(--shade) / 0.08), 0 0 0 1px rgb(var(--shade) / 0.04);
-  color: var(--ink);
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--on-ink);
 }
 .ask-seg input:focus-visible + span {
   outline: 2px solid var(--focus);
-  outline-offset: 1px;
+  outline-offset: 2px;
 }
 .ask-seg input:disabled + span {
   color: var(--ink-3);
@@ -438,7 +426,6 @@
 }
 .ask-why__tool,
 .ask-why__code {
-  font-family: var(--font-mono);
   font-variation-settings: var(--ui-mono);
 }
 .ask-why__tool {
@@ -456,12 +443,11 @@
   padding: var(--s-3);
   overflow: auto;
   border: 1px solid var(--line);
-  border-radius: var(--r-ctl);
-  background: var(--surface-sunk);
+  border-radius: var(--r-chip);
+  background: var(--surface-2);
   font-size: var(--fs-xs);
-  line-height: 1.6;
+  line-height: 1.5;
   white-space: pre;
-  scrollbar-width: thin;
 }
 .ask-why__timings {
   display: grid;
@@ -526,16 +512,16 @@
   min-height: 40px;
   padding: var(--s-2) var(--s-3);
   border: 1px solid var(--line);
-  border-radius: var(--r-ctl);
+  border-radius: var(--r-chip);
   background: var(--surface);
   text-align: left;
   font-size: var(--fs-sm);
   cursor: pointer;
-  transition: border-color var(--t-fast) var(--ease-out), background var(--t-fast) var(--ease-out);
+  transition: border-color var(--t-fast) var(--ease), background var(--t-fast) var(--ease);
 }
 .ask-sugg__btn:hover {
-  border-color: var(--line-strong);
-  background: var(--surface-sunk);
+  border-color: var(--ink-2);
+  background: var(--surface-2);
 }
 .ask-sugg__note {
   margin-top: var(--s-4);
@@ -549,7 +535,7 @@
   gap: var(--s-3);
   padding: var(--s-4) var(--s-5) calc(var(--s-4) + env(safe-area-inset-bottom, 0px));
   border-top: 1px solid var(--line);
-  background: var(--surface-sunk);
+  background: var(--surface-2);
 }
 .ask-dock__main {
   display: flex;
@@ -570,8 +556,9 @@
   display: inline-flex;
   align-items: center;
   gap: var(--s-2);
-  font-size: var(--fs-md);
-  font-weight: 620;
+  font-size: var(--fs-lg);
+  font-weight: 650;
+  font-variation-settings: var(--display-casual);
 }
 .ask-status__timer {
   color: var(--ink-2);
@@ -606,7 +593,7 @@
   min-width: 0;
 }
 
-/* switch: a rounded toggle that fills with ink when on */
+/* switch: square-shouldered, like a console toggle */
 .ask-switch {
   display: inline-flex;
   align-items: center;
@@ -626,30 +613,26 @@
 .ask-switch__track {
   position: relative;
   flex: none;
-  width: 34px;
-  height: 20px;
-  border-radius: var(--r-round);
+  width: 32px;
+  height: 18px;
+  border-radius: var(--r-chip);
   background: var(--line-strong);
-  transition: background var(--t-fast) var(--ease-out);
+  transition: background var(--t-fast) var(--ease);
 }
 .ask-switch__thumb {
   position: absolute;
   top: 2px;
   left: 2px;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: var(--knob);
-  box-shadow: 0 1px 2px rgb(var(--shade) / 0.25);
-  transition:
-    transform var(--t-fast) var(--ease-out),
-    background var(--t-fast) var(--ease-out);
+  width: 14px;
+  height: 14px;
+  border-radius: 2px;
+  background: var(--surface);
+  transition: transform var(--t-fast) var(--ease);
 }
 .ask-switch[aria-checked="true"] .ask-switch__track {
   background: var(--ink);
 }
 .ask-switch[aria-checked="true"] .ask-switch__thumb {
-  background: var(--on-ink);
   transform: translateX(14px);
 }
 
@@ -657,8 +640,8 @@
 .ask-talk {
   position: relative;
   flex: none;
-  width: 64px;
-  height: 64px;
+  width: 76px;
+  height: 76px;
 }
 .ask-talk__ring {
   position: absolute;
@@ -672,13 +655,12 @@
   position: relative;
   display: grid;
   place-items: center;
-  width: 64px;
-  height: 64px;
+  width: 76px;
+  height: 76px;
   padding: 0;
   border: 0;
   border-radius: var(--r-round);
   background: var(--ink);
-  box-shadow: 0 2px 4px rgb(var(--shade) / 0.18), 0 10px 24px -10px rgb(var(--shade) / 0.55);
   color: var(--on-ink);
   cursor: pointer;
   touch-action: none;
@@ -699,8 +681,9 @@
   outline-offset: 10px;
 }
 .ask-talk__btn svg {
-  width: 26px;
-  height: 26px;
+  width: 30px;
+  height: 30px;
+  stroke-width: 1.75;
 }
 .ask-talk[data-state="recording"] .ask-talk__btn {
   background: var(--rec);
@@ -725,7 +708,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ask-scrim,
   .ask-spin,
   .ask-talk[data-state="waiting"] .ask-talk__ring {
     animation: none;
@@ -748,8 +730,7 @@
     padding: var(--s-3) var(--s-2) var(--s-2) var(--s-4);
   }
   .ask-scope {
-    max-width: calc(100% - 2 * var(--s-4));
-    margin: 0 var(--s-4) var(--s-3);
+    padding: 0 var(--s-4) var(--s-3);
   }
   .ask-log {
     padding: var(--s-4);

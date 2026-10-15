@@ -1,6 +1,5 @@
-import { PlayIcon } from "@phosphor-icons/react";
-import { timecode } from "../../lib/format";
-import { useSpeakerColour } from "../meeting/stripCache";
+import { Play } from "lucide-react";
+import { speakerIndex, timecode } from "../../lib/format";
 import { useJump } from "./useJump";
 import "./evidence.css";
 
@@ -34,10 +33,9 @@ export default function EvidenceQuote({
   size = "md",
 }: EvidenceQuoteProps) {
   const jump = useJump();
-  const colour = useSpeakerColour(meetingId, track);
   const where = meetingTitle ? ` in ${meetingTitle}` : "";
   return (
-    <figure className={`evq evq--${size} spk spk-${colour}`}>
+    <figure className={`evq evq--${size} spk spk-${speakerIndex(track)}`}>
       <figcaption className="evq__meta">
         <span className="evq__who">{speakerName}</span>
         {meetingTitle ? <span className="evq__where">{meetingTitle}</span> : null}
@@ -50,7 +48,7 @@ export default function EvidenceQuote({
           }}
           aria-label={`Play ${speakerName} at ${timecode(t)}${where}`}
         >
-          <PlayIcon weight="fill" aria-hidden="true" />
+          <Play aria-hidden="true" />
           <span className="tc">{timecode(t)}</span>
         </button>
       </figcaption>

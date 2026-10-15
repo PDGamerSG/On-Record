@@ -1,5 +1,5 @@
 import { useState, type MouseEvent } from "react";
-import { CheckSquareIcon, HashIcon, PlayIcon, SignpostIcon } from "@phosphor-icons/react";
+import { Play } from "lucide-react";
 import { Link } from "react-router-dom";
 import type { ActionItem, Decision, Topic, Utterance } from "../../api/types";
 import { timecode } from "../../lib/format";
@@ -35,11 +35,10 @@ export default function InsightsRail(props: Props) {
       <div className="ins-scroll">
         <section className="ins-section" aria-labelledby="ins-dec">
           <h3 id="ins-dec" className="ins-h">
-            <SignpostIcon aria-hidden="true" />
             Decisions <span className="ins-n">{decisions.length}</span>
           </h3>
           {decisions.length === 0 ? (
-            <p className="ins-empty">{live ? "None yet. They appear as they're made." : "No decisions in this meeting."}</p>
+            <p className="ins-empty">{live ? "No decisions yet. They appear here as they're said." : "No decisions were recorded in this meeting."}</p>
           ) : (
             <ol className="ins-list">
               {decisions.map((d) => (
@@ -51,12 +50,11 @@ export default function InsightsRail(props: Props) {
 
         <section className="ins-section" aria-labelledby="ins-act">
           <h3 id="ins-act" className="ins-h">
-            <CheckSquareIcon aria-hidden="true" />
-            Action items <span className="ins-n">{actionItems.length ? `${openCount} open` : 0}</span>
+            Action items <span className="ins-n">{actionItems.length ? `${openCount} open of ${actionItems.length}` : 0}</span>
           </h3>
           {actionItems.length === 0 ? (
             <p className="ins-empty">
-              {live ? "None yet. They appear as people commit." : "No action items in this meeting."}
+              {live ? "No action items yet. When someone commits to doing something, it lands here." : "Nobody took on an action item in this meeting."}
             </p>
           ) : (
             <ul className="ins-list">
@@ -69,11 +67,10 @@ export default function InsightsRail(props: Props) {
 
         <section className="ins-section" aria-labelledby="ins-top">
           <h3 id="ins-top" className="ins-h">
-            <HashIcon aria-hidden="true" />
             Topics <span className="ins-n">{topics.length}</span>
           </h3>
           {topics.length === 0 ? (
-            <p className="ins-empty">{live ? "None yet." : "No topics picked out."}</p>
+            <p className="ins-empty">{live ? "No topics yet. They're picked out as the conversation moves." : "No topics were picked out."}</p>
           ) : (
             <ul className="ins-topics">
               {[...topics]
@@ -125,8 +122,7 @@ function DecisionRow({ d, all, fresh, nameOf, ...rest }: Props & { d: Decision; 
       </p>
       {(d.proposed_by || superseded || d.supersedes) && (
         <div className="ins-meta">
-          <span className={`ins-badge${superseded ? "" : " is-standing"}`}>{superseded ? "Replaced" : "Standing"}</span>
-          {d.proposed_by && <span>{nameOf(d.proposed_by)}</span>}
+          {d.proposed_by && <span>Proposed by {nameOf(d.proposed_by)}</span>}
           {superseded &&
             (replacement ? (
               <span>
@@ -140,7 +136,7 @@ function DecisionRow({ d, all, fresh, nameOf, ...rest }: Props & { d: Decision; 
                 Replaced by <Link to="/decisions">a later decision</Link>
               </span>
             ))}
-          {!superseded && d.supersedes && <span>Replaces an earlier one</span>}
+          {!superseded && d.supersedes && <span>Replaces an earlier decision</span>}
         </div>
       )}
       <Evidence ids={d.evidence} nameOf={nameOf} {...rest} />
@@ -170,12 +166,18 @@ function ActionRow({ a, fresh, nameOf, onToggleAction, ...rest }: Props & { a: A
   return (
     <li className={cls}>
       <label className="ins-check">
-        <input type="checkbox" className="check" checked={done} disabled={pending} onChange={(e) => void toggle(e.currentTarget.checked)} />
+        <input type="checkbox" checked={done} disabled={pending} onChange={(e) => void toggle(e.currentTarget.checked)} />
         <span className="ins-text">{a.text}</span>
       </label>
       <div className="ins-meta ins-meta--indent">
-        <span className="ins-owner">{owner || "No owner yet"}</span>
-        {a.due && <span className="ins-due">Due {a.due}</span>}
+        <span>
+          Owner <strong>{owner || "not named yet"}</strong>
+        </span>
+        {a.due && (
+          <span>
+            Due <strong>{a.due}</strong>
+          </span>
+        )}
       </div>
       {error && (
         <p className="ins-error" role="alert">
@@ -203,10 +205,10 @@ function Evidence({ ids, utterancesById, colours, nameOf, onEvidence }: Evidence
   const name = nameOf(u.speaker);
   return (
     <figure className={`ins-ev spk spk-${colours.get(u.speaker) ?? 7}`}>
-      <blockquote className="ins-ev-quote quote">{u.text}</blockquote>
+      <blockquote className="ins-ev-quote quote">{clip(u.text, 180)}</blockquote>
       <figcaption>
         <button type="button" className="ins-ev-play" onClick={() => onEvidence(u)} aria-label={`Play ${name} at ${timecode(u.t_start)}`}>
-          <PlayIcon weight="fill" aria-hidden="true" />
+          <Play aria-hidden="true" />
           <span className="ins-ev-name">{name}</span>
           <span className="tc">{timecode(u.t_start)}</span>
         </button>

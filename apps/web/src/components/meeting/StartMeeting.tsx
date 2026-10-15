@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
-import { CircleNotchIcon, MicrophoneIcon } from "@phosphor-icons/react";
+import { LoaderCircle, Mic } from "lucide-react";
 import { api } from "../../api/client";
 import { when } from "../../lib/format";
 
@@ -36,7 +36,7 @@ export default function StartMeeting() {
   if (!open) {
     return (
       <button type="button" className="btn btn--primary" onClick={openForm}>
-        <MicrophoneIcon aria-hidden="true" />
+        <Mic aria-hidden="true" />
         Start a live meeting
       </button>
     );
@@ -65,7 +65,7 @@ export default function StartMeeting() {
           onChange={(e) => setTitle(e.target.value)}
         />
         <button type="submit" className="btn btn--primary" disabled={busy}>
-          {busy ? <CircleNotchIcon className="spin" aria-hidden="true" /> : <MicrophoneIcon aria-hidden="true" />}
+          {busy ? <LoaderCircle className="spin" aria-hidden="true" /> : <Mic aria-hidden="true" />}
           {busy ? "Starting" : "Start meeting"}
         </button>
         <button type="button" className="btn btn--ghost" onClick={() => setOpen(false)} disabled={busy}>

@@ -20,7 +20,7 @@ export const KINDS: Record<string, KindStyle> = {
   Meeting: { shape: "square", r: 7, tone: "ink", label: "Meeting", plural: "Meetings", prominent: true },
   Speaker: { shape: "circle", r: 6, tone: "speaker", label: "Speaker", plural: "Speakers", prominent: true },
   Person: { shape: "ring", r: 6.5, tone: "ink", label: "Person", plural: "People", prominent: true },
-  Utterance: { shape: "circle", r: 2.8, tone: "ink3", label: "Utterance", plural: "Utterances", prominent: false },
+  Utterance: { shape: "circle", r: 2.8, tone: "lineStrong", label: "Utterance", plural: "Utterances", prominent: false },
   Decision: { shape: "diamond", r: 5.5, tone: "ink2", label: "Decision", plural: "Decisions", prominent: true },
   ActionItem: { shape: "hollowSquare", r: 5, tone: "ink2", label: "Action item", plural: "Action items", prominent: false },
   Topic: { shape: "triangle", r: 5.5, tone: "ink3", label: "Topic", plural: "Topics", prominent: true },
@@ -67,8 +67,6 @@ export interface Palette {
   line: string;
   lineStrong: string;
   surface: string;
-  /** The canvas well behind the graph; hollow shapes and label halos are cut from it. */
-  well: string;
   focus: string;
   font: string;
 }
@@ -84,7 +82,6 @@ export function readPalette(): Palette {
     line: v("--line", "silver"),
     lineStrong: v("--line-strong", "darkgray"),
     surface: v("--surface", "white"),
-    well: v("--surface-sunk", "white"),
     focus: v("--focus", "blue"),
     font: v("--font-ui", "sans-serif"),
   };

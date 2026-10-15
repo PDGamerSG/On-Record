@@ -1,27 +1,21 @@
-.gp {
-  padding-bottom: var(--s-8);
-}
-
 .gp-pick,
 .gp-picker {
   display: grid;
   gap: var(--s-1);
-  font-size: var(--fs-xs);
+  font-size: var(--fs-sm);
   font-weight: 550;
   color: var(--ink-2);
 }
 .gp-pick .field {
   min-width: min(320px, 100%);
   color: var(--ink);
-  font-size: var(--fs-sm);
-  cursor: pointer;
 }
 
 .gp-legend {
   display: flex;
   flex-wrap: wrap;
   gap: var(--s-2);
-  margin: 0 0 var(--s-4);
+  margin: 0 0 var(--s-3);
   padding: 0;
   list-style: none;
 }
@@ -31,39 +25,27 @@
   gap: var(--s-2);
   min-height: 32px;
   padding: 0 var(--s-3);
-  border: 1px solid var(--line-strong);
-  border-radius: var(--r-ctl);
+  border: 1px solid var(--line);
+  border-radius: var(--r-chip);
   background: var(--surface);
-  box-shadow: inset 0 1px 0 var(--hi);
   font-size: var(--fs-sm);
-  white-space: nowrap;
   cursor: pointer;
-  transition:
-    background var(--t-fast) var(--ease-out),
-    border-color var(--t-fast) var(--ease-out),
-    color var(--t-fast) var(--ease-out);
+  transition: border-color var(--t-fast) var(--ease), opacity var(--t-fast) var(--ease);
 }
 .gp-kind-btn:hover {
-  border-color: color-mix(in srgb, var(--ink-2) 55%, var(--line-strong));
-  background: var(--surface-2);
+  border-color: var(--ink-2);
 }
 .gp-kind-btn[aria-pressed="false"] {
-  border-color: var(--line);
-  border-style: dashed;
-  background: transparent;
-  box-shadow: none;
+  background: var(--surface-2);
   color: var(--ink-2);
   text-decoration: line-through;
-  text-decoration-color: var(--ink-3);
+  text-decoration-color: var(--line-strong);
 }
 .gp-kind-btn[aria-pressed="false"] .kind-swatch {
   opacity: 0.35;
 }
 .gp-num {
   color: var(--ink-2);
-  font-size: var(--fs-xs);
-  font-family: var(--font-mono);
-  font-variation-settings: var(--ui-mono);
   font-variant-numeric: tabular-nums;
 }
 
@@ -71,50 +53,29 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) 320px;
   gap: var(--s-4);
-  height: max(460px, calc(100dvh - 282px));
+  height: max(460px, calc(100dvh - 260px));
 }
 
 .gp-canvas {
   position: relative;
   min-height: 0;
   overflow: hidden;
-  background: var(--surface-sunk);
 }
-/* loading and empty messages sit in the middle of the well */
 .gp-state {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--s-2);
   padding: var(--s-6);
   color: var(--ink-2);
-  font-size: var(--fs-sm);
-  text-align: center;
-}
-.gp-state svg {
-  flex: none;
-  width: 16px;
-  height: 16px;
-  stroke-width: 1.75;
 }
 
 .gp-side {
   min-height: 0;
   overflow-y: auto;
-  padding: var(--s-4) var(--s-5);
-  scrollbar-width: thin;
+  padding: var(--s-4);
 }
 .gp-picker {
-  margin: 0 calc(-1 * var(--s-5)) var(--s-4);
-  padding: 0 var(--s-5) var(--s-4);
-  border-bottom: 1px solid var(--line);
+  margin-bottom: var(--s-4);
 }
 .gp-picker .field {
   color: var(--ink);
-  font-size: var(--fs-sm);
-  cursor: pointer;
 }
 .gp-hint {
   font-size: var(--fs-sm);
@@ -125,17 +86,16 @@
   display: flex;
   align-items: center;
   gap: var(--s-2);
-  font-size: var(--fs-xs);
-  font-weight: 550;
+  font-size: var(--fs-sm);
   color: var(--ink-2);
 }
 .gp-node__title {
-  margin-top: var(--s-2);
+  margin-top: var(--s-1);
   font-size: var(--fs-lg);
   overflow-wrap: anywhere;
 }
 .gp-node__quote {
-  margin: var(--s-3) 0 0;
+  margin: var(--s-2) 0 0;
   padding-left: var(--s-3);
   border-left: 3px solid var(--line-strong);
   overflow-wrap: anywhere;
@@ -144,33 +104,24 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--s-2);
-  margin-top: var(--s-4);
-}
-.gp-node__actions .btn.mp-mini svg {
-  width: 12px;
-  height: 12px;
-  fill: currentColor;
+  margin-top: var(--s-3);
 }
 .gp-node__h {
-  margin: var(--s-5) 0 var(--s-2);
-  color: var(--ink-2);
-  font-size: var(--fs-xs);
-  font-weight: 600;
-  letter-spacing: 0;
+  margin: var(--s-4) 0 var(--s-2);
+  font-size: var(--fs-sm);
+  font-weight: 650;
 }
 
 .gp-props {
   display: grid;
+  gap: var(--s-1);
   margin: var(--s-4) 0 0;
-  border-top: 1px solid var(--line);
   font-size: var(--fs-sm);
 }
 .gp-props > div {
   display: grid;
   grid-template-columns: minmax(6.5rem, auto) minmax(0, 1fr);
-  gap: var(--s-3);
-  padding: var(--s-2) 0;
-  border-bottom: 1px solid var(--line);
+  gap: var(--s-2);
 }
 .gp-props dt {
   color: var(--ink-2);
@@ -184,7 +135,7 @@
 .gp-links {
   display: grid;
   gap: 2px;
-  margin: 0 calc(-1 * var(--s-2));
+  margin: 0;
   padding: 0;
   list-style: none;
 }
@@ -206,9 +157,6 @@
   text-align: left;
   font-size: var(--fs-sm);
   cursor: pointer;
-  transition:
-    background var(--t-fast) var(--ease-out),
-    border-color var(--t-fast) var(--ease-out);
 }
 .gp-link:hover {
   border-color: var(--line);
@@ -220,9 +168,7 @@
   gap: 2px;
   flex: none;
   color: var(--ink-2);
-  font-size: var(--fs-2xs);
-  font-family: var(--font-mono);
-  font-variation-settings: var(--ui-mono);
+  font-size: var(--fs-xs);
 }
 .gp-link__rel svg {
   width: 12px;
@@ -246,32 +192,5 @@
   }
   .gp-side {
     overflow: visible;
-  }
-}
-
-@media (max-width: 767px) {
-  .gp-pick {
-    flex-basis: 100%;
-  }
-  .gp-pick .field {
-    width: 100%;
-  }
-  /* the legend becomes one row that scrolls sideways */
-  .gp-legend {
-    flex-wrap: nowrap;
-    margin-inline: calc(-1 * var(--s-4));
-    padding: 0 var(--s-4) 2px;
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-  .gp-legend > li {
-    flex: none;
-  }
-  .gp-side {
-    padding: var(--s-4);
-  }
-  .gp-picker {
-    margin: 0 calc(-1 * var(--s-4)) var(--s-4);
-    padding: 0 var(--s-4) var(--s-4);
   }
 }

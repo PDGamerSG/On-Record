@@ -1,5 +1,5 @@
 import { useEffect, useRef, type KeyboardEvent, type PointerEvent, type RefObject } from "react";
-import { MicrophoneIcon } from "@phosphor-icons/react";
+import { Mic } from "lucide-react";
 
 export type TalkbackVisual = "idle" | "opening" | "recording" | "armed" | "waiting" | "speaking";
 
@@ -112,7 +112,7 @@ export default function Talkback({ visual, levelRef, onPressStart, onPressEnd, l
         }}
         onContextMenu={(e) => e.preventDefault()}
       >
-        <MicrophoneIcon aria-hidden="true" />
+        <Mic aria-hidden="true" />
       </button>
     </div>
   );

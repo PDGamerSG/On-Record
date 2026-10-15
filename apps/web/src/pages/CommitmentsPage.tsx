@@ -1,14 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { PlayIcon } from "@phosphor-icons/react";
+import { Play } from "lucide-react";
 import { api } from "../api/client";
 import { useBusEvents } from "../api/events";
 import type { ActionItem, Utterance } from "../api/types";
-import { timecode, when } from "../lib/format";
+import { speakerIndex, timecode, when } from "../lib/format";
 import { errorText, loadDetails, utteranceIndex, utteranceStart } from "../components/ask/meetingData";
 import { useJump, meetingPath } from "../components/ask/useJump";
 import { useLiveRefresh } from "../components/ask/useLiveRefresh";
-import { useSpeakerColour } from "../components/meeting/stripCache";
 import "./memoryPages.css";
 import "./CommitmentsPage.css";
 
@@ -157,7 +156,7 @@ export default function CommitmentsPage() {
       <header className="mp-head">
         <div>
           <h1>Commitments</h1>
-          <p className="mp-sub">Action items Gemma 4 found in your meetings, by owner.</p>
+          <p className="mp-sub">Action items Gemma 4 picked out of your meetings, grouped by who owns them.</p>
           {items ? <p className="mp-count">{countText}</p> : null}
         </div>
         <fieldset className="mp-seg">
@@ -202,18 +201,7 @@ export default function CommitmentsPage() {
         </div>
       ) : null}
 
-      {!items && !error ? (
-        <div className="mp-loading">
-          <p className="visually-hidden">Loading commitments…</p>
-          {[0, 1].map((i) => (
-            <div key={i} className="panel mp-skel" aria-hidden="true">
-              <span className="skel mp-skel__head" />
-              <span className="skel mp-skel__line" />
-              <span className="skel mp-skel__line mp-skel__line--short" />
-            </div>
-          ))}
-        </div>
-      ) : null}
+      {!items && !error ? <p className="mp-state">Loading commitments…</p> : null}
 
       {items && !groups.length ? (
         <div className="panel mp-empty">
@@ -268,11 +256,10 @@ interface RowProps {
 
 function CommitmentRow({ item, evidence, onToggle, onPlay }: RowProps) {
   const done = item.status === "done";
-  const colour = useSpeakerColour(item.meeting_id, evidence?.speaker);
   const id = `cm-item-${item.id}`;
   return (
     <li className={`cm-item${done ? " is-done" : ""}`}>
-      <input id={id} type="checkbox" className="check cm-check" checked={done} onChange={onToggle} />
+      <input id={id} type="checkbox" className="cm-check" checked={done} onChange={onToggle} />
       <div className="cm-body">
         <label htmlFor={id} className="cm-text">
           {item.text}
@@ -282,13 +269,13 @@ function CommitmentRow({ item, evidence, onToggle, onPlay }: RowProps) {
           {item.due ? <span>Due {item.due}</span> : null}
           {done && item.done_at ? <span>Done {when(item.done_at)}</span> : null}
           <button type="button" className="btn btn--ghost mp-mini" onClick={onPlay}>
-            <PlayIcon weight="fill" aria-hidden="true" />
+            <Play aria-hidden="true" />
             {item.evidence.length ? "Play evidence" : "Open meeting"}
             {evidence ? <span className="tc">{timecode(evidence.t_start)}</span> : null}
           </button>
         </div>
         {evidence ? (
-          <blockquote className={`quote cm-quote spk spk-${colour}`}>
+          <blockquote className={`quote cm-quote spk spk-${speakerIndex(evidence.speaker)}`}>
             <span className="visually-hidden">{evidence.speaker_name ?? "Speaker"} said: </span>
             {evidence.text}
           </blockquote>

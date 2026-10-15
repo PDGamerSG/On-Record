@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { PlayIcon } from "@phosphor-icons/react";
+import { Play } from "lucide-react";
 import { api } from "../api/client";
 import type { Decision, MeetingDetail } from "../api/types";
 import { speakerName, timecode } from "../lib/format";
@@ -87,7 +87,10 @@ export default function DecisionsPage() {
       <header className="mp-head">
         <div>
           <h1>Decisions</h1>
-          <p className="mp-sub">Newest first. When a later meeting changes a decision, the earlier version stays underneath.</p>
+          <p className="mp-sub">
+            What was decided, newest first. When a later meeting changes a decision, the earlier version stays underneath
+            as history.
+          </p>
           {decisions ? (
             <p className="mp-count">
               {chains.length === 1 ? "1 decision" : `${chains.length} decisions`}
@@ -106,18 +109,7 @@ export default function DecisionsPage() {
         </div>
       ) : null}
 
-      {!decisions && !error ? (
-        <div className="mp-loading">
-          <p className="visually-hidden">Loading decisions…</p>
-          {[0, 1, 2].map((i) => (
-            <div key={i} className="panel mp-skel" aria-hidden="true">
-              <span className="skel mp-skel__head" />
-              <span className="skel mp-skel__line" />
-              <span className="skel mp-skel__line mp-skel__line--short" />
-            </div>
-          ))}
-        </div>
-      ) : null}
+      {!decisions && !error ? <p className="mp-state">Loading decisions…</p> : null}
 
       {decisions && !chains.length ? (
         <div className="panel mp-empty">
@@ -179,7 +171,7 @@ function DecisionEntry({ decision: d, title, details, head }: EntryProps) {
           onClick={() => jump({ meeting_id: d.meeting_id, t: d.made_at, utterance_id: d.evidence[0] })}
           aria-label={`Play the moment this was decided, ${timecode(d.made_at)} in ${title}`}
         >
-          <PlayIcon weight="fill" aria-hidden="true" />
+          <Play aria-hidden="true" />
           <span className="tc">{timecode(d.made_at)}</span>
         </button>
       </div>

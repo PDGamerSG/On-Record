@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { ArrowLeftIcon, ArrowRightIcon, CircleNotchIcon, PlayIcon } from "@phosphor-icons/react";
+import { ArrowLeft, ArrowRight, Play } from "lucide-react";
 import { api } from "../api/client";
 import type { GraphNode, Subgraph } from "../api/types";
 import { timecode, when } from "../lib/format";
@@ -118,7 +118,7 @@ export default function GraphPage() {
       <header className="mp-head">
         <div>
           <h1>Graph</h1>
-          <p className="mp-sub">Who spoke, what they said, and what it led to, as stored in FalkorDB.</p>
+          <p className="mp-sub">The FalkorDB graph behind your meetings: who spoke, what they said, and what it led to.</p>
         </div>
         <label className="gp-pick">
           <span>Meeting</span>
@@ -156,7 +156,7 @@ export default function GraphPage() {
             Record or upload a meeting. Each speaker, utterance, decision and action item is written to FalkorDB as it
             happens, and appears here.
           </p>
-          <Link className="btn" to="/meetings">
+          <Link className="btn" to="/">
             Go to meetings
           </Link>
         </div>
@@ -183,12 +183,7 @@ export default function GraphPage() {
 
           <div className="gp-body">
             <div className="panel gp-canvas">
-              {!graph && !error ? (
-                <p className="gp-state">
-                  <CircleNotchIcon className="spin" aria-hidden="true" />
-                  Loading the graph…
-                </p>
-              ) : null}
+              {!graph && !error ? <p className="gp-state">Loading the graph…</p> : null}
               {graph && !graph.nodes.length ? (
                 <p className="gp-state">
                   Nothing in the graph for this meeting yet. Utterances appear as people speak.
@@ -292,7 +287,7 @@ function NodeDetails({ node, graph, nodesById, titles, onPick }: DetailsProps) {
               className="btn mp-mini"
               onClick={() => jump({ meeting_id: meetingId, t, utterance_id: kind === "Utterance" ? id : undefined })}
             >
-              <PlayIcon weight="fill" aria-hidden="true" />
+              <Play aria-hidden="true" />
               Play <span className="tc">{timecode(t)}</span>
             </button>
           ) : null}
@@ -322,10 +317,10 @@ function NodeDetails({ node, graph, nodesById, titles, onPick }: DetailsProps) {
               <li key={`${l.other}-${l.type}-${i}`}>
                 <button type="button" className="gp-link" onClick={() => onPick(l.other)}>
                   <span className="gp-link__rel">
-                    {l.out ? null : <ArrowLeftIcon aria-hidden="true" />}
+                    {l.out ? null : <ArrowLeft aria-hidden="true" />}
                     <span className="visually-hidden">{l.out ? "Outgoing" : "Incoming"} </span>
                     {l.type}
-                    {l.out ? <ArrowRightIcon aria-hidden="true" /> : null}
+                    {l.out ? <ArrowRight aria-hidden="true" /> : null}
                   </span>
                   <KindSwatch kind={String(other.kind)} spk={other.kind === "Speaker" ? nodeSpeakerIndex(other) : 0} />
                   <span className="gp-link__label">{truncate(String(other.label ?? other.id), 48)}</span>
