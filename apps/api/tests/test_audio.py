@@ -121,3 +121,9 @@ def test_wav_appender_rejects_chunks_over_duration_limit(tmp_path: Path) -> None
     recorder.close()
     with wave.open(str(path), "rb") as reader:
         assert reader.getnframes() == SAMPLE_RATE * 3 // 2
+
+
+@pytest.mark.parametrize("max_duration_s", [-1, True, float("nan"), float("inf")])
+def test_wav_appender_rejects_invalid_duration_limits(tmp_path: Path, max_duration_s: object) -> None:
+    with pytest.raises(ValueError, match="max_duration_s"):
+        WavAppender(tmp_path / "invalid.wav", max_duration_s=max_duration_s)  # type: ignore[arg-type]

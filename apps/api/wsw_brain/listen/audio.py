@@ -207,6 +207,7 @@ class WavAppender:
         self.path.parent.mkdir(parents=True, exist_ok=True)
         self.sample_rate = sample_rate
         self.max_duration_s = max_duration_s
+        _validate_duration_limit(max_duration_s)
         self._max_frames = None if max_duration_s is None else int(max_duration_s * sample_rate)
         self._lock = threading.Lock()
         self._frames = 0
