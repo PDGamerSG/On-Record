@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 import threading
 import wave
 from collections.abc import Generator
@@ -46,6 +47,7 @@ def iter_decode(
     `metadata_errors=` to av.open, which PyAV >= 15 rejects. Falls back to soundfile + soxr
     (wav/flac/ogg only) if PyAV is unavailable.
     """
+    _validate_duration_limit(max_duration_s)
     p = Path(path)
     if not p.is_file():
         raise FileNotFoundError(f"audio file not found: {p}")
@@ -128,6 +130,18 @@ def _hours(seconds: float | None) -> str:
     return f"{s // 3600}:{s % 3600 // 60:02d}:{s % 60:02d}"
 
 
+def _validate_duration_limit(max_duration_s: float | None) -> None:
+    if max_duration_s is None:
+        return
+    if (
+        isinstance(max_duration_s, bool)
+        or not isinstance(max_duration_s, (int, float))
+        or not math.isfinite(float(max_duration_s))
+        or max_duration_s < 0
+    ):
+        raise ValueError("max_duration_s must be a finite, non-negative number")
+
+
 def _mono(planar: np.ndarray) -> np.ndarray:
     """(channels, samples) planar frame -> mono by channel average."""
     return planar.mean(axis=0) if planar.ndim == 2 and planar.shape[0] > 1 else planar.reshape(-1)
@@ -193,6 +207,7 @@ class WavAppender:
         self.path.parent.mkdir(parents=True, exist_ok=True)
         self.sample_rate = sample_rate
         self.max_duration_s = max_duration_s
+        _validate_duration_limit(max_duration_s)
         self._max_frames = None if max_duration_s is None else int(max_duration_s * sample_rate)
         self._lock = threading.Lock()
         self._frames = 0
