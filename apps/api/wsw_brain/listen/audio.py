@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 import threading
 import wave
 from collections.abc import Generator
@@ -46,6 +47,7 @@ def iter_decode(
     `metadata_errors=` to av.open, which PyAV >= 15 rejects. Falls back to soundfile + soxr
     (wav/flac/ogg only) if PyAV is unavailable.
     """
+    _validate_duration_limit(max_duration_s)
     p = Path(path)
     if not p.is_file():
         raise FileNotFoundError(f"audio file not found: {p}")
@@ -126,6 +128,18 @@ def _check_declared(path: Path, duration_s: float | None, max_duration_s: float 
 def _hours(seconds: float | None) -> str:
     s = int(seconds or 0)
     return f"{s // 3600}:{s % 3600 // 60:02d}:{s % 60:02d}"
+
+
+def _validate_duration_limit(max_duration_s: float | None) -> None:
+    if max_duration_s is None:
+        return
+    if (
+        isinstance(max_duration_s, bool)
+        or not isinstance(max_duration_s, (int, float))
+        or not math.isfinite(float(max_duration_s))
+        or max_duration_s < 0
+    ):
+        raise ValueError("max_duration_s must be a finite, non-negative number")
 
 
 def _mono(planar: np.ndarray) -> np.ndarray:

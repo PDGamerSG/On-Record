@@ -85,6 +85,15 @@ def test_decode_file_enforces_duration_limit(tmp_path: Path) -> None:
         decode_file(source, max_duration_s=1)
 
 
+@pytest.mark.parametrize("max_duration_s", [-1, True, float("nan"), float("inf")])
+def test_decode_file_rejects_invalid_duration_limits(tmp_path: Path, max_duration_s: object) -> None:
+    source = tmp_path / "source.wav"
+    sf.write(source, np.zeros(SAMPLE_RATE, dtype=np.float32), SAMPLE_RATE)
+
+    with pytest.raises(ValueError, match="max_duration_s"):
+        decode_file(source, max_duration_s=max_duration_s)  # type: ignore[arg-type]
+
+
 def test_wav_appender_is_readable_while_growing(tmp_path: Path) -> None:
     path = tmp_path / "recording.wav"
     recorder = WavAppender(path)
