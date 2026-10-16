@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import math
+from pathlib import Path
 from typing import Any
 
 import numpy as np
@@ -61,7 +62,7 @@ class FasterWhisperASR:
         return text, confidence
 
     def transcribe_file(
-        self, path: str, *, max_duration_s: float | None = None
+        self, path: str | Path, *, max_duration_s: float | None = None
     ) -> tuple[str, float]:
         """Decode an audio file and transcribe it with the same ASR settings."""
         return self.transcribe(decode_file(path, max_duration_s=max_duration_s))
