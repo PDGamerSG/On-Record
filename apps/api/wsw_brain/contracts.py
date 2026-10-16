@@ -12,6 +12,7 @@ Graph dicts returned to the API are plain JSON-serialisable dicts with the keys 
 
 from __future__ import annotations
 
+import math
 from collections.abc import Callable
 from dataclasses import asdict, dataclass, field
 from typing import Any, Literal, Protocol
@@ -28,7 +29,10 @@ SAMPLE_RATE = 16_000
 
 @dataclass
 class Utterance:
-    """One speaker turn produced by the listener (before it is written to the graph)."""
+    """One speaker turn produced by the listener (before it is written to the graph).
+
+    Invalid identifiers, sequence numbers, timestamps, or confidence raise ValueError at construction.
+    """
 
     meeting_id: str
     seq: int  # 0-based order within the meeting
@@ -37,6 +41,24 @@ class Utterance:
     t_end: float
     text: str
     confidence: float = 1.0  # speaker-assignment confidence in [0, 1]
+
+    def __post_init__(self) -> None:
+        for name in ("meeting_id", "speaker"):
+            value = getattr(self, name)
+            if not isinstance(value, str) or not value.strip():
+                raise ValueError(f"Utterance.{name} must be a non-empty string")
+        if isinstance(self.seq, bool) or not isinstance(self.seq, int) or self.seq < 0:
+            raise ValueError("Utterance.seq must be a non-negative int")
+        for name in ("t_start", "t_end", "confidence"):
+            value = getattr(self, name)
+            if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value):
+                raise ValueError(f"Utterance.{name} must be a finite number")
+        if self.t_start < 0:
+            raise ValueError("Utterance.t_start must be non-negative")
+        if self.t_end < self.t_start:
+            raise ValueError("Utterance.t_end must be greater than or equal to t_start")
+        if not 0 <= self.confidence <= 1:
+            raise ValueError("Utterance.confidence must be between 0 and 1")
 
     @property
     def id(self) -> str:
