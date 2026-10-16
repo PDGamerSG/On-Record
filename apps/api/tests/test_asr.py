@@ -4,6 +4,7 @@ from types import SimpleNamespace
 
 import numpy as np
 import pytest
+import soundfile as sf
 
 from wsw_brain.listen import FasterWhisperASR
 
@@ -63,3 +64,19 @@ def test_model_is_loaded_lazily(monkeypatch: pytest.MonkeyPatch) -> None:
     asr.transcribe(np.ones(4, dtype=np.float32))
 
     assert loaded == [{"model_size": "tiny", "device": "cpu", "compute_type": "int8"}]
+
+
+def test_transcribe_file_decodes_audio_and_applies_duration_limit(tmp_path) -> None:
+    model = FakeWhisperModel()
+    asr = FasterWhisperASR(model=model)
+    source = tmp_path / "meeting.wav"
+    sf.write(source, np.zeros(16_000, dtype=np.float32), 16_000)
+
+    text, confidence = asr.transcribe_file(source)
+
+    assert text == "Hello there team"
+    assert confidence == pytest.approx((np.exp(-0.1) + np.exp(-0.3)) / 2)
+    assert model.calls[0][0].dtype == np.float32
+
+    with pytest.raises(ValueError, match="limit"):
+        asr.transcribe_file(source, max_duration_s=0.5)
