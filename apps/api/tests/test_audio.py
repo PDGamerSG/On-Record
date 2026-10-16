@@ -78,6 +78,15 @@ def test_iter_decode_yields_bounded_blocks(tmp_path: Path) -> None:
     assert [block.size for block in blocks] == [SAMPLE_RATE, SAMPLE_RATE, SAMPLE_RATE // 2]
 
 
+@pytest.mark.parametrize("block_s", [0, -1, float("nan"), float("inf")])
+def test_iter_decode_rejects_invalid_block_duration(tmp_path: Path, block_s: object) -> None:
+    source = tmp_path / "source.wav"
+    sf.write(source, np.zeros(SAMPLE_RATE, dtype=np.float32), SAMPLE_RATE)
+
+    with pytest.raises(ValueError, match="block_s"):
+        list(iter_decode(source, block_s=block_s))  # type: ignore[arg-type]
+
+
 def test_decode_file_enforces_duration_limit(tmp_path: Path) -> None:
     source = tmp_path / "long.wav"
     sf.write(source, np.zeros(SAMPLE_RATE * 2, dtype=np.float32), SAMPLE_RATE)
