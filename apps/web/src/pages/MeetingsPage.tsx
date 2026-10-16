@@ -9,6 +9,7 @@ import StartMeeting from "../components/meeting/StartMeeting";
 import UploadRecording from "../components/meeting/UploadRecording";
 import { appendToStrip, invalidateStrip } from "../components/meeting/stripCache";
 import { useNow } from "../components/meeting/timeline";
+import "./memoryPages.css";
 import "./MeetingsPage.css";
 
 const newestFirst = (a: MeetingSummary, b: MeetingSummary) => (Number(b.started_at) || 0) - (Number(a.started_at) || 0);
@@ -55,10 +56,12 @@ export default function MeetingsPage() {
   const now = useNow(5000, anyLive);
 
   return (
-    <div className="home">
-      <header className="home-head">
-        <h1 className="home-title">{brand.name}</h1>
-        <p className="home-tagline">{brand.tagline}</p>
+    <div className="mp home">
+      <header className="mp-head home-head">
+        <div>
+          <h1>Meetings</h1>
+          <p className="mp-sub">{brand.tagline}</p>
+        </div>
         <div className="home-actions">
           <StartMeeting />
           <UploadRecording />
@@ -70,13 +73,13 @@ export default function MeetingsPage() {
       <section className="home-list" aria-labelledby="home-list-title">
         <div className="home-list-head">
           <h2 id="home-list-title" className="home-list-title">
-            Meetings {meetings && meetings.length > 0 && <span className="home-count">{meetings.length}</span>}
+            All meetings {meetings && meetings.length > 0 && <span className="home-count">{meetings.length}</span>}
           </h2>
           {meetings && meetings.length > 0 && <p className="home-list-hint">Each strip shows who spoke when. Open a meeting to hear it.</p>}
         </div>
 
         {error ? (
-          <div className="home-message panel" role="alert">
+          <div className="mp-alert" role="alert">
             <p>Couldn't load meetings: {error}. Check that the API is running, then retry.</p>
             <button type="button" className="btn" onClick={load}>
               Retry
@@ -91,13 +94,13 @@ export default function MeetingsPage() {
                   <span className="skel skel--meta" />
                 </div>
                 <div className="mrow-tape">
-                  <span className="tape tape--blank" />
+                  <span className="tape tape--blank is-loading" />
                 </div>
               </li>
             ))}
           </ul>
         ) : meetings.length === 0 ? (
-          <div className="home-message home-empty panel">
+          <div className="mp-empty panel">
             <h3>No meetings yet</h3>
             <p>
               Start a live meeting to capture one from your microphone, or upload a recording. The demo meetings appear here once the

@@ -68,12 +68,12 @@ function MeetingRow({ m, now }: { m: MeetingSummary; now: number }) {
           <Link to={`/m/${encodeURIComponent(m.id)}`} className="mrow-title">
             {m.title || "Untitled meeting"}
           </Link>
+          <span className="mrow-source">{sourceText(m)}</span>
         </div>
         <div className="mrow-meta">
-          {startedAt > 0 && <span>{when(startedAt)}</span>}
-          <span>{length > 0 ? duration(length) : "Just started"}</span>
+          {startedAt > 0 && <span className="mrow-num">{when(startedAt)}</span>}
+          <span className="mrow-num">{length > 0 ? duration(length) : "Just started"}</span>
           <span>{peopleText(entry.data, m.speaker_count ?? 0)}</span>
-          <span className="mrow-source">{sourceText(m)}</span>
         </div>
       </div>
       <div className="mrow-tape">

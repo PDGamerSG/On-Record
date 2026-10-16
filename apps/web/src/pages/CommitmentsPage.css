@@ -1,26 +1,33 @@
 .cm-groups {
   display: grid;
-  gap: var(--s-5);
+  gap: var(--s-4);
 }
 
 .cm-group {
-  padding: var(--s-4) var(--s-5) var(--s-2);
+  padding: 0 var(--s-5) var(--s-1);
 }
 
 .cm-owner {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
+  align-items: center;
   gap: var(--s-1) var(--s-3);
-  padding-bottom: var(--s-3);
+  margin: 0 calc(-1 * var(--s-5));
+  padding: var(--s-3) var(--s-5);
   border-bottom: 1px solid var(--line);
-  font-size: var(--fs-lg);
+  font-size: var(--fs-md);
+  font-weight: 650;
 }
 .cm-owner__count {
-  font-size: var(--fs-sm);
-  font-weight: 500;
+  padding: 0 var(--s-2);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-chip);
   color: var(--ink-2);
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  line-height: 1.6;
   font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
 }
 
 .cm-list {
@@ -33,18 +40,14 @@
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   gap: var(--s-3);
-  padding: var(--s-3) 0;
+  padding: var(--s-4) 0;
 }
 .cm-item + .cm-item {
   border-top: 1px solid var(--line);
 }
 
 .cm-check {
-  width: 18px;
-  height: 18px;
-  margin: 3px 0 0;
-  accent-color: var(--ink);
-  cursor: pointer;
+  margin-top: 2px;
 }
 
 .cm-text {
@@ -52,24 +55,22 @@
   font-weight: 550;
   cursor: pointer;
   overflow-wrap: anywhere;
+  transition: color var(--t-fast) var(--ease-out);
 }
 .cm-item.is-done .cm-text {
   color: var(--ink-2);
   text-decoration: line-through;
-  text-decoration-color: var(--line-strong);
+  text-decoration-color: var(--ink-3);
   font-weight: 450;
 }
 
 .cm-meta {
-  margin-top: var(--s-1);
-}
-.cm-meta .tc {
-  color: var(--ink-2);
+  margin-top: var(--s-2);
 }
 
 .cm-quote {
-  margin: var(--s-2) 0 0;
-  padding-left: var(--s-3);
+  margin: var(--s-3) 0 0;
+  padding: var(--s-1) 0 var(--s-1) var(--s-3);
   max-width: var(--measure);
   border-left: 3px solid var(--spk);
   color: var(--ink);
@@ -82,6 +83,10 @@
 
 @media (max-width: 767px) {
   .cm-group {
-    padding: var(--s-3) var(--s-4) var(--s-1);
+    padding: 0 var(--s-4) var(--s-1);
+  }
+  .cm-owner {
+    margin: 0 calc(-1 * var(--s-4));
+    padding: var(--s-3) var(--s-4);
   }
 }

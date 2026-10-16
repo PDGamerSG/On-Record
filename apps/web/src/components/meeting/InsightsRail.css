@@ -101,7 +101,7 @@
 .is-done .ins-text {
   color: var(--ink-2);
   text-decoration: line-through;
-  text-decoration-color: var(--line-strong);
+  text-decoration-color: var(--ink-3);
 }
 
 .ins-meta {
@@ -127,13 +127,8 @@
   gap: var(--s-3);
   cursor: pointer;
 }
-.ins-check input {
-  flex: none;
-  width: 18px;
-  height: 18px;
-  margin: 2px 0 0;
-  accent-color: var(--ink);
-  cursor: pointer;
+.ins-check .check {
+  margin-top: 2px;
 }
 .ins-check input:disabled {
   cursor: progress;

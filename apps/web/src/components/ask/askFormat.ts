@@ -37,6 +37,7 @@ const TIMINGS: Record<string, string> = {
   transcribe: "Hearing the question",
   hear: "Hearing the question",
   retrieve: "Searching the graph",
+  retrieval: "Searching the graph",
   embed: "Embedding the question",
   llm: "Gemma",
   agent: "Gemma",
@@ -45,7 +46,9 @@ const TIMINGS: Record<string, string> = {
 };
 
 export function timingLabel(key: string): string {
-  return TIMINGS[key] ?? key.replace(/_/g, " ").replace(/^\w/, (c) => c.toUpperCase());
+  // "llm_ms" -> "Gemma": the unit is shown with the value.
+  const k = key.replace(/_ms$/, "");
+  return TIMINGS[k] ?? k.replace(/_/g, " ").replace(/^\w/, (c) => c.toUpperCase());
 }
 
 export function ms(value: number): string {

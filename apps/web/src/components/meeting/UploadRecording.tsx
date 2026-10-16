@@ -41,7 +41,7 @@ export default function UploadRecording() {
         </button>
         <input ref={input} type="file" accept="audio/*" hidden onChange={(e) => void onFile(e)} />
         <label className="upload-pace" title="Lanes fill in as if the meeting were happening now. Off: processed as fast as possible.">
-          <input type="checkbox" checked={realtime} onChange={(e) => setRealtime(e.currentTarget.checked)} disabled={!!busyName} />
+          <input type="checkbox" className="check" checked={realtime} onChange={(e) => setRealtime(e.currentTarget.checked)} disabled={!!busyName} />
           Replay at real speed
         </label>
       </div>

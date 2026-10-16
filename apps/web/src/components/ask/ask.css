@@ -4,7 +4,13 @@
   position: fixed;
   inset: 0;
   z-index: 60;
-  background: color-mix(in srgb, var(--ink) 16%, transparent);
+  background: color-mix(in srgb, var(--bg) 60%, transparent);
+  animation: ask-fade var(--t-med) var(--ease-out);
+}
+@keyframes ask-fade {
+  from {
+    opacity: 0;
+  }
 }
 
 .ask-drawer {
@@ -20,7 +26,7 @@
   background: var(--surface);
   border-left: 1px solid var(--line);
   box-shadow: var(--shadow-float);
-  animation: ask-in var(--t-med) var(--ease);
+  animation: ask-in var(--t-med) var(--ease-out);
 }
 .ask-drawer:focus {
   outline: none;
@@ -54,13 +60,18 @@
   justify-content: center;
 }
 
-/* scope: a two-way segmented control built on native radios */
+/* scope: a two-way segmented control built on native radios, styled like the page filters */
 .ask-scope {
   display: flex;
-  margin: 0;
-  padding: 0 var(--s-5) var(--s-3);
-  border: 0;
+  gap: 2px;
+  width: fit-content;
+  max-width: calc(100% - 2 * var(--s-5));
   min-width: 0;
+  margin: 0 var(--s-5) var(--s-4);
+  padding: 2px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-ctl);
+  background: var(--surface-sunk);
 }
 .ask-seg {
   position: relative;
@@ -80,32 +91,32 @@
 .ask-seg span {
   display: block;
   min-width: 0;
-  max-width: 22ch;
-  padding: var(--s-1) var(--s-3);
-  border: 1px solid var(--line-strong);
-  background: var(--surface);
+  max-width: 24ch;
+  padding: 3px var(--s-3);
+  border: 1px solid transparent;
+  border-radius: var(--r-chip);
   color: var(--ink-2);
   font-size: var(--fs-sm);
   font-weight: 550;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  transition:
+    background var(--t-fast) var(--ease-out),
+    color var(--t-fast) var(--ease-out);
 }
-.ask-seg:first-of-type span {
-  border-radius: var(--r-chip) 0 0 var(--r-chip);
-}
-.ask-seg:last-of-type span {
-  border-left: 0;
-  border-radius: 0 var(--r-chip) var(--r-chip) 0;
+.ask-seg:hover span {
+  color: var(--ink);
 }
 .ask-seg input:checked + span {
-  background: var(--ink);
-  border-color: var(--ink);
-  color: var(--on-ink);
+  border-color: var(--line-strong);
+  background: var(--surface-3);
+  box-shadow: inset 0 1px 0 var(--hi);
+  color: var(--ink);
 }
 .ask-seg input:focus-visible + span {
   outline: 2px solid var(--focus);
-  outline-offset: 2px;
+  outline-offset: 1px;
 }
 .ask-seg input:disabled + span {
   color: var(--ink-3);
@@ -443,11 +454,12 @@
   padding: var(--s-3);
   overflow: auto;
   border: 1px solid var(--line);
-  border-radius: var(--r-chip);
-  background: var(--surface-2);
+  border-radius: var(--r-ctl);
+  background: var(--surface-sunk);
   font-size: var(--fs-xs);
-  line-height: 1.5;
+  line-height: 1.6;
   white-space: pre;
+  scrollbar-width: thin;
 }
 .ask-why__timings {
   display: grid;
@@ -512,15 +524,16 @@
   min-height: 40px;
   padding: var(--s-2) var(--s-3);
   border: 1px solid var(--line);
-  border-radius: var(--r-chip);
+  border-radius: var(--r-ctl);
   background: var(--surface);
+  box-shadow: inset 0 1px 0 var(--hi);
   text-align: left;
   font-size: var(--fs-sm);
   cursor: pointer;
-  transition: border-color var(--t-fast) var(--ease), background var(--t-fast) var(--ease);
+  transition: border-color var(--t-fast) var(--ease-out), background var(--t-fast) var(--ease-out);
 }
 .ask-sugg__btn:hover {
-  border-color: var(--ink-2);
+  border-color: var(--line-strong);
   background: var(--surface-2);
 }
 .ask-sugg__note {
@@ -616,8 +629,9 @@
   width: 32px;
   height: 18px;
   border-radius: var(--r-chip);
-  background: var(--line-strong);
-  transition: background var(--t-fast) var(--ease);
+  background: var(--surface-3);
+  box-shadow: inset 0 0 0 1px var(--line-strong);
+  transition: background var(--t-fast) var(--ease-out);
 }
 .ask-switch__thumb {
   position: absolute;
@@ -626,13 +640,16 @@
   width: 14px;
   height: 14px;
   border-radius: 2px;
-  background: var(--surface);
-  transition: transform var(--t-fast) var(--ease);
+  background: var(--ink-2);
+  transition:
+    transform var(--t-fast) var(--ease-out),
+    background var(--t-fast) var(--ease-out);
 }
 .ask-switch[aria-checked="true"] .ask-switch__track {
   background: var(--ink);
 }
 .ask-switch[aria-checked="true"] .ask-switch__thumb {
+  background: var(--on-ink);
   transform: translateX(14px);
 }
 
@@ -708,6 +725,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .ask-scrim,
   .ask-spin,
   .ask-talk[data-state="waiting"] .ask-talk__ring {
     animation: none;
@@ -730,7 +748,8 @@
     padding: var(--s-3) var(--s-2) var(--s-2) var(--s-4);
   }
   .ask-scope {
-    padding: 0 var(--s-4) var(--s-3);
+    max-width: calc(100% - 2 * var(--s-4));
+    margin: 0 var(--s-4) var(--s-3);
   }
   .ask-log {
     padding: var(--s-4);

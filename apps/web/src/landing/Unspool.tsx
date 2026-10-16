@@ -1,7 +1,6 @@
 import { useEffect, useRef } from "react";
 import { timecode } from "../lib/format";
 import { useDeckState, type Deck } from "./deck";
-import { useTheme } from "../lib/theme";
 import { speakerHex, type Side } from "./sides";
 
 const TURNS = 6.5;
@@ -68,7 +67,7 @@ function draw(ctx: CanvasRenderingContext2D, l: Layout, side: Side, p: number, h
   // lane guides, names and the minute ruler arrive as the turns settle
   if (settled > 0.01) {
     ctx.globalAlpha = settled;
-    ctx.font = `560 13px "Inter Variable", system-ui, sans-serif`;
+    ctx.font = `500 13px "Recursive Variable", system-ui, sans-serif`;
     ctx.textBaseline = "middle";
     side.speakers.forEach((s, i) => {
       const y = l.laneY[i];
@@ -84,7 +83,7 @@ function draw(ctx: CanvasRenderingContext2D, l: Layout, side: Side, p: number, h
     });
     ctx.fillStyle = faint;
     ctx.textAlign = "center";
-    ctx.font = `450 11px "Inter Variable", system-ui, sans-serif`;
+    ctx.font = `400 11px "Recursive Variable", system-ui, sans-serif`;
     const bottom = l.laneY[l.laneY.length - 1] + l.laneH / 2 + 18;
     for (let m = 0; m * 60 <= side.duration; m++) {
       const x = l.laneX0 + ((m * 60) / side.duration) * (l.laneX1 - l.laneX0);
@@ -146,7 +145,6 @@ function draw(ctx: CanvasRenderingContext2D, l: Layout, side: Side, p: number, h
 /** The groove is the timeline: scroll to unwind the record into the multitrack. */
 export default function Unspool({ deck }: { deck: Deck }) {
   const { side: sideIdx } = useDeckState(deck);
-  const theme = useTheme(); // the drawing reads its colours from the tokens, so a theme switch redraws it
   const sectionRef = useRef<HTMLElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -199,7 +197,7 @@ export default function Unspool({ deck }: { deck: Deck }) {
       io.disconnect();
       cancelAnimationFrame(raf);
     };
-  }, [deck, sideIdx, theme]);
+  }, [deck, sideIdx]);
 
   return (
     <section ref={sectionRef} className="unspool" id="how" aria-labelledby="unspool-title">
@@ -209,7 +207,10 @@ export default function Unspool({ deck }: { deck: Deck }) {
           <h2 id="unspool-title" className="l-h2">
             The groove is the timeline.
           </h2>
-          <p className="l-lede">Every band is a turn of speech, coloured by who spoke. Unwind it and you get one lane per voice.</p>
+          <p className="l-lede">
+            Each band of the record is one turn of speech, in the colour of whoever said it. Unwind it and you have the view the whole app is
+            built on: one lane per speaker, a block wherever they spoke.
+          </p>
         </div>
       </div>
     </section>

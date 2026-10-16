@@ -7,22 +7,38 @@
 }
 
 .dc {
-  padding: var(--s-4) var(--s-5);
+  padding: var(--s-5);
 }
 
+/* status chip: the chrome stays monochrome, so "current" is the brighter one */
 .dc-status {
-  display: inline-block;
-  margin-bottom: var(--s-2);
-  padding: 1px var(--s-2);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: var(--s-3);
+  padding: 0 var(--s-2);
+  border: 1px solid var(--line);
   border-radius: var(--r-chip);
-  background: var(--surface-2);
   color: var(--ink-2);
   font-size: var(--fs-xs);
   font-weight: 600;
+  line-height: 1.7;
+}
+.dc-status::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border: 1px solid var(--ink-3);
+  border-radius: 50%;
 }
 .dc-status--current {
-  background: var(--ok-soft);
-  color: var(--ok);
+  border-color: var(--line-strong);
+  background: var(--surface-3);
+  color: var(--ink);
+}
+.dc-status--current::before {
+  border-color: var(--ink);
+  background: var(--ink);
 }
 
 .dc-text {
@@ -37,21 +53,21 @@
 }
 
 .dc-meta {
-  margin-top: var(--s-1);
+  margin-top: var(--s-2);
 }
 
 .dc-evidence {
   display: grid;
-  gap: var(--s-3);
-  margin: var(--s-3) 0 var(--s-1);
+  gap: var(--s-4);
+  margin: var(--s-4) 0 var(--s-1);
   padding: 0;
   list-style: none;
 }
 
 /* history: earlier versions hang off a vertical rule, each marked with a small square splice */
 .dc-history {
-  margin: var(--s-4) 0 0 var(--s-1);
-  padding: 0 0 0 var(--s-5);
+  margin: var(--s-5) 0 0 var(--s-1);
+  padding: var(--s-1) 0 0 var(--s-5);
   border-left: 1px solid var(--line-strong);
   list-style: none;
 }
@@ -85,7 +101,7 @@
 
 @media (max-width: 767px) {
   .dc {
-    padding: var(--s-3) var(--s-4);
+    padding: var(--s-4);
   }
   .dc-history {
     padding-left: var(--s-4);

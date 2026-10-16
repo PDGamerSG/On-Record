@@ -34,7 +34,7 @@ function Room({ id }: { id: string }) {
     const notFound = error?.status === 404;
     return (
       <div className="room room--message">
-        <Link to="/" className="room-back">
+        <Link to="/meetings" className="room-back">
           <ArrowLeft aria-hidden="true" />
           Meetings
         </Link>
@@ -51,7 +51,7 @@ function Room({ id }: { id: string }) {
                 Try again
               </button>
             )}
-            <Link to="/" className="btn">
+            <Link to="/meetings" className="btn">
               Back to meetings
             </Link>
           </div>
@@ -74,7 +74,7 @@ function RoomLoading() {
       </div>
       <div className="lanes-skeleton panel" aria-hidden="true">
         {[0, 1, 2].map((i) => (
-          <span key={i} />
+          <span key={i} className="skel" />
         ))}
       </div>
     </div>
@@ -231,7 +231,7 @@ function RoomReady({ id, room, meeting }: { id: string; room: MeetingRoomApi; me
   return (
     <div className="room">
       <header className="room-head">
-        <Link to="/" className="room-back">
+        <Link to="/meetings" className="room-back">
           <ArrowLeft aria-hidden="true" />
           Meetings
         </Link>

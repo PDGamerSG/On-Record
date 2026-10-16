@@ -22,7 +22,7 @@ interface Item {
 }
 
 const PAGES: { label: string; path: string; icon: ReactNode; words: string }[] = [
-  { label: "Meetings", path: "/", icon: <AudioLines aria-hidden="true" />, words: "meetings home recordings" },
+  { label: "Meetings", path: "/meetings", icon: <AudioLines aria-hidden="true" />, words: "meetings home recordings" },
   { label: "Commitments", path: "/commitments", icon: <ListChecks aria-hidden="true" />, words: "commitments action items todo tasks" },
   { label: "Decisions", path: "/decisions", icon: <Gavel aria-hidden="true" />, words: "decisions decided history" },
   { label: "People", path: "/people", icon: <Users aria-hidden="true" />, words: "people speakers who knows" },

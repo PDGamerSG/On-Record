@@ -108,6 +108,18 @@ export default function GraphView({ data, label, onSelect, selectedId = null, hi
     return { nodes, links };
   }, [data, hiddenKinds]);
 
+  // Utterances take the colour of whoever said them (via SPOKEN_BY), so they gather round their speaker.
+  const saidBy = useMemo(() => {
+    const byId = new Map((data.nodes ?? []).filter(Boolean).map((n) => [String(n.id), n]));
+    const out = new Map<string, number>();
+    for (const l of data.links ?? []) {
+      if (String(l.type) !== "SPOKEN_BY") continue;
+      const speaker = byId.get(endId(l.target as SimLink["target"]));
+      if (speaker && String(speaker.kind) === "Speaker") out.set(endId(l.source as SimLink["source"]), nodeSpeakerIndex(speaker));
+    }
+    return out;
+  }, [data]);
+
   const neighbours = useMemo(() => {
     const set = new Set<string>();
     if (!selectedId) return set;
@@ -133,12 +145,14 @@ export default function GraphView({ data, label, onSelect, selectedId = null, hi
       const selected = node.id === selectedId;
       const hovered = node.id === hoverId;
       const dim = !!selectedId && !selected && !neighbours.has(node.id);
-      const color = toneColor(palette, s.tone, s.tone === "speaker" ? nodeSpeakerIndex(node.src) : 0);
+      const said = node.kind === "Utterance" ? saidBy.get(node.id) : undefined;
+      const color =
+        said !== undefined ? (palette.spk[said] ?? palette.ink3) : toneColor(palette, s.tone, s.tone === "speaker" ? nodeSpeakerIndex(node.src) : 0);
 
-      ctx.globalAlpha = dim ? 0.28 : 1;
+      ctx.globalAlpha = (dim ? 0.28 : 1) * (said !== undefined && !selected && !hovered ? 0.7 : 1);
       traceShape(ctx, s.shape, x, y, s.r);
       if (isHollow(s.shape)) {
-        ctx.fillStyle = palette.surface;
+        ctx.fillStyle = palette.well;
         ctx.fill();
         ctx.lineWidth = 1.6;
         ctx.strokeStyle = color;
@@ -165,14 +179,14 @@ export default function GraphView({ data, label, onSelect, selectedId = null, hi
         ctx.textBaseline = "top";
         ctx.lineJoin = "round";
         ctx.lineWidth = 3 / scale;
-        ctx.strokeStyle = palette.surface;
+        ctx.strokeStyle = palette.well;
         ctx.strokeText(text, x, ty);
-        ctx.fillStyle = palette.ink;
+        ctx.fillStyle = emphasis ? palette.ink : palette.ink2;
         ctx.fillText(text, x, ty);
       }
       ctx.globalAlpha = 1;
     },
-    [palette, selectedId, hoverId, neighbours],
+    [palette, selectedId, hoverId, neighbours, saidBy],
   );
 
   const paintPointerArea = useCallback((node: SimNode, color: string, ctx: CanvasRenderingContext2D) => {
@@ -244,7 +258,7 @@ export default function GraphView({ data, label, onSelect, selectedId = null, hi
             nodeLabel={() => ""}
             nodeCanvasObject={drawNode}
             nodePointerAreaPaint={paintPointerArea}
-            linkColor={(l: SimLink) => (touchesSelected(l) ? palette.ink2 : palette.line)}
+            linkColor={(l: SimLink) => (touchesSelected(l) ? palette.ink2 : palette.lineStrong)}
             linkWidth={(l: SimLink) => (touchesSelected(l) ? 1.6 : 1)}
             onNodeHover={(n: SimNode | null) => setHoverId(n ? String(n.id) : null)}
             onNodeClick={(n: SimNode) => onSelect?.(n.src)}

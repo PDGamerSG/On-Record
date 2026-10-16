@@ -166,7 +166,7 @@ function ActionRow({ a, fresh, nameOf, onToggleAction, ...rest }: Props & { a: A
   return (
     <li className={cls}>
       <label className="ins-check">
-        <input type="checkbox" checked={done} disabled={pending} onChange={(e) => void toggle(e.currentTarget.checked)} />
+        <input type="checkbox" className="check" checked={done} disabled={pending} onChange={(e) => void toggle(e.currentTarget.checked)} />
         <span className="ins-text">{a.text}</span>
       </label>
       <div className="ins-meta ins-meta--indent">

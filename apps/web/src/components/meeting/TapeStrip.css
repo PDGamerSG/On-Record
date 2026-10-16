@@ -1,19 +1,57 @@
+/* a meeting pressed into a strip of tape: a sunk well with one faint track per speaker */
 .tape {
   display: block;
   width: 100%;
   height: 34px;
   border-radius: var(--r-chip);
-  background: var(--surface-2);
+  background: var(--surface-sunk);
+  box-shadow: inset 0 0 0 1px var(--line);
   overflow: hidden;
 }
 
 .tape-track {
-  fill: var(--surface-sunk);
-  opacity: 0.55;
+  fill: var(--surface-2);
 }
 
-/* neutral strip until the meeting's segments arrive */
+/* no segments: a dashed centre line, so an empty meeting doesn't read as one still loading */
 .tape--blank {
-  background: var(--surface-sunk);
-  opacity: 0.6;
+  position: relative;
+}
+.tape--blank::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: var(--s-3);
+  right: var(--s-3);
+  border-top: 1px dashed var(--line-strong);
+}
+
+/* waiting for segments: two track bars that breathe, like any other skeleton */
+.tape--blank.is-loading::before,
+.tape--blank.is-loading::after {
+  content: "";
+  position: absolute;
+  height: 8px;
+  border: 0;
+  border-radius: 2px;
+  background: var(--surface-3);
+  animation: shell-breathe calc(var(--t-slow) * 2.5) var(--ease-out) infinite alternate;
+}
+.tape--blank.is-loading::before {
+  top: 7px;
+  left: var(--s-2);
+  right: 38%;
+}
+.tape--blank.is-loading::after {
+  top: auto;
+  bottom: 7px;
+  left: 30%;
+  right: var(--s-2);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tape--blank.is-loading::before,
+  .tape--blank.is-loading::after {
+    animation: none;
+  }
 }

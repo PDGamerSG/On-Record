@@ -109,7 +109,18 @@ export default function DecisionsPage() {
         </div>
       ) : null}
 
-      {!decisions && !error ? <p className="mp-state">Loading decisions…</p> : null}
+      {!decisions && !error ? (
+        <div className="mp-loading">
+          <p className="visually-hidden">Loading decisions…</p>
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="panel mp-skel" aria-hidden="true">
+              <span className="skel mp-skel__head" />
+              <span className="skel mp-skel__line" />
+              <span className="skel mp-skel__line mp-skel__line--short" />
+            </div>
+          ))}
+        </div>
+      ) : null}
 
       {decisions && !chains.length ? (
         <div className="panel mp-empty">

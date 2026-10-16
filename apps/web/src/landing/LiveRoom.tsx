@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { DatabaseIcon } from "@phosphor-icons/react";
+import { Database } from "lucide-react";
 import type { ActionItem, Topic, Utterance } from "../api/types";
 import InsightsRail from "../components/meeting/InsightsRail";
 import SpeakerLanes from "../components/meeting/SpeakerLanes";
@@ -127,7 +127,7 @@ export default function LiveRoom({ deck }: { deck: Deck }) {
           onRename={async () => undefined}
           meta={
             <span className="room-frame-writes">
-              <DatabaseIcon aria-hidden="true" />
+              <Database aria-hidden="true" />
               Written to FalkorDB <b className="tc">{count}</b> utterances
             </span>
           }

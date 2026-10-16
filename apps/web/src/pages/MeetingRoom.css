@@ -4,7 +4,7 @@
   gap: var(--s-4);
   min-height: 100%;
   max-width: 1680px;
-  padding: var(--s-5) var(--s-6) var(--s-6);
+  padding: var(--s-6) var(--s-8);
 }
 .room > * {
   flex-shrink: 0;
@@ -22,20 +22,28 @@
   align-items: center;
   gap: var(--s-1);
   align-self: flex-start;
+  margin-left: calc(-1 * var(--s-2));
+  padding: 2px var(--s-2);
+  border-radius: var(--r-chip);
   color: var(--ink-2);
   font-size: var(--fs-sm);
   text-decoration: none;
+  transition:
+    background var(--t-fast) var(--ease-out),
+    color var(--t-fast) var(--ease-out);
 }
 .room-back:hover {
+  background: var(--surface-2);
   color: var(--ink);
-  text-decoration: underline;
 }
 .room-back svg {
   width: 16px;
   height: 16px;
   stroke-width: 1.75;
 }
-.room-back--muted {
+.room-back--muted,
+.room-back--muted:hover {
+  background: none;
   color: var(--ink-3);
 }
 
@@ -66,6 +74,20 @@
   gap: var(--s-2) var(--s-5);
   color: var(--ink-2);
   font-size: var(--fs-sm);
+  font-variant-numeric: tabular-nums;
+}
+/* the meeting's state reads as a chip at the start of the line */
+.room-status > .room-state {
+  padding: 0 var(--s-2);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-chip);
+  background: var(--surface-2);
+  font-size: var(--fs-xs);
+  line-height: 1.7;
+}
+.room-status > .room-state svg {
+  width: 14px;
+  height: 14px;
 }
 
 .room-state {
@@ -262,8 +284,6 @@
 }
 .lanes-skeleton span {
   height: 22px;
-  border-radius: var(--r-chip);
-  background: var(--surface-sunk);
 }
 .lanes-skeleton span:nth-child(1) {
   width: 62%;
@@ -301,7 +321,7 @@
 
 @media (max-width: 767px) {
   .room {
-    padding: var(--s-4);
+    padding: var(--s-5) var(--s-4) var(--s-6);
     gap: var(--s-3);
   }
   .room-title {

@@ -14,7 +14,7 @@ interface NavItem {
 }
 
 const NAV: NavItem[] = [
-  { to: "/", label: "Meetings", icon: AudioLines, match: (p) => p === "/" || p.startsWith("/m/") },
+  { to: "/meetings", label: "Meetings", icon: AudioLines, match: (p) => p === "/meetings" || p.startsWith("/m/") },
   { to: "/commitments", label: "Commitments", icon: ListChecks, match: (p) => p.startsWith("/commitments") },
   { to: "/decisions", label: "Decisions", icon: Signpost, match: (p) => p.startsWith("/decisions") },
   { to: "/people", label: "People", icon: Users, match: (p) => p.startsWith("/people") },
@@ -56,7 +56,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
         Skip to main content
       </a>
       <nav className="shell-rail" aria-label="Main">
-        <Link to="/" className="shell-mark" aria-label={`${brand.short}, all meetings`}>
+        <Link to="/" className="shell-mark" aria-label={`${brand.short} home`}>
           <ProductMark />
           <span className="shell-mark-name" aria-hidden="true">
             {brand.short}

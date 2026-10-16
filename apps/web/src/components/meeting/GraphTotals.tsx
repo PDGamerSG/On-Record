@@ -54,7 +54,7 @@ export default function GraphTotals() {
   });
 
   return (
-    <section className="totals" aria-labelledby="totals-title">
+    <section className="totals panel" aria-labelledby="totals-title">
       <h2 id="totals-title" className="totals-title">
         In the FalkorDB graph
       </h2>
@@ -70,7 +70,7 @@ export default function GraphTotals() {
           {ROWS.map((r) => (
             <div key={r.key} className="totals-item">
               <dt>{r.label}</dt>
-              <dd>{stats ? fmt.format(Number(stats[r.key]) || 0) : "–"}</dd>
+              <dd className={stats ? undefined : "skel"}>{stats ? fmt.format(Number(stats[r.key]) || 0) : "–"}</dd>
             </div>
           ))}
         </dl>

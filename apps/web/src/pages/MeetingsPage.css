@@ -1,35 +1,22 @@
+/* Meetings: the page header and empty/error states come from memoryPages.css (.mp-*). */
 .home {
   display: flex;
   flex-direction: column;
   gap: var(--s-8);
-  max-width: 1180px;
-  padding: var(--s-10) var(--s-12) var(--s-12);
 }
-
-.home-head {
-  display: flex;
-  flex-direction: column;
-  gap: var(--s-3);
-}
-
-.home-title {
-  font-size: var(--fs-4xl);
-  letter-spacing: -0.02em;
-  max-width: 24ch;
-}
-
-.home-tagline {
-  color: var(--ink-2);
-  font-size: var(--fs-lg);
-  max-width: var(--measure);
+.home > .mp-head {
+  margin-bottom: 0;
 }
 
 .home-actions {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-start;
-  gap: var(--s-3) var(--s-4);
-  margin-top: var(--s-3);
+  align-items: center;
+  gap: var(--s-3);
+}
+/* the inline start form needs the full width under the title */
+.home-actions:has(.start) {
+  flex-basis: 100%;
 }
 
 .home-error {
@@ -50,6 +37,7 @@
   border: 1px solid var(--line);
   border-radius: var(--r-panel);
   background: var(--surface);
+  box-shadow: var(--shadow-panel);
 }
 .start-label {
   font-size: var(--fs-sm);
@@ -87,53 +75,62 @@
   color: var(--ink-2);
   font-size: var(--fs-sm);
   cursor: pointer;
+  transition: color var(--t-fast) var(--ease-out);
 }
-.upload-pace input {
-  width: 16px;
-  height: 16px;
-  margin: 0;
-  accent-color: var(--ink);
+.upload-pace:hover {
+  color: var(--ink);
 }
 
-/* graph totals */
+/* graph totals: one tile per count */
 .totals {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--s-3) var(--s-8);
-  padding: var(--s-3) var(--s-4);
-  border: 1px solid var(--line);
-  border-radius: var(--r-panel);
-  background: var(--surface);
+  overflow: hidden;
 }
 .totals-title {
+  padding: var(--s-3) var(--s-5);
+  border-bottom: 1px solid var(--line);
+  color: var(--ink-2);
   font-size: var(--fs-sm);
-  font-weight: 650;
+  font-weight: 550;
+  letter-spacing: 0;
 }
 .totals-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--s-2) var(--s-6);
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   margin: 0;
 }
 .totals-item {
   display: flex;
-  align-items: baseline;
-  gap: var(--s-2);
+  flex-direction: column;
+  gap: var(--s-1);
+  min-width: 0;
+  padding: var(--s-4) var(--s-5);
+}
+.totals-item + .totals-item {
+  border-left: 1px solid var(--line);
 }
 .totals-item dt {
   order: 2;
   color: var(--ink-2);
-  font-size: var(--fs-sm);
+  font-size: var(--fs-xs);
 }
 .totals-item dd {
   order: 1;
   margin: 0;
-  font-size: var(--fs-lg);
-  font-weight: 650;
+  font-size: var(--fs-2xl);
+  font-weight: 600;
+  line-height: 1.15;
+  font-variation-settings: var(--ui-mono);
   font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+.totals-item dd.skel {
+  width: 3ch;
+  height: 1.15em;
+  margin: 0;
+  color: transparent;
 }
 .totals-error {
+  padding: var(--s-4) var(--s-5);
   color: var(--ink-2);
   font-size: var(--fs-sm);
 }
@@ -161,7 +158,7 @@
   gap: var(--s-1) var(--s-4);
 }
 .home-list-title {
-  font-size: var(--fs-xl);
+  font-size: var(--fs-lg);
 }
 .home-count {
   margin-left: var(--s-1);
@@ -186,8 +183,9 @@
   display: grid;
   grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
   align-items: center;
-  gap: var(--s-3) var(--s-6);
-  padding: var(--s-4);
+  gap: var(--s-3) var(--s-8);
+  padding: var(--s-4) var(--s-5);
+  transition: background var(--t-fast) var(--ease-out);
 }
 .mrow + .mrow {
   border-top: 1px solid var(--line);
@@ -213,14 +211,11 @@
 .mrow-title {
   color: var(--ink);
   font-size: var(--fs-md);
-  font-weight: 650;
+  font-weight: 620;
   text-decoration: none;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-.mrow-title:hover {
-  text-decoration: underline;
 }
 /* the whole row opens the meeting */
 .mrow-title::after {
@@ -243,6 +238,7 @@
   flex: none;
   align-items: center;
   gap: 6px;
+  color: var(--rec);
   font-size: var(--fs-xs);
   font-weight: 650;
 }
@@ -250,9 +246,22 @@
 .mrow-meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 0 var(--s-4);
+  align-items: center;
+  gap: var(--s-1) var(--s-4);
   color: var(--ink-2);
   font-size: var(--fs-sm);
+}
+.mrow-num {
+  font-variant-numeric: tabular-nums;
+}
+.mrow-source {
+  flex: none;
+  padding: 0 var(--s-2);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-chip);
+  color: var(--ink-2);
+  font-size: var(--fs-xs);
+  line-height: 1.6;
 }
 
 .mrow-tape {
@@ -262,60 +271,53 @@
 .mrow--skeleton:hover {
   background: none;
 }
-.skel {
-  display: block;
-  height: 14px;
-  border-radius: var(--r-chip);
-  background: var(--surface-sunk);
+.mrow--skeleton .mrow-main {
+  gap: var(--s-3);
+  padding: var(--s-1) 0;
 }
 .skel--title {
-  width: 55%;
-  height: 16px;
+  width: 52%;
+  height: 14px;
 }
 .skel--meta {
-  width: 75%;
-  opacity: 0.7;
+  width: 78%;
+  height: 10px;
 }
 
-.home-message {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--s-3) var(--s-4);
-  padding: var(--s-6) var(--s-4);
-}
-.home-message p {
-  flex: 1 1 320px;
-  max-width: var(--measure);
-}
-.home-empty {
-  flex-direction: column;
-  align-items: flex-start;
-}
-.home-empty p {
-  flex: none;
-  color: var(--ink-2);
+@media (max-width: 1023px) {
+  .totals-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .totals-item:nth-child(3n + 1) {
+    border-left: 0;
+  }
+  .totals-item:nth-child(n + 4) {
+    border-top: 1px solid var(--line);
+  }
 }
 
 @media (max-width: 767px) {
   .home {
     gap: var(--s-6);
-    padding: var(--s-6) var(--s-4) var(--s-8);
   }
-  .home-title {
-    font-size: var(--fs-2xl);
+  .home-actions {
+    flex-basis: 100%;
   }
-  .home-tagline {
-    font-size: var(--fs-md);
+  .totals-title {
+    padding: var(--s-3) var(--s-4);
   }
-  .totals {
-    gap: var(--s-2) var(--s-4);
+  .totals-item {
+    padding: var(--s-3);
   }
-  .totals-list {
-    gap: var(--s-1) var(--s-4);
+  .totals-item:nth-child(3n + 1) {
+    padding-left: var(--s-4);
+  }
+  .totals-item dd {
+    font-size: var(--fs-xl);
   }
   .mrow {
     grid-template-columns: minmax(0, 1fr);
     gap: var(--s-3);
+    padding: var(--s-4);
   }
 }

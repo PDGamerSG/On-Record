@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { ArrowLeft, ArrowRight, Play } from "lucide-react";
+import { ArrowLeft, ArrowRight, LoaderCircle, Play } from "lucide-react";
 import { api } from "../api/client";
 import type { GraphNode, Subgraph } from "../api/types";
 import { timecode, when } from "../lib/format";
@@ -156,7 +156,7 @@ export default function GraphPage() {
             Record or upload a meeting. Each speaker, utterance, decision and action item is written to FalkorDB as it
             happens, and appears here.
           </p>
-          <Link className="btn" to="/">
+          <Link className="btn" to="/meetings">
             Go to meetings
           </Link>
         </div>
@@ -183,7 +183,12 @@ export default function GraphPage() {
 
           <div className="gp-body">
             <div className="panel gp-canvas">
-              {!graph && !error ? <p className="gp-state">Loading the graph…</p> : null}
+              {!graph && !error ? (
+                <p className="gp-state">
+                  <LoaderCircle className="spin" aria-hidden="true" />
+                  Loading the graph…
+                </p>
+              ) : null}
               {graph && !graph.nodes.length ? (
                 <p className="gp-state">
                   Nothing in the graph for this meeting yet. Utterances appear as people speak.

@@ -1,45 +1,53 @@
 /* Design tokens. Components read ONLY these variables (see docs/DESIGN.md). */
 @import "@fontsource-variable/recursive/full.css";
-@import "@fontsource/newsreader/400.css";
-@import "@fontsource/newsreader/400-italic.css";
-@import "@fontsource/newsreader/600.css";
+@import "@fontsource-variable/newsreader/opsz.css";
+@import "@fontsource-variable/newsreader/opsz-italic.css";
 
+/* "Night session": a recording studio after dark. Monochrome chrome; the only colour is speakers (and red when live). */
 :root {
-  /* colour */
-  --bg: #e3e6e8;
-  --surface: #f7f8f9;
-  --surface-2: #eef0f2;
-  --surface-sunk: #d9dde0;
-  --ink: #13202b;
-  --ink-2: #46535f;
-  --ink-3: #66727d; /* placeholders, disabled — AA only at >=18px */
-  --line: #c3cad0;
-  --line-strong: #9aa4ad;
-  --rec: #c8261b;
-  --rec-soft: #f6dcd9;
-  --focus: #2350c8;
-  --ok: #1d6e46;
-  --ok-soft: #dcefe4;
-  --warn: #8a5a00;
-  --warn-soft: #f5e8c8;
-  --on-ink: #ffffff;
+  color-scheme: dark;
 
-  /* speakers (white text passes AA on all) */
-  --spk-0: #2f5bd3;
-  --spk-1: #0e8577;
-  --spk-2: #b98900;
-  --spk-3: #a23b84;
-  --spk-4: #5e7f1e;
-  --spk-5: #b4531c;
-  --spk-6: #6a4fc9;
-  --spk-7: #4b6175;
+  /* colour: surfaces step up in lightness as they come forward */
+  --bg: #08090b;
+  --bg-2: #0b0d10; /* alternate page bands */
+  --surface: #101216; /* panels */
+  --surface-2: #15181d; /* hover, raised rows, inputs */
+  --surface-3: #1b1f25; /* pressed, selected */
+  --surface-sunk: #0a0b0e; /* wells: lanes, code */
+  --ink: #eceff3;
+  --ink-2: #a3acb8; /* secondary text, AA on every surface */
+  --ink-3: #6b7480; /* placeholders, disabled: decorative or >=18px only */
+  --line: #1e232a; /* hairlines, panel borders */
+  --line-strong: #2c333c; /* control borders, dividers that must read */
+  --hi: rgb(255 255 255 / 0.05); /* top-edge inner highlight on raised surfaces */
+  --rec: #ff4d3d;
+  --rec-soft: rgb(255 77 61 / 0.14);
+  --focus: #8ab4ff;
+  --ok: #3ddc97;
+  --ok-soft: rgb(61 220 151 / 0.12);
+  --warn: #f5b941;
+  --warn-soft: rgb(245 185 65 / 0.12);
+  --on-ink: #08090b; /* text on --ink (primary buttons are light) */
+  --on-spk: #08090b; /* text on any speaker colour: every hue passes AA with this */
+
+  /* speakers: bright tape-label hues tuned for a dark desk */
+  --spk-0: #5b8cff; /* cobalt */
+  --spk-1: #2cc4a8; /* teal */
+  --spk-2: #f2b53a; /* mustard */
+  --spk-3: #e066b3; /* plum */
+  --spk-4: #9bc53d; /* moss */
+  --spk-5: #f07a3c; /* rust */
+  --spk-6: #9b7bff; /* violet */
+  --spk-7: #8ca0b3; /* slate */
 
   /* type */
   --font-ui: "Recursive Variable", "Segoe UI", system-ui, sans-serif;
-  --font-quote: "Newsreader", Georgia, "Times New Roman", serif;
-  --ui-casual: "CASL" 0.15, "MONO" 0, "CRSV" 0.5;
+  --font-quote: "Newsreader Variable", Georgia, "Times New Roman", serif;
+  --font-display: "Newsreader Variable", Georgia, "Times New Roman", serif; /* landing headlines, optical size 72 */
+  --ui-casual: "CASL" 0, "MONO" 0, "CRSV" 0.5;
   --ui-mono: "CASL" 0, "MONO" 1;
-  --display-casual: "CASL" 0.45, "MONO" 0;
+  --display-casual: "CASL" 0, "MONO" 0;
+  --fs-2xs: 0.75rem; /* 12px; mono eyebrows */
   --fs-xs: 0.8125rem; /* 13px; labels, timecodes */
   --fs-sm: 0.875rem;
   --fs-md: 0.9375rem; /* 15px body */
@@ -48,9 +56,13 @@
   --fs-2xl: 1.625rem; /* 26 */
   --fs-3xl: 1.9375rem; /* 31 */
   --fs-4xl: 2.3125rem; /* 37 */
-  --lh-ui: 1.45;
+  --fs-display: clamp(2.75rem, 1.4rem + 4.6vw, 5.5rem); /* landing headline */
+  --lh-ui: 1.5;
   --lh-quote: 1.55;
   --measure: 62ch;
+  --track-tight: -0.022em;
+  --track-display: -0.04em;
+  --track-eyebrow: 0.08em;
 
   /* space (4px base) */
   --s-1: 4px;
@@ -62,24 +74,39 @@
   --s-8: 32px;
   --s-10: 40px;
   --s-12: 48px;
+  --s-16: 64px;
+  --s-24: 96px;
 
   /* shape */
-  --r-chip: 3px;
-  --r-panel: 6px;
+  --r-chip: 6px;
+  --r-ctl: 8px;
+  --r-panel: 12px;
+  --r-card: 18px;
   --r-round: 999px;
-  --shadow-float: 0 18px 48px -12px rgb(19 32 43 / 0.35), 0 2px 6px rgb(19 32 43 / 0.12);
-  --rail-w: 88px;
-  --drawer-w: 440px;
+  --shadow-panel: inset 0 1px 0 var(--hi), 0 1px 2px rgb(0 0 0 / 0.4);
+  --shadow-float: 0 0 0 1px rgb(255 255 255 / 0.06), 0 24px 64px -12px rgb(0 0 0 / 0.75), 0 2px 8px rgb(0 0 0 / 0.5);
+  --glow: 0 0 0 1px color-mix(in srgb, var(--spk, var(--ink)) 40%, transparent),
+    0 0 18px -2px color-mix(in srgb, var(--spk, var(--ink)) 55%, transparent);
+  --rail-w: 84px;
+  --drawer-w: 460px;
+
+  /* textures: film grain and the dot grid behind wells */
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --dots: radial-gradient(circle at 1px 1px, rgb(255 255 255 / 0.07) 1px, transparent 0) 0 0 / 16px 16px;
 
   /* motion */
-  --t-fast: 120ms;
-  --t-med: 220ms;
+  --t-fast: 140ms;
+  --t-med: 240ms;
+  --t-slow: 520ms;
   --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1); /* expo out */
+  --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
 }
 
 @media (prefers-reduced-motion: reduce) {
   :root {
     --t-fast: 0ms;
     --t-med: 0ms;
+    --t-slow: 0ms;
   }
 }

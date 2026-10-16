@@ -1,4 +1,4 @@
-import { ArrowRightIcon, CheckCircleIcon, PlayIcon } from "@phosphor-icons/react";
+import { ArrowRight, CircleCheck, Play } from "lucide-react";
 import type { Decision } from "../api/types";
 import { timecode, when } from "../lib/format";
 import { playLine, type Deck } from "./deck";
@@ -15,7 +15,7 @@ function Evidence({ deck, id }: { deck: Deck; id: string }) {
       <p className="ev-text">{u.text}</p>
       <footer className="ev-foot">
         <button type="button" className="ev-play" onClick={() => playLine(deck, side, u)} aria-label={`Play ${u.speaker_name} at ${timecode(u.t_start)} in ${side.title}`}>
-          <PlayIcon weight="fill" aria-hidden="true" />
+          <Play aria-hidden="true" />
         </button>
         <span className="ev-who">{u.speaker_name}</span>
         <span className="tc ev-at">{timecode(u.t_start)}</span>
@@ -36,7 +36,7 @@ function DecisionCard({ deck, d, side, delay }: { deck: Deck; d: Decision; side:
       </header>
       <p className="dec-text">{d.text}</p>
       <p className="dec-by">
-        {d.proposed_by} <span className="tc">{timecode(d.made_at)}</span>
+        Proposed by {d.proposed_by} <span className="tc">at {timecode(d.made_at)}</span>
       </p>
       <Evidence deck={deck} id={d.evidence[d.evidence.length - 1]} />
     </article>
@@ -57,8 +57,8 @@ export default function Decisions({ deck }: { deck: Deck }) {
             Decisions that know when they changed.
           </h2>
           <p className="l-lede" data-reveal style={{ ["--d" as string]: 1 }}>
-            Gemma 4 picks out decisions, owners and due dates, each tied to the words behind it. When a later meeting changes one, the old
-            version stays, marked replaced.
+            Gemma 4 reads along as the meeting happens. It pulls out decisions, owners and due dates, and ties each one to the words that
+            justify it. When a later meeting changes a decision, the old one is marked replaced in the graph, not lost.
           </p>
         </div>
 
@@ -67,21 +67,21 @@ export default function Decisions({ deck }: { deck: Deck }) {
             <DecisionCard deck={deck} d={older} side={a} delay={0} />
             <div className="dec-link" aria-hidden="true" data-reveal style={{ ["--d" as string]: 3 }}>
               <span className="dec-link-label">supersedes</span>
-              <ArrowRightIcon />
+              <ArrowRight />
             </div>
             <DecisionCard deck={deck} d={newer} side={b} delay={5} />
           </div>
         )}
 
         <div className="commit">
-          <h3 className="commit-title">Open commitments</h3>
+          <h3 className="commit-title">Open commitments, by owner</h3>
           <ul className="commit-list">
             {items.map((x, i) => {
               const side = SIDES.find((s) => s.id === x.meeting_id)!;
               const track = x.owner_track ?? "";
               return (
                 <li key={x.id} className={`commit-row spk spk-${side.colours.get(track) ?? 7}`} data-reveal style={{ ["--d" as string]: i }}>
-                  <CheckCircleIcon aria-hidden="true" className="commit-icon" />
+                  <CircleCheck aria-hidden="true" className="commit-icon" />
                   <span className="commit-owner">{x.owner}</span>
                   <span className="commit-text">{x.text}</span>
                   <span className="commit-due">{x.due ? `Due ${x.due}` : "No date"}</span>

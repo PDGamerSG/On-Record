@@ -88,7 +88,17 @@ export default function PeoplePage() {
               </button>
             </div>
           ) : null}
-          {!people && !error ? <p className="mp-state pp-pad">Loading people…</p> : null}
+          {!people && !error ? (
+            <div className="pp-loading">
+              <p className="visually-hidden">Loading people…</p>
+              {[0, 1, 2, 3].map((i) => (
+                <div key={i} className="pp-loading__row" aria-hidden="true">
+                  <span className="skel" />
+                  <span className="skel" />
+                </div>
+              ))}
+            </div>
+          ) : null}
           {people && !people.length ? (
             <div className="mp-empty">
               <h2>Nobody yet</h2>

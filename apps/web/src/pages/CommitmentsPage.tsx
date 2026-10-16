@@ -201,7 +201,18 @@ export default function CommitmentsPage() {
         </div>
       ) : null}
 
-      {!items && !error ? <p className="mp-state">Loading commitments…</p> : null}
+      {!items && !error ? (
+        <div className="mp-loading">
+          <p className="visually-hidden">Loading commitments…</p>
+          {[0, 1].map((i) => (
+            <div key={i} className="panel mp-skel" aria-hidden="true">
+              <span className="skel mp-skel__head" />
+              <span className="skel mp-skel__line" />
+              <span className="skel mp-skel__line mp-skel__line--short" />
+            </div>
+          ))}
+        </div>
+      ) : null}
 
       {items && !groups.length ? (
         <div className="panel mp-empty">
@@ -259,7 +270,7 @@ function CommitmentRow({ item, evidence, onToggle, onPlay }: RowProps) {
   const id = `cm-item-${item.id}`;
   return (
     <li className={`cm-item${done ? " is-done" : ""}`}>
-      <input id={id} type="checkbox" className="cm-check" checked={done} onChange={onToggle} />
+      <input id={id} type="checkbox" className="check cm-check" checked={done} onChange={onToggle} />
       <div className="cm-body">
         <label htmlFor={id} className="cm-text">
           {item.text}

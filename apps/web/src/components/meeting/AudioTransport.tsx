@@ -28,7 +28,7 @@ export default function AudioTransport({ src, title, audio, fallbackDuration }: 
         <span className="transport-time tc">
           {timecode(audio.time)} / {timecode(total)}
         </span>
-        <a className="btn btn--ghost transport-dl" href={src} download={fileName}>
+        <a className="btn btn--ghost" href={src} download={fileName}>
           <Download aria-hidden="true" />
           Download audio
         </a>
