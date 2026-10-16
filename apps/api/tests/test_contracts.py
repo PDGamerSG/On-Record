@@ -5,7 +5,8 @@ from dataclasses import replace
 
 import pytest
 
-from wsw_brain.contracts import Utterance
+from wsw_brain.contracts import FileASR, Utterance
+from wsw_brain.listen import FasterWhisperASR
 
 
 @pytest.mark.parametrize(
@@ -84,3 +85,9 @@ def test_valid_utterance_keeps_serialization_and_sequence_replacement() -> None:
         "confidence": 1.0,
     }
     assert replace(utterance, seq=13).id == "meeting-1:u00013"
+
+
+def test_file_asr_contract_matches_file_transcription_adapter() -> None:
+    adapter = FasterWhisperASR(model=object())
+
+    assert isinstance(adapter, FileASR)

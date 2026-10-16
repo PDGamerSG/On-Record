@@ -15,7 +15,8 @@ from __future__ import annotations
 import math
 from collections.abc import Callable
 from dataclasses import asdict, dataclass, field
-from typing import Any, Literal, Protocol
+from pathlib import Path
+from typing import Any, Literal, Protocol, runtime_checkable
 
 import numpy as np
 
@@ -84,6 +85,17 @@ class ASR(Protocol):
 
     def transcribe(self, samples: np.ndarray) -> tuple[str, float]:
         """16 kHz mono float32 in [-1, 1] -> (text, confidence in [0, 1])."""
+        ...
+
+
+@runtime_checkable
+class FileASR(ASR, Protocol):
+    """ASR adapter that can decode and transcribe an audio file in one call."""
+
+    def transcribe_file(
+        self, path: str | Path, *, max_duration_s: float | None = None
+    ) -> tuple[str, float]:
+        """Decode an audio path and return (text, confidence in [0, 1])."""
         ...
 
 
