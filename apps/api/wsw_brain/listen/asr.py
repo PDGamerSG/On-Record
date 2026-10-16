@@ -7,7 +7,7 @@ from typing import Any
 
 import numpy as np
 
-from .audio import as_mono_float32
+from .audio import as_mono_float32, decode_file
 
 
 class FasterWhisperASR:
@@ -59,6 +59,12 @@ class FasterWhisperASR:
         text = " ".join(text_parts)
         confidence = float(np.mean(scores)) if scores else 0.0
         return text, confidence
+
+    def transcribe_file(
+        self, path: str, *, max_duration_s: float | None = None
+    ) -> tuple[str, float]:
+        """Decode an audio file and transcribe it with the same ASR settings."""
+        return self.transcribe(decode_file(path, max_duration_s=max_duration_s))
 
     def _get_model(self) -> Any:
         if self._model is None:
