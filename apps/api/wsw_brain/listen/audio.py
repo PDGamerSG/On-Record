@@ -48,6 +48,7 @@ def iter_decode(
     (wav/flac/ogg only) if PyAV is unavailable.
     """
     _validate_duration_limit(max_duration_s)
+    _validate_block_duration(block_s)
     p = Path(path)
     if not p.is_file():
         raise FileNotFoundError(f"audio file not found: {p}")
@@ -140,6 +141,16 @@ def _validate_duration_limit(max_duration_s: float | None) -> None:
         or max_duration_s < 0
     ):
         raise ValueError("max_duration_s must be a finite, non-negative number")
+
+
+def _validate_block_duration(block_s: float) -> None:
+    if (
+        isinstance(block_s, bool)
+        or not isinstance(block_s, (int, float))
+        or not math.isfinite(float(block_s))
+        or block_s <= 0
+    ):
+        raise ValueError("block_s must be a finite, positive number")
 
 
 def _mono(planar: np.ndarray) -> np.ndarray:
