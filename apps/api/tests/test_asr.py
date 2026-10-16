@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 import soundfile as sf
 
-from wsw_brain.listen import FasterWhisperASR
+from wsw_brain.listen import FasterWhisperASR, FileASR
 
 
 class FakeWhisperModel:
@@ -80,3 +80,9 @@ def test_transcribe_file_decodes_audio_and_applies_duration_limit(tmp_path) -> N
 
     with pytest.raises(ValueError, match="limit"):
         asr.transcribe_file(source, max_duration_s=0.5)
+
+
+def test_file_asr_contract_is_exported_from_listen_package() -> None:
+    from wsw_brain.contracts import FileASR as ContractFileASR
+
+    assert FileASR is ContractFileASR

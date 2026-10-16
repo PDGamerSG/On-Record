@@ -1,5 +1,6 @@
 """Audio input and model-backed listening helpers."""
 
+from ..contracts import FileASR
 from .asr import FasterWhisperASR
 from .audio import (
     AudioTooLong,
@@ -14,6 +15,7 @@ from .audio import (
 __all__ = [
     "AudioTooLong",
     "FasterWhisperASR",
+    "FileASR",
     "WavAppender",
     "decode_file",
     "float_to_pcm16",
