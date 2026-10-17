@@ -77,6 +77,43 @@ def test_transcribe_averages_missing_confidence_with_valid_segments() -> None:
     assert confidence == pytest.approx(0.25)
 
 
+@pytest.mark.parametrize(
+    "segment",
+    [
+        SimpleNamespace(avg_logprob=0.0),
+        SimpleNamespace(text=None, avg_logprob=0.0),
+        SimpleNamespace(text=42, avg_logprob=0.0),
+        SimpleNamespace(text=[], avg_logprob=0.0),
+        SimpleNamespace(text=" \t", avg_logprob=0.0),
+    ],
+    ids=["missing-text", "null-text", "numeric-text", "list-text", "blank-text"],
+)
+def test_transcribe_ignores_unusable_text_without_diluting_confidence(segment: SimpleNamespace) -> None:
+    model = FakeWhisperModel([
+        SimpleNamespace(text=" Hello ", avg_logprob=-0.6931471805599453),
+        segment,
+        SimpleNamespace(text=" team ", avg_logprob=-0.6931471805599453),
+    ])
+
+    text, confidence = FasterWhisperASR(model=model).transcribe(np.ones(4, dtype=np.float32))
+
+    assert text == "Hello team"
+    assert confidence == pytest.approx(0.5)
+
+
+@pytest.mark.parametrize(
+    "segments",
+    [[], [SimpleNamespace(text=None), SimpleNamespace(avg_logprob=0.0)]],
+    ids=["no-segments", "no-usable-text"],
+)
+def test_transcribe_returns_empty_result_when_model_produces_no_usable_text(
+    segments: list[SimpleNamespace],
+) -> None:
+    asr = FasterWhisperASR(model=FakeWhisperModel(segments))
+
+    assert asr.transcribe(np.ones(4, dtype=np.float32)) == ("", 0.0)
+
+
 def test_transcribe_does_not_load_or_call_model_for_empty_audio() -> None:
     model = FakeWhisperModel()
     asr = FasterWhisperASR(model=model)

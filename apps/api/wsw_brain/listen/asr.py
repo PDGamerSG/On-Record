@@ -40,7 +40,11 @@ class FasterWhisperASR:
         self._model = model
 
     def transcribe(self, samples: np.ndarray) -> tuple[str, float]:
-        """Return ``(text, confidence)`` for 16 kHz mono float32 samples."""
+        """Return ``(text, confidence)`` for 16 kHz mono float32 samples.
+
+        Segments without non-blank string text are skipped. Only retained text contributes to
+        confidence; missing or malformed scores on those segments contribute zero.
+        """
         audio = as_mono_float32(samples)
         if audio.size == 0:
             return "", 0.0
@@ -53,7 +57,10 @@ class FasterWhisperASR:
         text_parts: list[str] = []
         scores: list[float] = []
         for segment in materialised:
-            part = segment.text.strip()
+            raw_text = getattr(segment, "text", None)
+            if not isinstance(raw_text, str):
+                continue
+            part = raw_text.strip()
             if part:
                 text_parts.append(part)
                 scores.append(_segment_confidence(segment))
