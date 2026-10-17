@@ -80,6 +80,24 @@ def test_subscriber_filters_replay_after_an_event_id() -> None:
     assert queue.get_nowait()["type"] == "utterance.created"
 
 
+@pytest.mark.asyncio
+async def test_subscription_context_replays_matching_events_and_cleans_up() -> None:
+    bus = EventBus()
+    bus.publish("meeting.started", {"title": "One"}, meeting_id="m1")
+    bus.publish("meeting.started", {"title": "Two"}, meeting_id="m2")
+
+    async with bus.subscription(meeting_id="m1") as subscription:
+        assert subscription.queue.qsize() == 1
+        assert subscription.queue.get_nowait()["meeting_id"] == "m1"
+
+        subscription.close()
+        subscription.close()
+        bus.publish("utterance.created", {"text": "after close"}, meeting_id="m1")
+
+    assert subscription.queue.empty()
+    assert bus._subs == {}
+
+
 def test_meeting_filter_handles_legacy_events_without_meeting_id() -> None:
     bus = EventBus()
     bus._replay.append({"id": 1, "type": "listener.status", "ts": 0.0, "data": {}})

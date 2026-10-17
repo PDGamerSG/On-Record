@@ -20,7 +20,31 @@ import asyncio
 import itertools
 import time
 from collections import deque
-from typing import Any
+from types import TracebackType
+from typing import Any, Self
+
+
+class EventSubscription:
+    """Own one event queue and remove it safely when the consumer disconnects."""
+
+    def __init__(self, bus: EventBus, queue: asyncio.Queue[dict[str, Any]]) -> None:
+        self._bus = bus
+        self.queue = queue
+        self._closed = False
+
+    def close(self) -> None:
+        """Detach this subscription; repeated cleanup calls are harmless."""
+        if not self._closed:
+            self._bus.unsubscribe(self.queue)
+            self._closed = True
+
+    async def __aenter__(self) -> Self:
+        return self
+
+    async def __aexit__(
+        self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: TracebackType | None
+    ) -> None:
+        self.close()
 
 
 class EventBus:
@@ -78,6 +102,10 @@ class EventBus:
                 q.put_nowait(e)
         self._subs[q] = meeting_id
         return q
+
+    def subscription(self, since_id: int = 0, meeting_id: str | None = None) -> EventSubscription:
+        """Create a queue subscription that can be cleaned up with an async context manager."""
+        return EventSubscription(self, self.subscribe(since_id=since_id, meeting_id=meeting_id))
 
     def unsubscribe(self, q: asyncio.Queue[dict[str, Any]]) -> None:
         self._subs.pop(q, None)
