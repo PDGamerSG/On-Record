@@ -2,7 +2,7 @@
 
 A meeting assistant that connects what was said to the person who said it.
 
-This repository is being assembled in feature-sized PRs from [Who Said What Brain](https://github.com/Hydra-Of-Malice/hack-october-who-said-what-brain). It currently includes the shared Python package, a local FalkorDB service, and the graph query definitions. The application store, recording, assistant, and web interface follow in separate branches.
+This repository is being assembled in feature-sized PRs from [Who Said What Brain](https://github.com/Hydra-Of-Malice/hack-october-who-said-what-brain). It currently includes shared Python contracts, graph storage and queries, audio decoding and transcription, text embeddings, and hybrid meeting retrieval. Live recording, the assistant, HTTP server, and web interface follow in separate branches.
 
 The display name lives in `brand.json`. `.env.example` lists the configuration the application will use; keep local values in an ignored `.env` file.
 
@@ -47,6 +47,35 @@ Application code can call `get_embedder()` from `wsw_brain.brain` to use `WSW_EM
 
 Model and hash vectors use different embedding spaces. When changing providers, use a separate graph or rebuild stored embeddings; matching vector dimensions alone does not make them compatible.
 
+## Hybrid meeting retrieval
+
+`Retriever` combines full-text and vector matches with reciprocal-rank fusion, counting each utterance once per source. Questions mentioning a known speaker also search that person's utterances; phrases such as "just now" add the newest utterances. The results keep the meeting, speaker, timestamps, text, and retrieval source needed for citations, alongside the Cypher queries that produced the evidence. Fused scores are relative to the best result, which scores 1.0; they are not confidence probabilities.
+
+With a running database and meetings indexed using the same embedder:
+
+```python
+from wsw_brain.brain import Retriever, get_embedder
+from wsw_brain.config import settings
+from wsw_brain.graph import GraphStore
+
+config = settings()
+store = GraphStore(config.falkordb_url, config.graph)
+try:
+    retriever = Retriever(store, get_embedder())
+    hits, cypher = retriever.retrieve("What did Priya say about pricing?", k=5)
+    # Pass meeting_id="..." to restrict every search source to one meeting.
+finally:
+    store.close()
+```
+
+Blank questions return no results. `k` must be a positive integer. A failed query embedder or search source is logged, while the remaining sources still contribute results. Speaker names are cached for 30 seconds. Vector compatibility checks sample at most two meetings per query and cache verdicts for ten minutes; confirmed incompatible meetings are excluded from vector results. These checks are best effort: unverified hits stay eligible, and they do not replace rebuilding embeddings when changing providers.
+
+Run the ranking and database integration checks without downloading a model:
+
+```bash
+uv run --project apps/api pytest apps/api/tests/test_retrieve.py apps/api/tests/test_retrieve_graph.py -q
+```
+
 ## Local graph database
 
 Start Docker, then run:
@@ -65,4 +94,4 @@ uv run --project apps/api pytest apps/api/tests/test_graph_schema.py -q
 
 These checks create and delete their own temporary graphs. They verify that reapplying indexes preserves existing records, and that full-text and vector searches return the expected utterances. Set `WSW_FALKORDB_URL` in the command environment to test a different server. The checks fail if the database is unavailable.
 
-Stop the service with `docker compose stop falkordb`. The application store will create indexes for the configured application graph when it is added in the next PR.
+Stop the service with `docker compose stop falkordb`. Call `GraphStore.ensure_schema(embedder.dim)` when setting up the configured graph, before writing utterances with embeddings.
