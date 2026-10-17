@@ -639,6 +639,16 @@ def test_save_turn_rejects_invalid_memory_fields() -> None:
             store.save_turn(session_id, role, "hello", at_ms)  # type: ignore[arg-type]
 
 
+def test_get_turns_rejects_invalid_memory_query() -> None:
+    store = GraphStore("falkor://127.0.0.1:1", "wsw_test_validation")
+    with pytest.raises(ValueError, match="session_id"):
+        store.get_turns(" ")
+
+    for limit in (0, -1, True, 1.5):
+        with pytest.raises(ValueError, match="limit"):
+            store.get_turns("sess", limit=limit)  # type: ignore[arg-type]
+
+
 def test_stats_counts_labels_and_relationships(store: GraphStore) -> None:
     empty = store.stats()
     assert empty == {label: 0 for label in (*store_module.cq.LABELS, "relationships")}
