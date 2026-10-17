@@ -105,3 +105,19 @@ def test_decision_draft_rejects_malformed_evidence() -> None:
 
     with pytest.raises(ValueError, match="evidence"):
         DecisionDraft("Ship the release", "m1:u0001")  # type: ignore[arg-type]
+
+
+def test_decision_draft_rejects_blank_optional_fields() -> None:
+    with pytest.raises(ValueError, match="proposed_by"):
+        DecisionDraft("Ship the release", [], proposed_by=" \t")
+
+    with pytest.raises(ValueError, match="supersedes_text"):
+        DecisionDraft("Ship the release", [], supersedes_text=" \t")
+
+
+def test_action_item_draft_rejects_blank_optional_fields() -> None:
+    with pytest.raises(ValueError, match="owner"):
+        ActionItemDraft("Send the notes", [], owner=" \t")
+
+    with pytest.raises(ValueError, match="due"):
+        ActionItemDraft("Send the notes", [], due=" \t")

@@ -136,6 +136,8 @@ class DecisionDraft:
     def __post_init__(self) -> None:
         _require_text(self.text, "DecisionDraft.text")
         _require_evidence(self.evidence, "DecisionDraft.evidence")
+        _require_optional_text(self.proposed_by, "DecisionDraft.proposed_by")
+        _require_optional_text(self.supersedes_text, "DecisionDraft.supersedes_text")
 
 
 @dataclass
@@ -148,11 +150,18 @@ class ActionItemDraft:
     def __post_init__(self) -> None:
         _require_text(self.text, "ActionItemDraft.text")
         _require_evidence(self.evidence, "ActionItemDraft.evidence")
+        _require_optional_text(self.owner, "ActionItemDraft.owner")
+        _require_optional_text(self.due, "ActionItemDraft.due")
 
 
 def _require_text(value: object, field: str) -> None:
     if not isinstance(value, str) or not value.strip():
         raise ValueError(f"{field} must be a non-empty string")
+
+
+def _require_optional_text(value: object, field: str) -> None:
+    if value is not None:
+        _require_text(value, field)
 
 
 def _require_evidence(value: object, field: str) -> None:
