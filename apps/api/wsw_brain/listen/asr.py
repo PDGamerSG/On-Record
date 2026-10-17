@@ -80,8 +80,11 @@ class FasterWhisperASR:
 
 
 def _segment_confidence(segment: Any) -> float:
-    """Map faster-whisper's average log probability into the ASR confidence contract."""
-    logprob = getattr(segment, "avg_logprob", None)
-    if logprob is None or not math.isfinite(float(logprob)):
+    """Map average log probability to confidence; missing or invalid scores give zero."""
+    try:
+        logprob = float(getattr(segment, "avg_logprob", None))
+    except (TypeError, ValueError, OverflowError):
         return 0.0
-    return float(np.clip(math.exp(min(float(logprob), 0.0)), 0.0, 1.0))
+    if not math.isfinite(logprob):
+        return 0.0
+    return float(np.clip(math.exp(min(logprob, 0.0)), 0.0, 1.0))

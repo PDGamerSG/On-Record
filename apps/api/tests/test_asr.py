@@ -10,19 +10,18 @@ from wsw_brain.listen import FasterWhisperASR, FileASR
 
 
 class FakeWhisperModel:
-    def __init__(self) -> None:
+    def __init__(self, segments: list[SimpleNamespace] | None = None) -> None:
         self.calls: list[tuple[np.ndarray, dict[str, object]]] = []
+        self.segments = segments if segments is not None else [
+            SimpleNamespace(text=" Hello there ", avg_logprob=-0.1),
+            SimpleNamespace(text="", avg_logprob=-1.0),
+            SimpleNamespace(text=" team", avg_logprob=-0.3),
+        ]
 
     def transcribe(self, samples: np.ndarray, **options: object):
         self.calls.append((samples, options))
         return (
-            iter(
-                [
-                    SimpleNamespace(text=" Hello there ", avg_logprob=-0.1),
-                    SimpleNamespace(text="", avg_logprob=-1.0),
-                    SimpleNamespace(text=" team", avg_logprob=-0.3),
-                ]
-            ),
+            iter(self.segments),
             SimpleNamespace(language="en"),
         )
 
@@ -36,6 +35,46 @@ def test_transcribe_joins_text_and_returns_bounded_confidence() -> None:
     assert text == "Hello there team"
     assert confidence == pytest.approx((np.exp(-0.1) + np.exp(-0.3)) / 2)
     assert model.calls[0][1] == {"language": "en", "vad_filter": True}
+
+
+@pytest.mark.parametrize(
+    ("logprob", "expected_confidence"),
+    [
+        (None, 0.0),
+        (float("nan"), 0.0),
+        (float("inf"), 0.0),
+        (-float("inf"), 0.0),
+        ("unknown", 0.0),
+        ({}, 0.0),
+        pytest.param(10**1000, 0.0, id="overflow"),
+        (-1000.0, 0.0),
+        (0.2, 1.0),
+        (-0.6931471805599453, 0.5),
+        ("-0.6931471805599453", 0.5),
+    ],
+)
+def test_transcribe_preserves_text_when_normalising_confidence(
+    logprob: object, expected_confidence: float
+) -> None:
+    model = FakeWhisperModel([SimpleNamespace(text=" Keep these words ", avg_logprob=logprob)])
+    asr = FasterWhisperASR(model=model)
+
+    text, confidence = asr.transcribe(np.ones(4, dtype=np.float32))
+
+    assert text == "Keep these words"
+    assert confidence == pytest.approx(expected_confidence)
+
+
+def test_transcribe_averages_missing_confidence_with_valid_segments() -> None:
+    model = FakeWhisperModel([
+        SimpleNamespace(text="Hello", avg_logprob=-0.6931471805599453),
+        SimpleNamespace(text="team"),
+    ])
+
+    text, confidence = FasterWhisperASR(model=model).transcribe(np.ones(4, dtype=np.float32))
+
+    assert text == "Hello team"
+    assert confidence == pytest.approx(0.25)
 
 
 def test_transcribe_does_not_load_or_call_model_for_empty_audio() -> None:
