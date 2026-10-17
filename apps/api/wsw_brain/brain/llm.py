@@ -402,6 +402,151 @@ def _read_gemini_response(response: Any) -> tuple[str, list[ToolCall]]:
     return text, calls
 
 
+class OpenAICompatLLM:
+    """OpenAI-compatible chat completions for hosted or self-hosted endpoints."""
+
+    provider = "openai"
+    supports_audio = False
+
+    def __init__(
+        self,
+        base_url: str,
+        api_key: str | None,
+        model: str,
+        *,
+        transport: httpx.AsyncBaseTransport | None = None,
+    ) -> None:
+        if not isinstance(base_url, str):
+            raise TypeError("base_url must be a string")
+        try:
+            parsed = httpx.URL(base_url)
+        except httpx.InvalidURL as exc:
+            raise ValueError("base_url must be an absolute HTTP or HTTPS URL") from exc
+        if parsed.scheme not in ("http", "https") or not parsed.host:
+            raise ValueError("base_url must be an absolute HTTP or HTTPS URL")
+        if not isinstance(model, str) or not model.strip():
+            raise ValueError("model must be a non-empty string")
+        base = base_url.rstrip("/")
+        self.url = f"{base if parsed.path.rstrip('/').endswith('/v1') else base + '/v1'}/chat/completions"
+        self.model = model
+        self._headers = {"Authorization": f"Bearer {api_key}"} if api_key else {}
+        self._transport = transport
+
+    async def chat(
+        self,
+        messages: list[dict[str, Any]],
+        *,
+        tools: list[dict[str, Any]] | None = None,
+        json_mode: bool = False,
+        temperature: float = 0.2,
+        max_tokens: int = 800,
+    ) -> LLMResult:
+        payload: dict[str, Any] = {
+            "model": self.model,
+            "messages": [self._message(message) for message in messages],
+            "temperature": temperature,
+            "max_tokens": max_tokens,
+        }
+        if tools:
+            payload["tools"] = [{"type": "function", "function": OllamaLLM._function(tool)} for tool in tools]
+            payload["tool_choice"] = "auto"
+        if json_mode:
+            payload["response_format"] = {"type": "json_object"}
+        started = time.perf_counter()
+        try:
+            async with httpx.AsyncClient(timeout=OLLAMA_TIMEOUT, transport=self._transport) as client:
+                response = await client.post(self.url, json=payload, headers=self._headers)
+        except httpx.HTTPError as exc:
+            raise LLMError(f"OpenAI-compatible request to {self.url} failed: {exc!r}") from exc
+        if response.status_code != 200:
+            raise LLMError(
+                f"OpenAI-compatible {self.url} returned HTTP {response.status_code}: {response.text[:300]}"
+            )
+        try:
+            data = response.json()
+        except ValueError as exc:
+            raise LLMError(f"OpenAI-compatible returned non-JSON: {response.text[:200]}") from exc
+        if not isinstance(data, dict):
+            raise LLMError("OpenAI-compatible response must be a JSON object")
+        if data.get("error"):
+            detail = data["error"]
+            if isinstance(detail, dict):
+                detail = detail.get("message") or detail
+            raise LLMError(f"OpenAI-compatible error: {str(detail)[:300]}")
+        choices = data.get("choices")
+        if not isinstance(choices, list) or not choices or not isinstance(choices[0], dict):
+            raise LLMError("OpenAI-compatible response must contain a choices array")
+        message = choices[0].get("message")
+        if not isinstance(message, dict):
+            raise LLMError("OpenAI-compatible choice must contain a message object")
+        text = message.get("content") or ""
+        if not isinstance(text, str):
+            raise LLMError("OpenAI-compatible message content must be text")
+        calls = []
+        raw_calls = message.get("tool_calls") or []
+        if not isinstance(raw_calls, list):
+            raise LLMError("OpenAI-compatible tool_calls must be a list")
+        for raw_call in raw_calls:
+            function = raw_call.get("function") if isinstance(raw_call, dict) else None
+            if not isinstance(function, dict) or not isinstance(function.get("name"), str) or not function["name"].strip():
+                raise LLMError("OpenAI-compatible tool call must contain a function name")
+            raw_arguments = function.get("arguments")
+            if raw_arguments in (None, ""):
+                arguments = {}
+            elif isinstance(raw_arguments, dict):
+                arguments = raw_arguments
+            elif isinstance(raw_arguments, str):
+                try:
+                    arguments = json.loads(raw_arguments)
+                except ValueError as exc:
+                    raise LLMError("OpenAI-compatible tool arguments are not valid JSON") from exc
+                if not isinstance(arguments, dict):
+                    raise LLMError("OpenAI-compatible tool arguments must be a JSON object")
+            else:
+                raise LLMError("OpenAI-compatible tool arguments must be a JSON object")
+            calls.append(ToolCall(name=function["name"], arguments=arguments))
+        text = strip_thoughts(text)
+        if not text and not calls:
+            raise LLMError("OpenAI-compatible returned no answer or tool calls")
+        return LLMResult(
+            text=text,
+            tool_calls=calls,
+            model=self.model,
+            provider=self.provider,
+            latency_ms=round((time.perf_counter() - started) * 1000, 1),
+        )
+
+    async def transcribe(self, wav_bytes: bytes, *, hint: str | None = None) -> Transcript:
+        raise NotImplementedError("audio questions are not routed through the OpenAI-compatible adapter")
+
+    @staticmethod
+    def _message(message: dict[str, Any]) -> dict[str, Any]:
+        role = message["role"]
+        if role == "assistant" and message.get("tool_calls"):
+            return {
+                "role": "assistant",
+                "content": message.get("content") or None,
+                "tool_calls": [
+                    {
+                        "id": call.get("id") or f"call_{index}",
+                        "type": "function",
+                        "function": {
+                            "name": call["name"],
+                            "arguments": json.dumps(call.get("arguments") or {}, separators=(",", ":")),
+                        },
+                    }
+                    for index, call in enumerate(message["tool_calls"])
+                ],
+            }
+        if role == "tool":
+            return {
+                "role": "tool",
+                "tool_call_id": message.get("tool_call_id") or message.get("name", ""),
+                "content": message.get("content") or "",
+            }
+        return {"role": role, "content": message.get("content") or ""}
+
+
 class FakeLLM:
     """Deterministic, offline text model for local development and tests."""
 
@@ -472,12 +617,14 @@ def select_llm(s: Settings, probe: Any = probe_ollama_model) -> LLM:
             raise LLMError("configured Gemini provider needs GEMINI_API_KEY")
         return GeminiLLM(s.gemini_api_key, s.gemini_model)
     if provider == "openai":
-        raise LLMError(f"configured LLM provider {provider!r} is not available in this build")
+        if not s.openai_base_url:
+            raise LLMError("configured OpenAI-compatible provider needs WSW_OPENAI_BASE_URL")
+        return OpenAICompatLLM(s.openai_base_url, s.openai_api_key, s.openai_model)
     if provider == "ollama":
         return OllamaLLM(s.ollama_url, s.ollama_model)
     if s.gemini_api_key or s.openai_base_url or s.openai_api_key:
         raise LLMError(
-            "hosted LLM credentials are configured, but this build supports only local or fake text models"
+            "hosted credentials are configured; set WSW_LLM_PROVIDER to gemini or openai explicitly"
         )
     try:
         available = probe(s.ollama_url, s.ollama_model)

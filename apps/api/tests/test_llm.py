@@ -314,11 +314,11 @@ async def test_fake_llm_is_deterministic_and_quotes_first_evidence_line():
     assert result.provider == "fake" and result.model == "fake"
 
 
-def test_unimplemented_openai_provider_fails_loudly():
+def test_openai_provider_requires_a_base_url():
     provider = "openai"
     cfg = Settings(_env_file=None, WSW_LLM_PROVIDER=provider)
 
-    with pytest.raises(LLMError, match="not available"):
+    with pytest.raises(LLMError, match="WSW_OPENAI_BASE_URL"):
         select_llm(cfg)
 
 
