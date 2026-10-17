@@ -1,6 +1,36 @@
 from __future__ import annotations
 
+import pytest
+
 from wsw_brain.events import EventBus
+
+
+def test_publish_rejects_invalid_event_payloads() -> None:
+    bus = EventBus()
+
+    for event_type, data, meeting_id, field, error_type in [
+        ("", {}, None, "type", ValueError),
+        (" ", {}, None, "type", ValueError),
+        ("meeting.started", [], None, "data", TypeError),
+        ("meeting.started", {}, " ", "meeting_id", ValueError),
+    ]:
+        try:
+            bus.publish(event_type, data, meeting_id=meeting_id)  # type: ignore[arg-type]
+        except error_type as exc:
+            assert field in str(exc)
+        else:
+            raise AssertionError(f"publish should reject invalid {field}")
+
+
+@pytest.mark.parametrize("since_id", [-1, True, "1"])
+def test_subscribe_rejects_invalid_replay_cursors(since_id: object) -> None:
+    with pytest.raises(ValueError, match="since_id"):
+        EventBus().subscribe(since_id=since_id)  # type: ignore[arg-type]
+
+
+def test_subscribe_rejects_blank_meeting_filters() -> None:
+    with pytest.raises(ValueError, match="meeting_id"):
+        EventBus().subscribe(meeting_id=" \t")
 
 
 def test_subscribe_filters_replay_by_meeting() -> None:

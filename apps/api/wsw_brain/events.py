@@ -37,6 +37,11 @@ class EventBus:
 
     def publish(self, type_: str, data: dict[str, Any], meeting_id: str | None = None) -> dict[str, Any]:
         """Thread-safe: may be called from listener worker threads."""
+        _require_non_empty_text(type_, "event type")
+        if not isinstance(data, dict):
+            raise TypeError("event data must be a dictionary")
+        if meeting_id is not None:
+            _require_non_empty_text(meeting_id, "meeting_id")
         event = {"id": next(self._ids), "type": type_, "meeting_id": meeting_id, "ts": time.time(), "data": data}
         loop = self._loop
         if loop is not None and loop.is_running():
@@ -63,6 +68,10 @@ class EventBus:
                 pass  # slow consumer: drop; the client re-syncs over REST
 
     def subscribe(self, since_id: int = 0, meeting_id: str | None = None) -> asyncio.Queue[dict[str, Any]]:
+        if isinstance(since_id, bool) or not isinstance(since_id, int) or since_id < 0:
+            raise ValueError("since_id must be a non-negative int")
+        if meeting_id is not None:
+            _require_non_empty_text(meeting_id, "meeting_id")
         q: asyncio.Queue[dict[str, Any]] = asyncio.Queue(maxsize=2000)
         for e in self._replay:
             if e["id"] > since_id and (meeting_id is None or e.get("meeting_id") == meeting_id):
@@ -75,3 +84,8 @@ class EventBus:
 
 
 bus = EventBus()
+
+
+def _require_non_empty_text(value: object, field: str) -> None:
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError(f"{field} must be a non-empty string")
