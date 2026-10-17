@@ -21,7 +21,7 @@ _SNAPSHOT_PATTERNS = ["onnx/model_quantized.onnx*", "tokenizer*", "*.json"]
 _WORD = re.compile(r"[a-z0-9]+(?:'[a-z]+)?")
 
 
-def _snapshot_dir(repo: str) -> Path:
+def _snapshot_dir(repo: str, *, refresh: bool = False) -> Path:
     """Keep ONNX and its external weights together as plain files, not HF cache symlinks."""
     from huggingface_hub import snapshot_download
 
@@ -29,9 +29,9 @@ def _snapshot_dir(repo: str) -> Path:
         return (path / "onnx" / "model_quantized.onnx").is_file() and (path / "tokenizer.json").is_file()
 
     folder = settings().models_dir / repo.replace("/", "--")
-    if has_model(folder):
+    if not refresh and has_model(folder):
         return folder
-    log.info("EmbeddingGemma %s not in %s; downloading", repo, folder)
+    log.info("Downloading EmbeddingGemma %s into %s", repo, folder)
     path = Path(snapshot_download(repo, allow_patterns=_SNAPSHOT_PATTERNS, local_dir=folder))
     if not has_model(path):
         raise FileNotFoundError(
@@ -64,15 +64,28 @@ class GemmaEmbedder:
         from tokenizers import Tokenizer
 
         cfg = settings()
-        folder = _snapshot_dir(repo or cfg.embed_repo)
+        model_repo = repo or cfg.embed_repo
+        folder = _snapshot_dir(model_repo)
         options = ort.SessionOptions()
         options.intra_op_num_threads = threads
         options.inter_op_num_threads = 1
-        self._session = ort.InferenceSession(
-            str(folder / "onnx" / "model_quantized.onnx"),
-            sess_options=options,
-            providers=["CPUExecutionProvider"],
-        )
+
+        def load_session(model_folder: Path) -> ort.InferenceSession:
+            return ort.InferenceSession(
+                str(model_folder / "onnx" / "model_quantized.onnx"),
+                sess_options=options,
+                providers=["CPUExecutionProvider"],
+            )
+
+        try:
+            self._session = load_session(folder)
+        except Exception as exc:
+            if "external data path does not exist" not in str(exc).lower():
+                raise
+            # An interrupted snapshot can leave the small graph/tokenizer files in place.
+            log.warning("EmbeddingGemma external weights are missing; resuming download for %s", model_repo)
+            folder = _snapshot_dir(model_repo, refresh=True)
+            self._session = load_session(folder)
         self._inputs = {item.name for item in self._session.get_inputs()}
         missing = {"input_ids", "attention_mask"} - self._inputs
         if missing:

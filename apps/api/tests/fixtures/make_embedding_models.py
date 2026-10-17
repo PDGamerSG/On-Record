@@ -8,7 +8,7 @@ from onnx import TensorProto, checker, helper, numpy_helper, save
 DESTINATION = Path(__file__).parent
 
 
-def make_model(pooled: bool) -> None:
+def make_model(pooled: bool, *, external: bool = False) -> None:
     inputs = [
         helper.make_tensor_value_info(name, TensorProto.INT64, ["batch", "sequence"])
         for name in ("input_ids", "attention_mask", "token_type_ids")
@@ -41,9 +41,18 @@ def make_model(pooled: bool) -> None:
     graph = helper.make_graph(nodes, "embedding-test", inputs, outputs, initializers)
     model = helper.make_model(graph, opset_imports=[helper.make_opsetid("", 18)], ir_version=9)
     checker.check_model(model)
-    save(model, DESTINATION / ("pooled_embedding.onnx" if pooled else "token_embeddings.onnx"))
+    filename = "external_embedding.onnx" if external else (
+        "pooled_embedding.onnx" if pooled else "token_embeddings.onnx"
+    )
+    if external:
+        (DESTINATION / "model_quantized.onnx_data").unlink(missing_ok=True)
+    save(
+        model, DESTINATION / filename, save_as_external_data=external,
+        all_tensors_to_one_file=True, location="model_quantized.onnx_data", size_threshold=0,
+    )
 
 
 if __name__ == "__main__":
     make_model(pooled=False)
     make_model(pooled=True)
+    make_model(pooled=False, external=True)

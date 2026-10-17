@@ -18,8 +18,8 @@ FIXTURES = Path(__file__).parent / "fixtures"
 REPO = "tests/tiny-embeddings"
 
 
-@pytest.fixture(params=["token_embeddings.onnx", "pooled_embedding.onnx"])
-def local_model(request, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+@pytest.fixture
+def model_cache(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     cfg = Settings(
         _env_file=None, WSW_MODELS_DIR=tmp_path / "models", WSW_EMBED_DIM=4,
         WSW_EMBED_REPO=REPO, WSW_EMBEDDER="gemma",
@@ -27,7 +27,6 @@ def local_model(request, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Pat
     monkeypatch.setattr(embed_module, "settings", lambda: cfg)
     folder = cfg.models_dir / REPO.replace("/", "--")
     (folder / "onnx").mkdir(parents=True)
-    shutil.copyfile(FIXTURES / request.param, folder / "onnx" / "model_quantized.onnx")
     vocab = {word: index for index, word in enumerate([
         "<pad>", "<unk>", "title:", "none", "|", "text:", "task:", "search", "result", "query:",
         "alpha", "beta",
@@ -36,6 +35,12 @@ def local_model(request, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Pat
     tokenizer.pre_tokenizer = pre_tokenizers.WhitespaceSplit()
     tokenizer.save(str(folder / "tokenizer.json"))
     return folder
+
+
+@pytest.fixture(params=["token_embeddings.onnx", "pooled_embedding.onnx"])
+def local_model(request, model_cache: Path) -> Path:
+    shutil.copyfile(FIXTURES / request.param, model_cache / "onnx" / "model_quantized.onnx")
+    return model_cache
 
 
 @pytest.fixture(autouse=True)
@@ -202,3 +207,34 @@ def test_invalid_local_model_falls_back_to_hash_vectors(
     assert isinstance(embedder, HashEmbedder)
     assert len(embedder.embed_query("pricing deck")) == 4
     assert "using HashEmbedder" in caplog.text
+
+
+@pytest.mark.parametrize("outcome", ["repaired", "still-missing", "offline"])
+def test_missing_external_weights_resume_download_once(
+    model_cache: Path, monkeypatch: pytest.MonkeyPatch, outcome: str,
+) -> None:
+    shutil.copyfile(FIXTURES / "external_embedding.onnx", model_cache / "onnx" / "model_quantized.onnx")
+    attempts = []
+
+    def resume(repo: str, *, allow_patterns: list[str], local_dir: Path) -> str:
+        attempts.append(repo)
+        assert repo == REPO and local_dir == model_cache
+        if outcome == "offline":
+            raise OSError("offline")
+        if outcome == "repaired":
+            shutil.copyfile(
+                FIXTURES / "model_quantized.onnx_data", local_dir / "onnx" / "model_quantized.onnx_data",
+            )
+        return str(local_dir)
+
+    monkeypatch.setattr("huggingface_hub.snapshot_download", resume)
+
+    embedder = get_embedder()
+
+    assert attempts == [REPO]
+    if outcome == "repaired":
+        assert isinstance(embedder, GemmaEmbedder)
+        assert embedder.embed_query("alpha") == pytest.approx([3 / math.sqrt(34), 5 / math.sqrt(34), 0, 0])
+    else:
+        assert isinstance(embedder, HashEmbedder)
+        assert len(embedder.embed_query("alpha")) == 4
