@@ -30,6 +30,10 @@ class Settings(BaseSettings):
     openai_base_url: str | None = Field(None, alias="WSW_OPENAI_BASE_URL")
     openai_api_key: str | None = Field(None, alias="WSW_OPENAI_API_KEY")
     openai_model: str = Field("gemma-4-31B-it", alias="WSW_OPENAI_MODEL")
+    # Model request scheduling. These keep local inference responsive under concurrent clients.
+    model_slots: int = Field(2, ge=1, alias="WSW_MODEL_SLOTS")
+    model_max_waiting: int = Field(6, ge=0, alias="WSW_MODEL_MAX_WAITING")
+    model_queue_wait_s: float = Field(90.0, gt=0, alias="WSW_MODEL_QUEUE_WAIT_S")
     # Which runtime hears spoken questions natively. "ollama" = Gemma 4 E4B audio input; "whisper" = server ASR.
     question_audio: Literal["auto", "ollama", "whisper"] = Field("auto", alias="WSW_QUESTION_AUDIO")
 

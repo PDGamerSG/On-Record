@@ -30,10 +30,6 @@ log = logging.getLogger(__name__)
 
 OLLAMA_TIMEOUT = httpx.Timeout(connect=5.0, read=180.0, write=60.0, pool=5.0)
 PROBE_TIMEOUT_S = 2.0
-# A laptop model server should not receive an unbounded number of generations at once.
-OLLAMA_SLOTS = 2
-OLLAMA_MAX_WAITING = 6
-OLLAMA_QUEUE_WAIT_S = 90.0
 _priority: ContextVar[int] = ContextVar("wsw_llm_priority", default=0)
 _THOUGHT_BLOCK = re.compile(r"^\s*(?:<\|channel>thought.*?<channel\|>|<think>.*?</think>)", re.DOTALL)
 _THINK_OPTION_ERROR = re.compile(
@@ -146,7 +142,8 @@ def model_gate(key: str) -> ModelGate:
     with _gates_lock:
         gate = _gates.get(key)
         if gate is None:
-            gate = _gates[key] = ModelGate(OLLAMA_SLOTS, OLLAMA_MAX_WAITING, OLLAMA_QUEUE_WAIT_S)
+            cfg = settings()
+            gate = _gates[key] = ModelGate(cfg.model_slots, cfg.model_max_waiting, cfg.model_queue_wait_s)
         return gate
 
 

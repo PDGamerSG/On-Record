@@ -4,6 +4,7 @@ import asyncio
 
 import pytest
 
+import wsw_brain.brain.llm as llm_module
 from wsw_brain.brain.llm import LLMError, ModelGate, llm_priority, model_gate
 
 
@@ -127,3 +128,50 @@ async def test_waiting_call_times_out_with_public_error():
 def test_model_gate_is_shared_by_endpoint_key():
     key = "test-model-gate-endpoint"
     assert model_gate(key) is model_gate(key)
+
+
+def test_model_gate_uses_runtime_limits(monkeypatch):
+    key = "test-configured-model-gate-endpoint"
+
+    class Config:
+        model_slots = 3
+        model_max_waiting = 12
+        model_queue_wait_s = 45.0
+
+    monkeypatch.setattr(llm_module, "settings", lambda: Config())
+    gate = llm_module.model_gate(key)
+
+    assert (gate.slots, gate.max_waiting, gate.wait_s) == (3, 12, 45.0)
+
+
+@pytest.mark.asyncio
+async def test_cancelled_waiter_is_removed_before_the_next_handoff():
+    gate = ModelGate(slots=1, max_waiting=2, wait_s=1)
+    entered = asyncio.Event()
+    release = asyncio.Event()
+
+    async def holder():
+        async with gate.slot():
+            entered.set()
+            await release.wait()
+
+    async def waiting():
+        async with gate.slot():
+            return
+
+    first = asyncio.create_task(holder())
+    await entered.wait()
+    cancelled = asyncio.create_task(waiting())
+    await _wait_until(lambda: gate.waiting == 1)
+
+    cancelled.cancel()
+    with pytest.raises(asyncio.CancelledError):
+        await cancelled
+
+    assert gate.waiting == 0
+    release.set()
+    await first
+
+    async with gate.slot():
+        assert gate.busy == 1
+    assert gate.busy == 0
