@@ -626,6 +626,29 @@ def test_turns_round_trip(store: GraphStore) -> None:
     assert store.get_turns("nobody") == []
 
 
+def test_save_turn_rejects_invalid_memory_fields() -> None:
+    store = GraphStore("falkor://127.0.0.1:1", "wsw_test_validation")
+    invalid = [
+        ("", "user", 1_000, "session_id"),
+        ("sess", " \t", 1_000, "turn role"),
+        ("sess", "user", -1, "at_ms"),
+        ("sess", "user", True, "at_ms"),
+    ]
+    for session_id, role, at_ms, field in invalid:
+        with pytest.raises(ValueError, match=field):
+            store.save_turn(session_id, role, "hello", at_ms)  # type: ignore[arg-type]
+
+
+def test_get_turns_rejects_invalid_memory_query() -> None:
+    store = GraphStore("falkor://127.0.0.1:1", "wsw_test_validation")
+    with pytest.raises(ValueError, match="session_id"):
+        store.get_turns(" ")
+
+    for limit in (0, -1, True, 1.5):
+        with pytest.raises(ValueError, match="limit"):
+            store.get_turns("sess", limit=limit)  # type: ignore[arg-type]
+
+
 def test_stats_counts_labels_and_relationships(store: GraphStore) -> None:
     empty = store.stats()
     assert empty == {label: 0 for label in (*store_module.cq.LABELS, "relationships")}

@@ -858,14 +858,16 @@ class GraphStore:
     def save_turn(self, session_id: str, role: str, text: str, at_ms: int,
                   citations: list[str] | None = None) -> None:
         _require_id(session_id, "session_id")
-        if not role or not isinstance(role, str):
-            raise ValueError("turn role must be a non-empty string such as 'user' or 'assistant'")
+        _require_id(role, "turn role")
+        _require_non_negative_int(at_ms, "at_ms")
         params = {"session_id": session_id, "turn_id": uuid.uuid4().hex, "role": role, "text": text or "",
                   "at": int(at_ms), "citations": [str(c) for c in citations or []]}
         self._query(cq.SAVE_TURN, params)
 
     def get_turns(self, session_id: str, limit: int = 12) -> list[dict[str, Any]]:
         """[{role, text, at, citations}] oldest first."""
+        _require_id(session_id, "session_id")
+        _require_positive_int(limit, "limit")
         rows = self._query(cq.GET_TURNS, {"session_id": session_id, "limit": _clamp(limit, 1, 500)})
         return [
             {"role": row["role"], "text": row["text"] or "", "at": int(row["at"] or 0),
@@ -1124,6 +1126,11 @@ def _require_id(value: Any, what: str) -> None:
 def _require_non_negative_int(value: Any, what: str) -> None:
     if isinstance(value, bool) or not isinstance(value, int) or value < 0:
         raise ValueError(f"{what} must be a non-negative int")
+
+
+def _require_positive_int(value: Any, what: str) -> None:
+    if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
+        raise ValueError(f"{what} must be a positive int")
 
 
 def _require_non_negative_number(value: Any, what: str) -> None:
