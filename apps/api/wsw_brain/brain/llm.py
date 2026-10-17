@@ -7,17 +7,30 @@ the matching tool_call_id. Helpers let later adapters share the same exchange.
 from __future__ import annotations
 
 import json
+import logging
 import re
 import time
 import uuid
+from functools import lru_cache
 from typing import Any
 
 import httpx
 
-from ..contracts import LLMResult, ToolCall, Transcript
+from ..config import Settings, settings
+from ..contracts import LLM, LLMResult, ToolCall, Transcript
+
+log = logging.getLogger(__name__)
 
 OLLAMA_TIMEOUT = httpx.Timeout(connect=5.0, read=180.0, write=60.0, pool=5.0)
+PROBE_TIMEOUT_S = 2.0
 _THOUGHT_BLOCK = re.compile(r"^\s*(?:<\|channel>thought.*?<channel\|>|<think>.*?</think>)", re.DOTALL)
+_THINK_OPTION_ERROR = re.compile(
+    r"(?:\b(?:unsupported|unrecognized|unknown|invalid|unexpected)\b.{0,32}\bthink(?:ing)?\b|"
+    r"\b(?:does not|doesn't)\s+support\b.{0,32}\bthink(?:ing)?\b|"
+    r"\bthink(?:ing)?\b.{0,32}\b(?:unsupported|not supported|unrecognized|unknown|invalid|unexpected)\b)",
+    re.IGNORECASE | re.DOTALL,
+)
+_EVIDENCE_LINE = re.compile(r"^\[u:([^\]]+)\]\s*(.+)$", re.MULTILINE)
 
 
 class LLMError(RuntimeError):
@@ -61,7 +74,7 @@ def _parse_arguments(raw: Any) -> dict[str, Any]:
 
 
 class OllamaLLM:
-    """Text chat and tool calls. Audio and automatic provider selection follow separately."""
+    """Text chat and tool calls for a local model server."""
 
     provider = "ollama"
     supports_audio = False
@@ -161,21 +174,128 @@ class OllamaLLM:
 
     async def _post_chat(self, payload: dict[str, Any]) -> dict[str, Any]:
         url = f"{self.base_url}/api/chat"
+        initial_error: str | None = None
+
+        def error(message: str) -> LLMError:
+            if initial_error:
+                message += f" (initial response: {initial_error})"
+            return LLMError(message)
+
         try:
             async with httpx.AsyncClient(timeout=OLLAMA_TIMEOUT, transport=self._transport) as client:
                 response = await client.post(url, json=payload)
-                if response.status_code == 400 and "think" in response.text.lower():
+                if (
+                    response.status_code == 400
+                    and "think" in payload
+                    and _THINK_OPTION_ERROR.search(response.text)
+                ):
+                    initial_error = response.text[:300]
                     response = await client.post(url, json={k: v for k, v in payload.items() if k != "think"})
         except httpx.HTTPError as exc:
-            raise LLMError(f"Ollama request to {url} failed: {exc!r}") from exc
+            detail = f"Ollama request to {url} failed: {exc!r}"
+            if initial_error:
+                detail += f" (initial response: {initial_error})"
+            raise LLMError(detail) from exc
         if response.status_code != 200:
-            raise LLMError(f"Ollama {url} returned HTTP {response.status_code}: {response.text[:300]}")
+            raise error(f"Ollama {url} returned HTTP {response.status_code}: {response.text[:300]}")
         try:
             data = response.json()
         except ValueError as exc:
-            raise LLMError(f"Ollama returned non-JSON: {response.text[:200]}") from exc
+            raise error(f"Ollama returned non-JSON: {response.text[:200]}") from exc
         if not isinstance(data, dict):
-            raise LLMError("Ollama response must be a JSON object")
+            raise error("Ollama response must be a JSON object")
         if data.get("error"):
-            raise LLMError(f"Ollama error: {str(data['error'])[:300]}")
+            raise error(f"Ollama error: {str(data['error'])[:300]}")
         return data
+
+
+class FakeLLM:
+    """Deterministic, offline text model for local development and tests."""
+
+    provider = "fake"
+    model = "fake"
+    supports_audio = False
+
+    async def chat(
+        self,
+        messages: list[dict[str, Any]],
+        *,
+        tools: list[dict[str, Any]] | None = None,
+        json_mode: bool = False,
+        temperature: float = 0.2,
+        max_tokens: int = 800,
+    ) -> LLMResult:
+        started = time.perf_counter()
+        text = "{}" if json_mode else self._answer(messages)
+        return LLMResult(
+            text=text,
+            tool_calls=[],
+            model=self.model,
+            provider=self.provider,
+            latency_ms=round((time.perf_counter() - started) * 1000, 1),
+        )
+
+    async def transcribe(self, wav_bytes: bytes, *, hint: str | None = None) -> Transcript:
+        raise NotImplementedError("FakeLLM cannot hear audio")
+
+    @staticmethod
+    def _answer(messages: list[dict[str, Any]]) -> str:
+        for message in messages:
+            match = _EVIDENCE_LINE.search(message.get("content") or "")
+            if match:
+                uid, rest = match.group(1), match.group(2)
+                who, _, said = rest.partition(": ")
+                quote = said.strip() or rest.strip()
+                return f'{who.strip()} said: "{quote}" [u:{uid}]'
+        return "I couldn't find that in the meetings."
+
+
+def probe_ollama_model(
+    base_url: str, model: str, timeout: float = PROBE_TIMEOUT_S
+) -> dict[str, Any] | None:
+    """Return the exact model entry from the local model server, or ``None`` if unavailable."""
+    try:
+        response = httpx.get(f"{base_url.rstrip('/')}/api/tags", timeout=timeout)
+        response.raise_for_status()
+        models = response.json().get("models") or []
+    except (httpx.HTTPError, ValueError, TypeError, AttributeError) as exc:
+        log.info("Local model server at %s is not usable: %r", base_url, exc)
+        return None
+    wanted = {model, f"{model}:latest"} if ":" not in model else {model}
+    for entry in models:
+        if isinstance(entry, dict) and (entry.get("name") in wanted or entry.get("model") in wanted):
+            return entry
+    log.info("Local model server at %s does not have model %s", base_url, model)
+    return None
+
+
+def select_llm(s: Settings, probe: Any = probe_ollama_model) -> LLM:
+    """Select the configured text provider without making inference requests."""
+    provider = s.llm_provider
+    if provider == "fake":
+        return FakeLLM()
+    if provider in ("gemini", "openai"):
+        raise LLMError(f"configured LLM provider {provider!r} is not available in this build")
+    if provider == "ollama":
+        return OllamaLLM(s.ollama_url, s.ollama_model)
+    if s.gemini_api_key or s.openai_base_url or s.openai_api_key:
+        raise LLMError(
+            "hosted LLM credentials are configured, but this build supports only local or fake text models"
+        )
+    try:
+        available = probe(s.ollama_url, s.ollama_model)
+    except Exception as exc:  # noqa: BLE001 - auto mode must remain usable offline
+        log.info("Local model probe failed: %r", exc)
+        available = None
+    if available is not None:
+        return OllamaLLM(s.ollama_url, s.ollama_model)
+    log.info("no local model available; using the deterministic fake LLM")
+    return FakeLLM()
+
+
+@lru_cache(maxsize=1)
+def get_llm() -> LLM:
+    """Return the process-wide provider selected from the current settings."""
+    llm = select_llm(settings())
+    log.info("LLM: %s %s", llm.provider, llm.model)
+    return llm

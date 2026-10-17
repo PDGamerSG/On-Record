@@ -78,7 +78,7 @@ uv run --project apps/api pytest apps/api/tests/test_retrieve.py apps/api/tests/
 
 ## Local text model calls
 
-`OllamaLLM` implements text chat and tool calls using the existing `LLM` contract. Start an Ollama server with your chosen model available, then construct the adapter with its URL and model name. The existing `WSW_OLLAMA_URL` and `WSW_OLLAMA_MODEL` settings supply defaults:
+`OllamaLLM` implements text chat and tool calls using the existing `LLM` contract. Start a local model server with your chosen model available, then construct the adapter with its URL and model name. The existing `WSW_OLLAMA_URL` and `WSW_OLLAMA_MODEL` settings supply defaults:
 
 ```python
 import asyncio
@@ -97,7 +97,9 @@ asyncio.run(main())
 
 `chat()` accepts tool schemas, JSON mode, temperature, and a token limit. Results include cleaned answer text, parsed `ToolCall` values, model/provider names, and latency. `assistant_tool_message` and `tool_result_message` in `brain.llm` preserve a tool exchange for subsequent calls; the adapter returns requested tools for the caller to execute.
 
-Calls have bounded connection, read, and write timeouts. Models that reject the `think` option are retried once without it. Network errors, unsuccessful HTTP responses, malformed responses, empty answers without tools, and invalid tool arguments raise `LLMError`. This adapter reports `supports_audio=False`; native audio and hosted adapters are separate features. Configured provider selection follows in the second commit of this PR.
+Calls have bounded connection, read, and write timeouts. Models that explicitly reject the `think` option are retried once without it; unrelated HTTP errors are returned after one request. Network errors, unsuccessful HTTP responses, malformed responses, empty answers without tools, and invalid tool arguments raise `LLMError`. This adapter reports `supports_audio=False`.
+
+Application code can use the cached `get_llm()` factory instead of constructing an adapter directly. `WSW_LLM_PROVIDER=ollama` selects the configured local adapter without probing; `fake` selects a deterministic offline responder; and `auto` checks the local model list for an exact model match before falling back to `fake`. The fallback quotes evidence lines such as `[u:m1:u00001] Priya: The deck is due Friday.` so local development remains deterministic. Hosted provider values are rejected clearly until their adapters arrive in a separate feature.
 
 The transport tests require neither a running model server nor a model download:
 
