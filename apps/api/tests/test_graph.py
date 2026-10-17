@@ -115,6 +115,20 @@ def test_constructor_rejects_missing_connection_or_graph_name() -> None:
         GraphStore("falkor://127.0.0.1:6379", "")
 
 
+def test_end_meeting_rejects_invalid_lifecycle_values() -> None:
+    store = GraphStore("falkor://127.0.0.1:1", "wsw_test_validation")
+    invalid = [
+        ("", 1_000, 1.0, "meeting_id"),
+        ("m1", -1, 1.0, "ended_at_ms"),
+        ("m1", True, 1.0, "ended_at_ms"),
+        ("m1", 1_000, -1.0, "duration_s"),
+        ("m1", 1_000, float("nan"), "duration_s"),
+    ]
+    for meeting_id, ended_at_ms, duration_s, field in invalid:
+        with pytest.raises(ValueError, match=field):
+            store.end_meeting(meeting_id, ended_at_ms, duration_s)  # type: ignore[arg-type]
+
+
 def test_ping_reports_engine_version(store: GraphStore, graph_name: str) -> None:
     status = store.ping()
     assert status["ok"] is True

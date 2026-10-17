@@ -264,6 +264,9 @@ class GraphStore:
         return meeting
 
     def end_meeting(self, meeting_id: str, ended_at_ms: int, duration_s: float) -> dict[str, Any] | None:
+        _require_id(meeting_id, "meeting_id")
+        _require_non_negative_int(ended_at_ms, "ended_at_ms")
+        _require_non_negative_number(duration_s, "duration_s")
         params = {"meeting_id": meeting_id, "ended_at": int(ended_at_ms), "duration_s": float(duration_s)}
         if not self._query(cq.END_MEETING, params):
             return None
@@ -1115,6 +1118,16 @@ def _clamp(value: Any, low: int, high: int) -> int:
 def _require_id(value: Any, what: str) -> None:
     if not isinstance(value, str) or not value.strip():
         raise ValueError(f"{what} must be a non-empty string")
+
+
+def _require_non_negative_int(value: Any, what: str) -> None:
+    if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+        raise ValueError(f"{what} must be a non-negative int")
+
+
+def _require_non_negative_number(value: Any, what: str) -> None:
+    if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(float(value)) or value < 0:
+        raise ValueError(f"{what} must be a finite, non-negative number")
 
 
 def _now_ms() -> int:
