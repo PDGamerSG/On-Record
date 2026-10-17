@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     data_dir: Path = Field(REPO_ROOT / "data", alias="WSW_DATA_DIR")
     models_dir: Path = Field(REPO_ROOT / "models", alias="WSW_MODELS_DIR")
 
-    # Gemma 4 / LLM routing. "auto": gemini if a key is set, else ollama if reachable, else fake.
+    # Text model routing. "auto" probes the configured local model, then uses the deterministic fake.
     llm_provider: Literal["auto", "ollama", "gemini", "openai", "fake"] = Field("auto", alias="WSW_LLM_PROVIDER")
     ollama_url: str = Field("http://127.0.0.1:11434", alias="WSW_OLLAMA_URL")
     ollama_model: str = Field("gemma4:e4b", alias="WSW_OLLAMA_MODEL")

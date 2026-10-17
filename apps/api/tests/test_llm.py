@@ -7,12 +7,17 @@ import httpx
 import pytest
 
 from wsw_brain.brain.llm import (
+    FakeLLM,
     LLMError,
     OllamaLLM,
     assistant_tool_message,
+    get_llm,
+    probe_ollama_model,
+    select_llm,
     strip_thoughts,
     tool_result_message,
 )
+from wsw_brain.config import Settings
 from wsw_brain.contracts import ToolCall
 
 
@@ -112,6 +117,81 @@ async def test_unsupported_thinking_option_is_retried_once_without_changing_call
     assert payloads[1] == first
 
 
+@pytest.mark.asyncio
+async def test_thinking_wording_is_treated_as_an_unsupported_think_option():
+    payloads = []
+
+    def handler(request):
+        payloads.append(json.loads(request.content))
+        if len(payloads) == 1:
+            return httpx.Response(400, json={"error": "model does not support thinking"})
+        return httpx.Response(200, json={"message": {"content": "Ready"}})
+
+    llm = OllamaLLM("http://ollama.test", "gemma4:e4b", transport=httpx.MockTransport(handler))
+    assert (await llm.chat([])).text == "Ready"
+    assert len(payloads) == 2 and "think" not in payloads[1]
+
+
+@pytest.mark.asyncio
+async def test_unrelated_think_text_is_not_retried_and_original_error_is_preserved():
+    requests = []
+
+    def handler(request):
+        requests.append(request)
+        return httpx.Response(400, json={"error": "model not found; did you think of another name?"})
+
+    llm = OllamaLLM("http://ollama.test", "gemma4:e4b", transport=httpx.MockTransport(handler))
+    with pytest.raises(LLMError, match="did you think of another name"):
+        await llm.chat([])
+    assert len(requests) == 1
+
+
+@pytest.mark.asyncio
+async def test_failed_think_retry_keeps_the_initial_server_error_context():
+    responses = [
+        httpx.Response(400, json={"error": "unsupported think option"}),
+        httpx.Response(503, text="server unavailable on retry"),
+    ]
+
+    def handler(request):
+        return responses.pop(0)
+
+    llm = OllamaLLM("http://ollama.test", "gemma4:e4b", transport=httpx.MockTransport(handler))
+    with pytest.raises(LLMError, match="server unavailable on retry.*initial response.*unsupported think option"):
+        await llm.chat([])
+
+
+@pytest.mark.parametrize("retry_response", [
+    httpx.Response(200, text="garbled"),
+    httpx.Response(200, json={"error": "model still unavailable"}),
+])
+@pytest.mark.asyncio
+async def test_failed_think_retry_keeps_initial_error_for_invalid_success(retry_response):
+    responses = [httpx.Response(400, json={"error": "unsupported think option"}), retry_response]
+
+    def handler(request):
+        return responses.pop(0)
+
+    llm = OllamaLLM("http://ollama.test", "gemma4:e4b", transport=httpx.MockTransport(handler))
+    with pytest.raises(LLMError, match="initial response.*unsupported think option"):
+        await llm.chat([])
+
+
+@pytest.mark.asyncio
+async def test_failed_think_retry_keeps_initial_error_for_invalid_message_shape():
+    responses = [
+        httpx.Response(400, json={"error": "unsupported think option"}),
+        httpx.Response(200, json={"message": []}),
+    ]
+
+    def handler(request):
+        return responses.pop(0)
+
+    llm = OllamaLLM("http://ollama.test", "gemma4:e4b", transport=httpx.MockTransport(handler))
+    with pytest.raises(LLMError, match="message object.*initial response.*unsupported think option"):
+        await llm.chat([])
+
+
 @pytest.mark.parametrize(("status", "body", "expected_requests"), [
     (400, "unsupported think option", 2),
     (400, "invalid model", 1),
@@ -199,3 +279,73 @@ async def test_text_adapter_explicitly_reports_audio_as_unavailable():
     assert llm.supports_audio is False
     with pytest.raises(NotImplementedError, match="audio"):
         await llm.transcribe(b"audio")
+
+
+def test_probe_matches_exact_model_names_and_latest_alias(monkeypatch: pytest.MonkeyPatch):
+    class Response:
+        def raise_for_status(self):
+            return None
+
+        def json(self):
+            return {"models": [{"name": "other:latest"}, {"name": "gemma4:latest"}, {"name": "gemma4:e4b"}]}
+
+    monkeypatch.setattr("httpx.get", lambda *args, **kwargs: Response())
+
+    assert probe_ollama_model("http://ollama.test/", "gemma4:e4b")["name"] == "gemma4:e4b"
+    assert probe_ollama_model("http://ollama.test/", "gemma4")["name"] == "gemma4:latest"
+    assert probe_ollama_model("http://ollama.test/", "missing") is None
+
+
+def test_select_llm_uses_explicit_fake_without_probing():
+    cfg = Settings(_env_file=None, WSW_LLM_PROVIDER="fake")
+    called = []
+
+    assert isinstance(select_llm(cfg, lambda *args: called.append(args)), FakeLLM)
+    assert called == []
+
+
+def test_select_llm_auto_uses_ollama_only_for_a_matching_probe():
+    cfg = Settings(_env_file=None, WSW_LLM_PROVIDER="auto", WSW_OLLAMA_URL="http://ollama.test")
+    selected = select_llm(cfg, lambda url, model: {"name": model})
+
+    assert isinstance(selected, OllamaLLM)
+    assert selected.base_url == "http://ollama.test"
+    assert selected.model == cfg.ollama_model
+
+
+def test_select_llm_auto_falls_back_to_fake_when_ollama_is_unavailable():
+    cfg = Settings(_env_file=None, WSW_LLM_PROVIDER="auto")
+
+    assert isinstance(select_llm(cfg, lambda *args: None), FakeLLM)
+
+
+@pytest.mark.asyncio
+async def test_fake_llm_is_deterministic_and_quotes_first_evidence_line():
+    result = await FakeLLM().chat([
+        {"role": "user", "content": "[u:m1:u00001] Priya: The deck is due Friday."},
+    ])
+
+    assert result.text == 'Priya said: "The deck is due Friday." [u:m1:u00001]'
+    assert result.provider == "fake" and result.model == "fake"
+
+
+@pytest.mark.parametrize("provider", ["gemini", "openai"])
+def test_unimplemented_hosted_provider_fails_loudly(provider):
+    cfg = Settings(_env_file=None, WSW_LLM_PROVIDER=provider)
+
+    with pytest.raises(LLMError, match="not available"):
+        select_llm(cfg)
+
+
+def test_get_llm_caches_the_selected_provider(monkeypatch: pytest.MonkeyPatch):
+    cfg = Settings(_env_file=None, WSW_LLM_PROVIDER="fake")
+    monkeypatch.setattr("wsw_brain.brain.llm.settings", lambda: cfg)
+    get_llm.cache_clear()
+    try:
+        first = get_llm()
+        second = get_llm()
+    finally:
+        get_llm.cache_clear()
+
+    assert isinstance(first, FakeLLM)
+    assert first is second
