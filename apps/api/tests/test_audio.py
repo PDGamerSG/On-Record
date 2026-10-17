@@ -34,6 +34,17 @@ def test_pcm16_round_trip_and_odd_payload_rejection() -> None:
         pcm16_to_float(b"\x00\x01\x02")
 
 
+@pytest.mark.parametrize("value", [np.nan, np.inf, -np.inf])
+def test_float_audio_rejects_non_finite_samples(value: float) -> None:
+    with pytest.raises(ValueError, match="finite"):
+        float_to_pcm16(np.array([0.0, value], dtype=np.float32))
+
+
+def test_float_audio_rejects_non_mono_shapes() -> None:
+    with pytest.raises(ValueError, match="mono"):
+        float_to_pcm16(np.zeros((2, 2), dtype=np.float32))
+
+
 def test_decode_file_resamples_downmixes_and_writes_wav(tmp_path: Path) -> None:
     stereo = np.stack([tone(), tone()], axis=1)
     source = tmp_path / "source.wav"

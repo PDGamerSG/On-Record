@@ -178,8 +178,12 @@ def as_mono_float32(samples: np.ndarray) -> np.ndarray:
     if arr.ndim != 1:
         raise ValueError(f"expected mono samples (1-D), got shape {arr.shape}")
     if arr.dtype == np.int16:
-        return arr.astype(np.float32) / _PCM16_SCALE
-    return np.ascontiguousarray(arr, dtype=np.float32)
+        normalised = arr.astype(np.float32) / _PCM16_SCALE
+    else:
+        normalised = np.ascontiguousarray(arr, dtype=np.float32)
+    if not np.isfinite(normalised).all():
+        raise ValueError("audio samples must be finite")
+    return normalised
 
 
 def pcm16_to_float(data: bytes) -> np.ndarray:
