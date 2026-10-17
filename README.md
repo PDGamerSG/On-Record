@@ -19,6 +19,16 @@ uv run --project apps/api python -c "from wsw_brain.brand import product_name; p
 
 The package uses Python 3.12. It currently provides configuration, shared data contracts, and an in-process event bus. The HTTP server and web interface arrive in later PRs, so there is no application to start yet.
 
+## Offline text embeddings
+
+`HashEmbedder` converts meeting text and search queries into repeatable, normalised vectors without a model download. It uses word and word-pair overlap, so it is useful for local tests and offline search; it does not provide a language model's semantic understanding. Its tokenizer handles ASCII letters and digits. Empty or punctuation-only text receives a fixed unit vector so it remains valid for cosine indexes.
+
+```bash
+uv run --project apps/api python -c "from wsw_brain.brain import HashEmbedder; e = HashEmbedder(); print(e.name, len(e.embed_query('pricing deck')))"
+```
+
+The default dimension is 768. Pass a positive integer to `HashEmbedder(dim)` to match an existing vector index. The model-backed embedder and configured provider selection will arrive in a later PR.
+
 ## Local graph database
 
 Start Docker, then run:
