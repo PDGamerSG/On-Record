@@ -68,6 +68,10 @@ class EventBus:
                 pass  # slow consumer: drop; the client re-syncs over REST
 
     def subscribe(self, since_id: int = 0, meeting_id: str | None = None) -> asyncio.Queue[dict[str, Any]]:
+        if isinstance(since_id, bool) or not isinstance(since_id, int) or since_id < 0:
+            raise ValueError("since_id must be a non-negative int")
+        if meeting_id is not None:
+            _require_non_empty_text(meeting_id, "meeting_id")
         q: asyncio.Queue[dict[str, Any]] = asyncio.Queue(maxsize=2000)
         for e in self._replay:
             if e["id"] > since_id and (meeting_id is None or e.get("meeting_id") == meeting_id):
