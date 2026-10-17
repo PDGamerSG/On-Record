@@ -107,14 +107,16 @@ class Retriever:
             )
         if refers_to_recent(question):
             recent = self._call(cypher, self.store.recent_utterances, meeting_id=meeting_id, limit=k)
-            lists.append(list(reversed(recent)) if _oldest_first(recent) else recent)
+            # GraphStore returns oldest-first by sequence, including tied timestamps.
+            lists.append(list(reversed(recent)))
         return rrf_fuse(lists, k), cypher
 
     def same_space_hits(self, hits: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """Vector hits minus those from meetings whose stored vectors came from another embedder (the
         hashing fallback over a graph EmbeddingGemma filled, or the reverse): their similarities are noise
         that RRF would weigh like real matches. A meeting passes when one of its utterances, embedded again
-        now, finds its own stored vector; verdicts are cached for SPACE_CHECK_TTL_S."""
+        now, finds its own stored vector or an equivalent passage. Missing neighbors are inconclusive;
+        verdicts are cached for SPACE_CHECK_TTL_S."""
         now = time.monotonic()
         checks = 0
         kept: list[dict[str, Any]] = []
@@ -148,9 +150,12 @@ class Retriever:
         except Exception as exc:  # noqa: BLE001 - no verdict; the hit is kept
             log.debug("embedding-space check failed: %s", exc)
             return None
-        return any(
-            h.get("utterance_id") == uid and float(h.get("score") or 0.0) >= SELF_MATCH_MIN for h in found
-        )
+        # Approximate KNN and tied vectors may return another copy of the same passage.
+        # A missing self ID does not establish a mismatch (the meeting filter also runs after KNN).
+        matches = [h for h in found if h.get("utterance_id") == uid or h.get("text") == text]
+        if not matches:
+            return None
+        return any(float(h.get("score") or 0.0) >= SELF_MATCH_MIN for h in matches)
 
     def mentioned_speakers(self, question: str, meeting_id: str | None = None) -> list[str]:
         """Known person/speaker names (or labels like "Speaker 2") that the question mentions."""
@@ -194,15 +199,6 @@ class Retriever:
             hits = []
         cypher.extend(getattr(self.store, "last_cypher", None) or [])
         return hits
-
-
-def _oldest_first(hits: list[dict[str, Any]]) -> bool:
-    """recent_utterances may come oldest- or newest-first; rank the newest first for fusion."""
-    if len(hits) < 2:
-        return False
-    first, last = hits[0], hits[-1]
-    key = "t_start" if first.get("meeting_id") == last.get("meeting_id") else None
-    return key is not None and float(first.get(key) or 0) < float(last.get(key) or 0)
 
 
 def _require_positive_int(value: object, name: str) -> None:
