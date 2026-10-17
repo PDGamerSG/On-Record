@@ -177,6 +177,16 @@ class Insights:
     entities: list[dict[str, str]] = field(default_factory=list)  # {name, kind}
     mentions: dict[str, list[str]] = field(default_factory=dict)  # utterance_id -> topic/entity names
 
+    def __post_init__(self) -> None:
+        if not isinstance(self.decisions, list) or any(not isinstance(item, DecisionDraft) for item in self.decisions):
+            raise ValueError("Insights.decisions must be a list of DecisionDraft values")
+        if not isinstance(self.action_items, list) or any(
+            not isinstance(item, ActionItemDraft) for item in self.action_items
+        ):
+            raise ValueError("Insights.action_items must be a list of ActionItemDraft values")
+        if not isinstance(self.topics, list) or any(not isinstance(topic, str) or not topic.strip() for topic in self.topics):
+            raise ValueError("Insights.topics must be a list of non-empty strings")
+
     def is_empty(self) -> bool:
         return not (self.decisions or self.action_items or self.topics or self.entities)
 

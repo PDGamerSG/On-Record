@@ -5,7 +5,7 @@ from dataclasses import replace
 
 import pytest
 
-from wsw_brain.contracts import ActionItemDraft, DecisionDraft, FileASR, Utterance
+from wsw_brain.contracts import ActionItemDraft, DecisionDraft, FileASR, Insights, Utterance
 from wsw_brain.listen import FasterWhisperASR
 
 
@@ -121,3 +121,16 @@ def test_action_item_draft_rejects_blank_optional_fields() -> None:
 
     with pytest.raises(ValueError, match="due"):
         ActionItemDraft("Send the notes", [], due=" \t")
+
+
+def test_insights_rejects_invalid_collection_types() -> None:
+    with pytest.raises(ValueError, match="decisions"):
+        Insights(decisions=None)  # type: ignore[arg-type]
+
+    with pytest.raises(ValueError, match="action_items"):
+        Insights(action_items=["send notes"])  # type: ignore[list-item]
+
+
+def test_insights_rejects_blank_topics() -> None:
+    with pytest.raises(ValueError, match="topics"):
+        Insights(topics=[" "])
