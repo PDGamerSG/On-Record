@@ -132,6 +132,80 @@ async def test_openai_http_and_network_errors_are_wrapped():
         await network.chat([])
 
 
+@pytest.mark.asyncio
+async def test_openai_retries_once_without_rejected_json_control():
+    payloads = []
+
+    def handler(request):
+        payloads.append(json.loads(request.content))
+        if len(payloads) == 1:
+            return httpx.Response(400, json={"error": {"message": "response_format is not supported"}})
+        return httpx.Response(200, json={"choices": [{"message": {"content": "Ready"}}]})
+
+    llm = OpenAICompatLLM(
+        "https://inference.example/v1", None, "model", transport=httpx.MockTransport(handler)
+    )
+    result = await llm.chat([], json_mode=True)
+
+    assert result.text == "Ready"
+    assert len(payloads) == 2
+    assert "response_format" in payloads[0]
+    assert "response_format" not in payloads[1]
+
+
+@pytest.mark.asyncio
+async def test_openai_retries_without_tool_choice_but_keeps_tool_declarations():
+    payloads = []
+
+    def handler(request):
+        payloads.append(json.loads(request.content))
+        if len(payloads) == 1:
+            return httpx.Response(422, json={"error": {"message": "tool_choice is unsupported"}})
+        return httpx.Response(200, json={"choices": [{"message": {"content": "Done"}}]})
+
+    llm = OpenAICompatLLM(
+        "https://inference.example/v1", None, "model", transport=httpx.MockTransport(handler)
+    )
+    result = await llm.chat([], tools=[{"name": "seek", "parameters": {"type": "object"}}])
+
+    assert result.text == "Done"
+    assert "tool_choice" not in payloads[1]
+    assert payloads[1]["tools"][0]["function"]["name"] == "seek"
+
+
+@pytest.mark.asyncio
+async def test_openai_unrelated_optional_control_error_is_not_retried():
+    requests = []
+
+    def handler(request):
+        requests.append(request)
+        return httpx.Response(400, json={"error": {"message": "invalid model; response_format was recorded in logs"}})
+
+    llm = OpenAICompatLLM(
+        "https://inference.example/v1", None, "model", transport=httpx.MockTransport(handler)
+    )
+    with pytest.raises(LLMError, match="invalid model"):
+        await llm.chat([])
+    assert len(requests) == 1
+
+
+@pytest.mark.asyncio
+async def test_openai_retry_failure_preserves_initial_error():
+    responses = [
+        httpx.Response(400, json={"error": {"message": "response_format is not supported"}}),
+        httpx.Response(503, text="server unavailable"),
+    ]
+
+    def handler(request):
+        return responses.pop(0)
+
+    llm = OpenAICompatLLM(
+        "https://inference.example/v1", None, "model", transport=httpx.MockTransport(handler)
+    )
+    with pytest.raises(LLMError, match="server unavailable.*initial response.*response_format"):
+        await llm.chat([], json_mode=True)
+
+
 @pytest.mark.parametrize(("base_url", "model"), [
     ("", "model"), ("localhost:8080", "model"), ("ftp://host", "model"), ("https://host", ""),
 ])

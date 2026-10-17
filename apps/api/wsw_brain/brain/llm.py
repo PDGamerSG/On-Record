@@ -453,43 +453,54 @@ class OpenAICompatLLM:
         if json_mode:
             payload["response_format"] = {"type": "json_object"}
         started = time.perf_counter()
+        initial_error: str | None = None
+
+        def error(message: str) -> LLMError:
+            if initial_error:
+                message += f" (initial response: {initial_error})"
+            return LLMError(message)
+
         try:
             async with httpx.AsyncClient(timeout=OLLAMA_TIMEOUT, transport=self._transport) as client:
                 response = await client.post(self.url, json=payload, headers=self._headers)
+                retry_payload = self._compatibility_payload(payload, response)
+                if retry_payload is not None:
+                    initial_error = response.text[:300]
+                    response = await client.post(self.url, json=retry_payload, headers=self._headers)
         except httpx.HTTPError as exc:
-            raise LLMError(f"OpenAI-compatible request to {self.url} failed: {exc!r}") from exc
+            raise error(f"OpenAI-compatible request to {self.url} failed: {exc!r}") from exc
         if response.status_code != 200:
-            raise LLMError(
+            raise error(
                 f"OpenAI-compatible {self.url} returned HTTP {response.status_code}: {response.text[:300]}"
             )
         try:
             data = response.json()
         except ValueError as exc:
-            raise LLMError(f"OpenAI-compatible returned non-JSON: {response.text[:200]}") from exc
+            raise error(f"OpenAI-compatible returned non-JSON: {response.text[:200]}") from exc
         if not isinstance(data, dict):
-            raise LLMError("OpenAI-compatible response must be a JSON object")
+            raise error("OpenAI-compatible response must be a JSON object")
         if data.get("error"):
             detail = data["error"]
             if isinstance(detail, dict):
                 detail = detail.get("message") or detail
-            raise LLMError(f"OpenAI-compatible error: {str(detail)[:300]}")
+            raise error(f"OpenAI-compatible error: {str(detail)[:300]}")
         choices = data.get("choices")
         if not isinstance(choices, list) or not choices or not isinstance(choices[0], dict):
-            raise LLMError("OpenAI-compatible response must contain a choices array")
+            raise error("OpenAI-compatible response must contain a choices array")
         message = choices[0].get("message")
         if not isinstance(message, dict):
-            raise LLMError("OpenAI-compatible choice must contain a message object")
+            raise error("OpenAI-compatible choice must contain a message object")
         text = message.get("content") or ""
         if not isinstance(text, str):
-            raise LLMError("OpenAI-compatible message content must be text")
+            raise error("OpenAI-compatible message content must be text")
         calls = []
         raw_calls = message.get("tool_calls") or []
         if not isinstance(raw_calls, list):
-            raise LLMError("OpenAI-compatible tool_calls must be a list")
+            raise error("OpenAI-compatible tool_calls must be a list")
         for raw_call in raw_calls:
             function = raw_call.get("function") if isinstance(raw_call, dict) else None
             if not isinstance(function, dict) or not isinstance(function.get("name"), str) or not function["name"].strip():
-                raise LLMError("OpenAI-compatible tool call must contain a function name")
+                raise error("OpenAI-compatible tool call must contain a function name")
             raw_arguments = function.get("arguments")
             if raw_arguments in (None, ""):
                 arguments = {}
@@ -499,15 +510,15 @@ class OpenAICompatLLM:
                 try:
                     arguments = json.loads(raw_arguments)
                 except ValueError as exc:
-                    raise LLMError("OpenAI-compatible tool arguments are not valid JSON") from exc
+                    raise error("OpenAI-compatible tool arguments are not valid JSON") from exc
                 if not isinstance(arguments, dict):
-                    raise LLMError("OpenAI-compatible tool arguments must be a JSON object")
+                    raise error("OpenAI-compatible tool arguments must be a JSON object")
             else:
-                raise LLMError("OpenAI-compatible tool arguments must be a JSON object")
+                raise error("OpenAI-compatible tool arguments must be a JSON object")
             calls.append(ToolCall(name=function["name"], arguments=arguments))
         text = strip_thoughts(text)
         if not text and not calls:
-            raise LLMError("OpenAI-compatible returned no answer or tool calls")
+            raise error("OpenAI-compatible returned no answer or tool calls")
         return LLMResult(
             text=text,
             tool_calls=calls,
@@ -515,6 +526,23 @@ class OpenAICompatLLM:
             provider=self.provider,
             latency_ms=round((time.perf_counter() - started) * 1000, 1),
         )
+
+    @staticmethod
+    def _compatibility_payload(payload: dict[str, Any], response: httpx.Response) -> dict[str, Any] | None:
+        """Drop only optional controls named by a client-side feature rejection, once."""
+        if response.status_code not in (400, 422):
+            return None
+        text = response.text.lower()
+        retry = dict(payload)
+        if "response_format" in payload and (
+            "response_format" in text or "json mode" in text or "structured output" in text
+        ):
+            retry.pop("response_format", None)
+        if "tool_choice" in payload and (
+            "tool_choice" in text or "function calling" in text or "tool use" in text
+        ):
+            retry.pop("tool_choice", None)
+        return retry if retry != payload else None
 
     async def transcribe(self, wav_bytes: bytes, *, hint: str | None = None) -> Transcript:
         raise NotImplementedError("audio questions are not routed through the OpenAI-compatible adapter")
