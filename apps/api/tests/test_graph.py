@@ -129,6 +129,13 @@ def test_end_meeting_rejects_invalid_lifecycle_values() -> None:
             store.end_meeting(meeting_id, ended_at_ms, duration_s)  # type: ignore[arg-type]
 
 
+def test_create_meeting_rejects_invalid_start_timestamp() -> None:
+    store = GraphStore("falkor://127.0.0.1:1", "wsw_test_validation")
+    for started_at_ms in (-1, True, 1.5):
+        with pytest.raises(ValueError, match="started_at_ms"):
+            store.create_meeting("m1", "Standup", "mic", started_at_ms)  # type: ignore[arg-type]
+
+
 def test_ping_reports_engine_version(store: GraphStore, graph_name: str) -> None:
     status = store.ping()
     assert status["ok"] is True

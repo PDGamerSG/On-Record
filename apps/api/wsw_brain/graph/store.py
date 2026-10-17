@@ -254,6 +254,7 @@ class GraphStore:
         if source not in SOURCES:
             raise ValueError(f"meeting source must be one of {SOURCES}, got {source!r}")
         _require_id(meeting_id, "meeting_id")
+        _require_non_negative_int(started_at_ms, "started_at_ms")
         self._restore_schema()
         params = {"meeting_id": meeting_id, "title": (title or "").strip() or "Untitled meeting",
                   "source": source, "started_at": int(started_at_ms)}
