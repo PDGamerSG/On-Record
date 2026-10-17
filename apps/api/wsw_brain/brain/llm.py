@@ -368,22 +368,38 @@ def _merge_same_role(contents: list[Any]) -> list[Any]:
 def _read_gemini_response(response: Any) -> tuple[str, list[ToolCall]]:
     texts: list[str] = []
     calls: list[ToolCall] = []
-    for candidate in (getattr(response, "candidates", None) or [])[:1]:
-        content = getattr(candidate, "content", None)
-        for part in (getattr(content, "parts", None) or []):
-            if getattr(part, "thought", False):
-                continue
-            function_call = getattr(part, "function_call", None)
-            if function_call is not None:
-                calls.append(
-                    ToolCall(
-                        name=getattr(function_call, "name", "") or "",
-                        arguments=dict(getattr(function_call, "args", None) or {}),
-                    )
-                )
-            elif getattr(part, "text", None):
-                texts.append(part.text)
-    return strip_thoughts("".join(texts)), [call for call in calls if call.name]
+    candidates = getattr(response, "candidates", None) or []
+    if not candidates:
+        feedback = getattr(getattr(response, "prompt_feedback", None), "block_reason", None)
+        detail = f" ({feedback})" if feedback else ""
+        raise LLMError(f"Gemini returned no candidates{detail}")
+    candidate = candidates[0]
+    content = getattr(candidate, "content", None)
+    if content is None:
+        reason = getattr(candidate, "finish_reason", None)
+        detail = f" ({reason})" if reason else ""
+        raise LLMError(f"Gemini returned no response content{detail}")
+    for part in getattr(content, "parts", None) or []:
+        if getattr(part, "thought", False):
+            continue
+        function_call = getattr(part, "function_call", None)
+        if function_call is not None:
+            name = getattr(function_call, "name", "") or ""
+            args = getattr(function_call, "args", None) or {}
+            if not name:
+                raise LLMError("Gemini returned a tool call without a function name")
+            if not isinstance(args, dict):
+                raise LLMError("Gemini tool arguments must be an object")
+            calls.append(ToolCall(name=name, arguments=dict(args)))
+        elif getattr(part, "text", None):
+            texts.append(part.text)
+    text = strip_thoughts("".join(texts))
+    calls = [call for call in calls if call.name]
+    if not text and not calls:
+        reason = getattr(candidate, "finish_reason", None)
+        detail = f" ({reason})" if reason else ""
+        raise LLMError(f"Gemini returned no text or tool calls{detail}")
+    return text, calls
 
 
 class FakeLLM:

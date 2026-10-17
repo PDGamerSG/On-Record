@@ -9,6 +9,7 @@ from wsw_brain.brain.llm import (
     FakeLLM,
     GeminiLLM,
     LLMError,
+    _read_gemini_response,
     assistant_tool_message,
     select_llm,
     to_gemini_contents,
@@ -133,6 +134,48 @@ async def test_gemini_non_feature_error_is_not_retried():
     with pytest.raises(LLMError, match="invalid API key"):
         await llm.chat([])
     assert calls == 1
+
+
+@pytest.mark.parametrize("response_factory", [
+    lambda types: types.GenerateContentResponse(candidates=[]),
+    lambda types: types.GenerateContentResponse(
+        candidates=[types.Candidate(content=types.Content(role="model", parts=[]))]
+    ),
+])
+@pytest.mark.asyncio
+async def test_gemini_rejects_empty_or_blocked_responses(response_factory):
+    from google.genai import types
+
+    llm = _llm()
+    response = response_factory(types)
+
+    async def generate_content(**kwargs: Any) -> Any:
+        return response
+
+    llm._client.aio = SimpleNamespace(models=SimpleNamespace(generate_content=generate_content))
+    with pytest.raises(LLMError, match="Gemini returned no"):
+        await llm.chat([])
+
+
+@pytest.mark.asyncio
+async def test_gemini_rejects_malformed_tool_calls():
+    response = SimpleNamespace(
+        candidates=[
+            SimpleNamespace(
+                content=SimpleNamespace(
+                    parts=[
+                        SimpleNamespace(
+                            thought=False,
+                            function_call=SimpleNamespace(name="seek_to", args=[1, 2]),
+                            text=None,
+                        )
+                    ]
+                )
+            )
+        ]
+    )
+    with pytest.raises(LLMError, match="tool arguments must be an object"):
+        _read_gemini_response(response)
 
 
 def test_gemini_settings_select_provider_before_local_probe():
