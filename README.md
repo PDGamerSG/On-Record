@@ -27,7 +27,23 @@ The package uses Python 3.12. It currently provides configuration, shared data c
 uv run --project apps/api python -c "from wsw_brain.brain import HashEmbedder; e = HashEmbedder(); print(e.name, len(e.embed_query('pricing deck')))"
 ```
 
-The default dimension is 768. Pass a positive integer to `HashEmbedder(dim)` to match an existing vector index. The model-backed embedder and configured provider selection will arrive in a later PR.
+The default dimension is 768. Pass a positive integer to `HashEmbedder(dim)` to match an existing vector index.
+
+## Model-backed text embeddings
+
+`GemmaEmbedder` runs EmbeddingGemma-300m on the CPU. It applies the model's separate document and query prompts, batches documents, and normalises vectors after truncating them to the requested dimension (up to the model's native width).
+
+```python
+from wsw_brain.brain import GemmaEmbedder
+
+embedder = GemmaEmbedder()
+documents = embedder.embed_documents(["The pricing deck is due Friday."])
+query = embedder.embed_query("When is the pricing deck due?")
+```
+
+The first use downloads the quantised ONNX model and tokenizer into `WSW_MODELS_DIR` (default: `models/`). Later runs reuse those files. `WSW_EMBED_REPO` chooses the model repository and `WSW_EMBED_DIM` sets the requested vector width. The tokenizer truncates input to 256 tokens by default; documents are processed in batches of 16. The adapter also accepts `threads`, `max_tokens`, and `batch_size` options, all positive integers. No hosted inference API is required.
+
+Model and hash vectors use different embedding spaces. When changing providers, use a separate graph or rebuild stored embeddings; matching vector dimensions alone does not make them compatible.
 
 ## Local graph database
 
