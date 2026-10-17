@@ -45,6 +45,15 @@ def test_float_audio_rejects_non_mono_shapes() -> None:
         float_to_pcm16(np.zeros((2, 2), dtype=np.float32))
 
 
+@pytest.mark.parametrize("sample_rate", [0, -1, True, 16_000.5])
+def test_audio_writers_reject_invalid_sample_rates(tmp_path: Path, sample_rate: object) -> None:
+    with pytest.raises(ValueError, match="sample_rate"):
+        write_wav(tmp_path / "invalid.wav", np.zeros(4, dtype=np.float32), sample_rate=sample_rate)  # type: ignore[arg-type]
+
+    with pytest.raises(ValueError, match="sample_rate"):
+        WavAppender(tmp_path / "invalid-growing.wav", sample_rate=sample_rate)  # type: ignore[arg-type]
+
+
 def test_decode_file_resamples_downmixes_and_writes_wav(tmp_path: Path) -> None:
     stereo = np.stack([tone(), tone()], axis=1)
     source = tmp_path / "source.wav"

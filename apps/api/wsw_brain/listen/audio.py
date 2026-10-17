@@ -143,6 +143,11 @@ def _validate_duration_limit(max_duration_s: float | None) -> None:
         raise ValueError("max_duration_s must be a finite, non-negative number")
 
 
+def _validate_sample_rate(sample_rate: int) -> None:
+    if isinstance(sample_rate, bool) or not isinstance(sample_rate, int) or sample_rate <= 0:
+        raise ValueError("sample_rate must be a positive int")
+
+
 def _validate_block_duration(block_s: float) -> None:
     if (
         isinstance(block_s, bool)
@@ -200,6 +205,7 @@ def float_to_pcm16(samples: np.ndarray) -> bytes:
 
 
 def write_wav(path: str | Path, samples: np.ndarray, sample_rate: int = SAMPLE_RATE) -> Path:
+    _validate_sample_rate(sample_rate)
     p = Path(path)
     p.parent.mkdir(parents=True, exist_ok=True)
     sf.write(str(p), as_mono_float32(samples), sample_rate, subtype="PCM_16", format="WAV")
@@ -218,6 +224,7 @@ class WavAppender:
     def __init__(
         self, path: str | Path, sample_rate: int = SAMPLE_RATE, max_duration_s: float | None = None
     ) -> None:
+        _validate_sample_rate(sample_rate)
         self.path = Path(path)
         self.path.parent.mkdir(parents=True, exist_ok=True)
         self.sample_rate = sample_rate
