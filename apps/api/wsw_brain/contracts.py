@@ -133,6 +133,10 @@ class DecisionDraft:
     proposed_by: str | None = None  # speaker track
     supersedes_text: str | None = None  # text of an earlier decision this one replaces, if any
 
+    def __post_init__(self) -> None:
+        _require_text(self.text, "DecisionDraft.text")
+        _require_evidence(self.evidence, "DecisionDraft.evidence")
+
 
 @dataclass
 class ActionItemDraft:
@@ -140,6 +144,20 @@ class ActionItemDraft:
     evidence: list[str]
     owner: str | None = None  # speaker track ("S2") or a person name
     due: str | None = None  # free text as spoken ("Friday", "next sprint")
+
+    def __post_init__(self) -> None:
+        _require_text(self.text, "ActionItemDraft.text")
+        _require_evidence(self.evidence, "ActionItemDraft.evidence")
+
+
+def _require_text(value: object, field: str) -> None:
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError(f"{field} must be a non-empty string")
+
+
+def _require_evidence(value: object, field: str) -> None:
+    if not isinstance(value, list) or any(not isinstance(item, str) or not item.strip() for item in value):
+        raise ValueError(f"{field} must be a list of non-empty strings")
 
 
 @dataclass

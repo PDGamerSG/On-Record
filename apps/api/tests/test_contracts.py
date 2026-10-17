@@ -5,7 +5,7 @@ from dataclasses import replace
 
 import pytest
 
-from wsw_brain.contracts import FileASR, Utterance
+from wsw_brain.contracts import ActionItemDraft, DecisionDraft, FileASR, Utterance
 from wsw_brain.listen import FasterWhisperASR
 
 
@@ -91,3 +91,17 @@ def test_file_asr_contract_matches_file_transcription_adapter() -> None:
     adapter = FasterWhisperASR(model=object())
 
     assert isinstance(adapter, FileASR)
+
+
+@pytest.mark.parametrize("draft", [DecisionDraft, ActionItemDraft])
+def test_insight_drafts_reject_blank_text(draft: type[DecisionDraft | ActionItemDraft]) -> None:
+    with pytest.raises(ValueError, match="text"):
+        draft(" \t", [])
+
+
+def test_decision_draft_rejects_malformed_evidence() -> None:
+    with pytest.raises(ValueError, match="evidence"):
+        DecisionDraft("Ship the release", ["m1:u0001", " "])
+
+    with pytest.raises(ValueError, match="evidence"):
+        DecisionDraft("Ship the release", "m1:u0001")  # type: ignore[arg-type]
