@@ -314,8 +314,8 @@ async def test_fake_llm_is_deterministic_and_quotes_first_evidence_line():
     assert result.provider == "fake" and result.model == "fake"
 
 
-@pytest.mark.parametrize("provider", ["gemini", "openai"])
-def test_unimplemented_hosted_provider_fails_loudly(provider):
+def test_unimplemented_openai_provider_fails_loudly():
+    provider = "openai"
     cfg = Settings(_env_file=None, WSW_LLM_PROVIDER=provider)
 
     with pytest.raises(LLMError, match="not available"):

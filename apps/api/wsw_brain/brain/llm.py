@@ -209,6 +209,183 @@ class OllamaLLM:
         return data
 
 
+class GeminiLLM:
+    """Gemini API text adapter with one compatibility retry for older model variants."""
+
+    provider = "gemini"
+    supports_audio = False
+
+    def __init__(self, api_key: str, model: str) -> None:
+        if not isinstance(api_key, str) or not api_key.strip():
+            raise ValueError("GeminiLLM needs an API key (GEMINI_API_KEY)")
+        if not isinstance(model, str) or not model.strip():
+            raise ValueError("model must be a non-empty string")
+        from google import genai
+
+        self.model = model
+        self._client = genai.Client(api_key=api_key)
+        self._compat = False
+
+    async def chat(
+        self,
+        messages: list[dict[str, Any]],
+        *,
+        tools: list[dict[str, Any]] | None = None,
+        json_mode: bool = False,
+        temperature: float = 0.2,
+        max_tokens: int = 800,
+    ) -> LLMResult:
+        from google.genai import errors
+
+        started = time.perf_counter()
+        try:
+            response = await self._generate(messages, tools, json_mode, temperature, max_tokens)
+        except errors.ClientError as exc:
+            if self._compat or not _is_feature_rejection(exc):
+                raise LLMError(f"Gemini API error ({self.model}): {exc}") from exc
+            log.info("Gemini %s rejected advanced request options; retrying in compatibility mode", self.model)
+            self._compat = True
+            try:
+                response = await self._generate(messages, tools, json_mode, temperature, max_tokens)
+            except (errors.APIError, httpx.HTTPError) as retry_exc:
+                raise LLMError(f"Gemini API error ({self.model}): {retry_exc!r}") from retry_exc
+        except errors.APIError as exc:
+            raise LLMError(f"Gemini API error ({self.model}): {exc}") from exc
+        except httpx.HTTPError as exc:
+            raise LLMError(f"Gemini API request failed: {exc!r}") from exc
+        text, calls = _read_gemini_response(response)
+        return LLMResult(
+            text=text,
+            tool_calls=calls,
+            model=self.model,
+            provider=self.provider,
+            latency_ms=round((time.perf_counter() - started) * 1000, 1),
+        )
+
+    async def transcribe(self, wav_bytes: bytes, *, hint: str | None = None) -> Transcript:
+        raise NotImplementedError("Gemini text models do not provide native audio input")
+
+    async def _generate(
+        self,
+        messages: list[dict[str, Any]],
+        tools: list[dict[str, Any]] | None,
+        json_mode: bool,
+        temperature: float,
+        max_tokens: int,
+    ) -> Any:
+        from google.genai import types
+
+        system, contents = to_gemini_contents(messages)
+        if self._compat and system:
+            contents.insert(0, types.Content(role="user", parts=[types.Part.from_text(text=system)]))
+            contents = _merge_same_role(contents)
+            system = ""
+        if self._compat and json_mode:
+            contents.append(
+                types.Content(role="user", parts=[types.Part.from_text(text="Reply with one JSON object only.")])
+            )
+            contents = _merge_same_role(contents)
+        config = types.GenerateContentConfig(
+            system_instruction=system or None,
+            temperature=temperature,
+            max_output_tokens=max_tokens,
+            tools=[
+                types.Tool(
+                    function_declarations=[
+                        types.FunctionDeclaration(
+                            name=tool["name"],
+                            description=tool.get("description", ""),
+                            parameters_json_schema=tool.get("parameters")
+                            or {"type": "object", "properties": {}},
+                        )
+                        for tool in tools
+                    ]
+                )
+            ]
+            if tools
+            else None,
+            automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True) if tools else None,
+            response_mime_type="application/json" if json_mode and not self._compat else None,
+        )
+        return await self._client.aio.models.generate_content(
+            model=self.model, contents=contents, config=config
+        )
+
+
+def _is_feature_rejection(exc: Exception) -> bool:
+    text = str(exc).lower()
+    return any(term in text for term in ("instruction", "json mode", "response_mime_type", "mime type"))
+
+
+def to_gemini_contents(messages: list[dict[str, Any]]) -> tuple[str, list[Any]]:
+    """Convert contract messages into Gemini's alternating contents and system instruction."""
+    from google.genai import types
+
+    system_parts: list[str] = []
+    contents: list[Any] = []
+    for message in messages:
+        role, text = message["role"], message.get("content") or ""
+        if role == "system":
+            system_parts.append(text)
+        elif role == "user":
+            contents.append(types.Content(role="user", parts=[types.Part.from_text(text=text)]))
+        elif role == "assistant":
+            parts = [types.Part.from_text(text=text)] if text else []
+            parts.extend(
+                types.Part.from_function_call(name=call["name"], args=call.get("arguments") or {})
+                for call in message.get("tool_calls") or []
+            )
+            if parts:
+                contents.append(types.Content(role="model", parts=parts))
+        elif role == "tool":
+            try:
+                result: Any = json.loads(text)
+            except json.JSONDecodeError:
+                result = text
+            response = result if isinstance(result, dict) else {"result": result}
+            part = types.Part.from_function_response(name=message.get("name", "tool"), response=response)
+            contents.append(types.Content(role="user", parts=[part]))
+        else:
+            raise ValueError(f"unknown message role {role!r}")
+    return "\n\n".join(system_parts), _merge_same_role(contents)
+
+
+def _merge_same_role(contents: list[Any]) -> list[Any]:
+    merged: list[Any] = []
+    from google.genai import types
+
+    for content in contents:
+        if merged and merged[-1].role == content.role:
+            merged[-1] = types.Content(
+                role=content.role,
+                parts=[*(merged[-1].parts or []), *(content.parts or [])],
+            )
+        else:
+            merged.append(content)
+    return merged
+
+
+def _read_gemini_response(response: Any) -> tuple[str, list[ToolCall]]:
+    texts: list[str] = []
+    calls: list[ToolCall] = []
+    for candidate in (getattr(response, "candidates", None) or [])[:1]:
+        content = getattr(candidate, "content", None)
+        for part in (getattr(content, "parts", None) or []):
+            if getattr(part, "thought", False):
+                continue
+            function_call = getattr(part, "function_call", None)
+            if function_call is not None:
+                calls.append(
+                    ToolCall(
+                        name=getattr(function_call, "name", "") or "",
+                        arguments=dict(getattr(function_call, "args", None) or {}),
+                    )
+                )
+            elif getattr(part, "text", None):
+                texts.append(part.text)
+    return strip_thoughts("".join(texts)), [call for call in calls if call.name]
+
+
 class FakeLLM:
     """Deterministic, offline text model for local development and tests."""
 
@@ -274,7 +451,11 @@ def select_llm(s: Settings, probe: Any = probe_ollama_model) -> LLM:
     provider = s.llm_provider
     if provider == "fake":
         return FakeLLM()
-    if provider in ("gemini", "openai"):
+    if provider == "gemini" or (provider == "auto" and s.gemini_api_key):
+        if not s.gemini_api_key:
+            raise LLMError("configured Gemini provider needs GEMINI_API_KEY")
+        return GeminiLLM(s.gemini_api_key, s.gemini_model)
+    if provider == "openai":
         raise LLMError(f"configured LLM provider {provider!r} is not available in this build")
     if provider == "ollama":
         return OllamaLLM(s.ollama_url, s.ollama_model)
