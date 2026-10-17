@@ -40,11 +40,11 @@ jobs:
       - name: Start the local database
         run: docker compose up -d --wait falkordb
 
-      - name: Run graph schema checks
-        run: uv run --project apps/api pytest apps/api/tests/test_graph_schema.py -q
+      - name: Run API checks
+        run: uv run --project apps/api pytest -q
 
       - name: Run Python lint
-        run: uv run --project apps/api ruff check apps/api/wsw_brain apps/api/tests/test_graph_schema.py
+        run: uv run --project apps/api ruff check apps/api/wsw_brain apps/api/tests
 
       - name: Show database diagnostics on failure
         if: failure()
