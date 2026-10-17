@@ -133,6 +133,12 @@ class DecisionDraft:
     proposed_by: str | None = None  # speaker track
     supersedes_text: str | None = None  # text of an earlier decision this one replaces, if any
 
+    def __post_init__(self) -> None:
+        _require_text(self.text, "DecisionDraft.text")
+        _require_evidence(self.evidence, "DecisionDraft.evidence")
+        _require_optional_text(self.proposed_by, "DecisionDraft.proposed_by")
+        _require_optional_text(self.supersedes_text, "DecisionDraft.supersedes_text")
+
 
 @dataclass
 class ActionItemDraft:
@@ -140,6 +146,27 @@ class ActionItemDraft:
     evidence: list[str]
     owner: str | None = None  # speaker track ("S2") or a person name
     due: str | None = None  # free text as spoken ("Friday", "next sprint")
+
+    def __post_init__(self) -> None:
+        _require_text(self.text, "ActionItemDraft.text")
+        _require_evidence(self.evidence, "ActionItemDraft.evidence")
+        _require_optional_text(self.owner, "ActionItemDraft.owner")
+        _require_optional_text(self.due, "ActionItemDraft.due")
+
+
+def _require_text(value: object, field: str) -> None:
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError(f"{field} must be a non-empty string")
+
+
+def _require_optional_text(value: object, field: str) -> None:
+    if value is not None:
+        _require_text(value, field)
+
+
+def _require_evidence(value: object, field: str) -> None:
+    if not isinstance(value, list) or any(not isinstance(item, str) or not item.strip() for item in value):
+        raise ValueError(f"{field} must be a list of non-empty strings")
 
 
 @dataclass
@@ -149,6 +176,16 @@ class Insights:
     topics: list[str] = field(default_factory=list)
     entities: list[dict[str, str]] = field(default_factory=list)  # {name, kind}
     mentions: dict[str, list[str]] = field(default_factory=dict)  # utterance_id -> topic/entity names
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.decisions, list) or any(not isinstance(item, DecisionDraft) for item in self.decisions):
+            raise ValueError("Insights.decisions must be a list of DecisionDraft values")
+        if not isinstance(self.action_items, list) or any(
+            not isinstance(item, ActionItemDraft) for item in self.action_items
+        ):
+            raise ValueError("Insights.action_items must be a list of ActionItemDraft values")
+        if not isinstance(self.topics, list) or any(not isinstance(topic, str) or not topic.strip() for topic in self.topics):
+            raise ValueError("Insights.topics must be a list of non-empty strings")
 
     def is_empty(self) -> bool:
         return not (self.decisions or self.action_items or self.topics or self.entities)

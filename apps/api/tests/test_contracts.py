@@ -5,7 +5,7 @@ from dataclasses import replace
 
 import pytest
 
-from wsw_brain.contracts import FileASR, Utterance
+from wsw_brain.contracts import ActionItemDraft, DecisionDraft, FileASR, Insights, Utterance
 from wsw_brain.listen import FasterWhisperASR
 
 
@@ -91,3 +91,46 @@ def test_file_asr_contract_matches_file_transcription_adapter() -> None:
     adapter = FasterWhisperASR(model=object())
 
     assert isinstance(adapter, FileASR)
+
+
+@pytest.mark.parametrize("draft", [DecisionDraft, ActionItemDraft])
+def test_insight_drafts_reject_blank_text(draft: type[DecisionDraft | ActionItemDraft]) -> None:
+    with pytest.raises(ValueError, match="text"):
+        draft(" \t", [])
+
+
+def test_decision_draft_rejects_malformed_evidence() -> None:
+    with pytest.raises(ValueError, match="evidence"):
+        DecisionDraft("Ship the release", ["m1:u0001", " "])
+
+    with pytest.raises(ValueError, match="evidence"):
+        DecisionDraft("Ship the release", "m1:u0001")  # type: ignore[arg-type]
+
+
+def test_decision_draft_rejects_blank_optional_fields() -> None:
+    with pytest.raises(ValueError, match="proposed_by"):
+        DecisionDraft("Ship the release", [], proposed_by=" \t")
+
+    with pytest.raises(ValueError, match="supersedes_text"):
+        DecisionDraft("Ship the release", [], supersedes_text=" \t")
+
+
+def test_action_item_draft_rejects_blank_optional_fields() -> None:
+    with pytest.raises(ValueError, match="owner"):
+        ActionItemDraft("Send the notes", [], owner=" \t")
+
+    with pytest.raises(ValueError, match="due"):
+        ActionItemDraft("Send the notes", [], due=" \t")
+
+
+def test_insights_rejects_invalid_collection_types() -> None:
+    with pytest.raises(ValueError, match="decisions"):
+        Insights(decisions=None)  # type: ignore[arg-type]
+
+    with pytest.raises(ValueError, match="action_items"):
+        Insights(action_items=["send notes"])  # type: ignore[list-item]
+
+
+def test_insights_rejects_blank_topics() -> None:
+    with pytest.raises(ValueError, match="topics"):
+        Insights(topics=[" "])
