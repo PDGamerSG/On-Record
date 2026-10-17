@@ -2,7 +2,7 @@
 
 A meeting assistant that connects what was said to the person who said it.
 
-This repository is being assembled in feature-sized PRs from [Who Said What Brain](https://github.com/Hydra-Of-Malice/hack-october-who-said-what-brain). It currently includes shared Python contracts, graph storage and queries, audio decoding and transcription, text embeddings, and hybrid meeting retrieval. Live recording, the assistant, HTTP server, and web interface follow in separate branches.
+This repository is being assembled in feature-sized PRs from [Who Said What Brain](https://github.com/Hydra-Of-Malice/hack-october-who-said-what-brain). It currently includes shared Python contracts, graph storage and queries, audio decoding and transcription, text embeddings, hybrid meeting retrieval, and a local text model adapter. Live recording, the assistant, HTTP server, and web interface follow in separate branches.
 
 The display name lives in `brand.json`. `.env.example` lists the configuration the application will use; keep local values in an ignored `.env` file.
 
@@ -74,6 +74,35 @@ Run the ranking and database integration checks without downloading a model:
 
 ```bash
 uv run --project apps/api pytest apps/api/tests/test_retrieve.py apps/api/tests/test_retrieve_graph.py -q
+```
+
+## Local text model calls
+
+`OllamaLLM` implements text chat and tool calls using the existing `LLM` contract. Start an Ollama server with your chosen model available, then construct the adapter with its URL and model name. The existing `WSW_OLLAMA_URL` and `WSW_OLLAMA_MODEL` settings supply defaults:
+
+```python
+import asyncio
+
+from wsw_brain.brain import OllamaLLM
+from wsw_brain.config import settings
+
+async def main():
+    config = settings()
+    model = OllamaLLM(config.ollama_url, config.ollama_model)
+    result = await model.chat([{"role": "user", "content": "Reply with one word: ready"}])
+    print(result.text)
+
+asyncio.run(main())
+```
+
+`chat()` accepts tool schemas, JSON mode, temperature, and a token limit. Results include cleaned answer text, parsed `ToolCall` values, model/provider names, and latency. `assistant_tool_message` and `tool_result_message` in `brain.llm` preserve a tool exchange for subsequent calls; the adapter returns requested tools for the caller to execute.
+
+Calls have bounded connection, read, and write timeouts. Models that reject the `think` option are retried once without it. Network errors, unsuccessful HTTP responses, malformed responses, empty answers without tools, and invalid tool arguments raise `LLMError`. This adapter reports `supports_audio=False`; native audio and hosted adapters are separate features. Configured provider selection follows in the second commit of this PR.
+
+The transport tests require neither a running model server nor a model download:
+
+```bash
+uv run --project apps/api pytest apps/api/tests/test_llm.py -q
 ```
 
 ## Local graph database
