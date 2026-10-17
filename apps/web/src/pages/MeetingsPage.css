@@ -1,0 +1,323 @@
+/* Meetings: the page header and empty/error states come from memoryPages.css (.mp-*). */
+.home {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-8);
+}
+.home > .mp-head {
+  margin-bottom: 0;
+}
+
+.home-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-3);
+}
+/* the inline start form needs the full width under the title */
+.home-actions:has(.start) {
+  flex-basis: 100%;
+}
+
+.home-error {
+  margin-top: var(--s-2);
+  color: var(--warn);
+  font-size: var(--fs-sm);
+  max-width: var(--measure);
+}
+
+/* start form */
+.start {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  flex: 1 1 100%;
+  max-width: 640px;
+  padding: var(--s-4);
+  border: 1px solid var(--line);
+  border-radius: var(--r-panel);
+  background: var(--surface);
+  box-shadow: var(--shadow-panel);
+}
+.start-label {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+}
+.start-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
+.start-input {
+  flex: 1 1 240px;
+  width: auto;
+}
+.start-hint {
+  color: var(--ink-2);
+  font-size: var(--fs-xs);
+}
+
+/* upload */
+.upload {
+  display: flex;
+  flex-direction: column;
+}
+.upload-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-2) var(--s-4);
+}
+.upload-pace {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  color: var(--ink-2);
+  font-size: var(--fs-sm);
+  cursor: pointer;
+  transition: color var(--t-fast) var(--ease-out);
+}
+.upload-pace:hover {
+  color: var(--ink);
+}
+
+/* graph totals: one tile per count */
+.totals {
+  overflow: hidden;
+}
+.totals-title {
+  padding: 14px var(--s-5);
+  border-bottom: 1px solid var(--line);
+  color: var(--ink-2);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  letter-spacing: 0;
+}
+.totals-list {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  margin: 0;
+}
+.totals-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  padding: var(--s-5);
+}
+.totals-item + .totals-item {
+  border-left: 1px solid var(--line);
+}
+.totals-item dt {
+  order: 2;
+  color: var(--ink-2);
+  font-size: var(--fs-xs);
+}
+.totals-item dd {
+  order: 1;
+  margin: 0;
+  font-size: 1.875rem;
+  font-weight: 620;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em;
+}
+.totals-item dd.skel {
+  width: 3ch;
+  height: 1.15em;
+  margin: 0;
+  color: transparent;
+}
+.totals-error {
+  padding: var(--s-4) var(--s-5);
+  color: var(--ink-2);
+  font-size: var(--fs-sm);
+}
+.totals-retry {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--focus);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+/* meeting list */
+.home-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+.home-list-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-1) var(--s-4);
+}
+.home-list-title {
+  font-size: var(--fs-lg);
+}
+.home-count {
+  margin-left: var(--s-1);
+  color: var(--ink-2);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+.home-list-hint {
+  color: var(--ink-2);
+  font-size: var(--fs-sm);
+}
+
+.mlist {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow: hidden;
+}
+
+.mrow {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  align-items: center;
+  gap: var(--s-3) var(--s-8);
+  padding: var(--s-5);
+  transition: background var(--t-fast) var(--ease-out);
+}
+.mrow + .mrow {
+  border-top: 1px solid var(--line);
+}
+.mrow:hover {
+  background: var(--surface-sunk);
+}
+
+.mrow-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+  min-width: 0;
+}
+
+.mrow-titleline {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  min-width: 0;
+}
+
+.mrow-title {
+  color: var(--ink);
+  font-size: var(--fs-md);
+  font-weight: 620;
+  text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* the whole row opens the meeting */
+.mrow-title::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+@supports selector(:has(a)) {
+  .mrow-title:focus-visible {
+    outline: none;
+  }
+  .mrow:has(.mrow-title:focus-visible) {
+    outline: 2px solid var(--focus);
+    outline-offset: -2px;
+  }
+}
+
+.mrow-live {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 6px;
+  color: var(--rec);
+  font-size: var(--fs-xs);
+  font-weight: 650;
+}
+
+.mrow-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-1) var(--s-4);
+  color: var(--ink-2);
+  font-size: var(--fs-sm);
+}
+.mrow-num {
+  font-variant-numeric: tabular-nums;
+}
+.mrow-source {
+  flex: none;
+  padding: 0 8px;
+  border-radius: var(--r-round);
+  background: var(--surface-2);
+  color: var(--ink-2);
+  font-size: 11.5px;
+  font-weight: 560;
+  line-height: 20px;
+}
+
+.mrow-tape {
+  min-width: 0;
+}
+
+.mrow--skeleton:hover {
+  background: none;
+}
+.mrow--skeleton .mrow-main {
+  gap: var(--s-3);
+  padding: var(--s-1) 0;
+}
+.skel--title {
+  width: 52%;
+  height: 14px;
+}
+.skel--meta {
+  width: 78%;
+  height: 10px;
+}
+
+@media (max-width: 1023px) {
+  .totals-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .totals-item:nth-child(3n + 1) {
+    border-left: 0;
+  }
+  .totals-item:nth-child(n + 4) {
+    border-top: 1px solid var(--line);
+  }
+}
+
+@media (max-width: 767px) {
+  .home {
+    gap: var(--s-6);
+  }
+  .home-actions {
+    flex-basis: 100%;
+  }
+  .totals-title {
+    padding: var(--s-3) var(--s-4);
+  }
+  .totals-item {
+    padding: var(--s-3);
+  }
+  .totals-item:nth-child(3n + 1) {
+    padding-left: var(--s-4);
+  }
+  .totals-item dd {
+    font-size: var(--fs-xl);
+  }
+  .mrow {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--s-3);
+    padding: var(--s-4);
+  }
+}

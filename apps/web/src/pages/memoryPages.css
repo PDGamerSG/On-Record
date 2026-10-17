@@ -1,0 +1,218 @@
+/* Shared layout for the cross-meeting views: Meetings, Commitments, Decisions, People, Graph. */
+.mp {
+  max-width: calc(1120px + 2 * var(--s-8));
+  margin: 0 auto;
+  padding: var(--s-8) var(--s-8) var(--s-16);
+}
+.mp--wide {
+  max-width: 1600px;
+}
+
+/* page header: title, one line of description, actions on the right */
+.mp-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--s-4) var(--s-6);
+  margin-bottom: var(--s-8);
+}
+.mp-head > div:first-child {
+  flex: 1 1 36ch;
+  min-width: 0;
+}
+.mp-head h1 {
+  font-size: clamp(1.75rem, 1.3rem + 1vw, 2.25rem);
+  font-weight: 650;
+  letter-spacing: -0.028em;
+}
+.mp-sub {
+  margin-top: var(--s-2);
+  max-width: 64ch;
+  color: var(--ink-2);
+  font-size: var(--fs-md);
+}
+.mp-count {
+  margin-top: var(--s-3);
+  font-size: var(--fs-sm);
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+}
+
+/* segmented filter on native radios: a sunk track, the chosen segment raised */
+.mp-seg {
+  display: flex;
+  gap: 2px;
+  margin: 0;
+  padding: 3px;
+  border: 0;
+  border-radius: var(--r-ctl);
+  background: var(--surface-3);
+}
+.mp-seg label {
+  position: relative;
+  display: flex;
+}
+.mp-seg input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.mp-seg span {
+  display: block;
+  min-height: 30px;
+  padding: 5px var(--s-4);
+  border: 1px solid transparent;
+  border-radius: var(--r-chip);
+  color: var(--ink-2);
+  font-size: var(--fs-sm);
+  font-weight: 550;
+  transition:
+    background var(--t-fast) var(--ease-out),
+    color var(--t-fast) var(--ease-out);
+}
+.mp-seg label:hover span {
+  color: var(--ink);
+}
+.mp-seg input:checked + span {
+  background: var(--surface);
+  box-shadow: 0 1px 2px rgb(var(--shade) / 0.08), 0 0 0 1px rgb(var(--shade) / 0.04);
+  color: var(--ink);
+}
+.mp-seg input:focus-visible + span {
+  outline: 2px solid var(--focus);
+  outline-offset: 1px;
+}
+
+.mp-state {
+  padding: var(--s-6) 0;
+  color: var(--ink-2);
+}
+
+/* loading: panels shaped like the content, breathing */
+.mp-loading {
+  display: grid;
+  gap: var(--s-4);
+}
+.mp-skel {
+  display: grid;
+  gap: var(--s-3);
+  padding: var(--s-5);
+}
+.mp-skel__head {
+  width: 22%;
+  height: 16px;
+  margin-bottom: var(--s-2);
+}
+.mp-skel__line {
+  width: 72%;
+}
+.mp-skel__line--short {
+  width: 46%;
+}
+
+.mp-empty {
+  padding: var(--s-10) var(--s-8);
+}
+.mp-empty h2,
+.mp-empty h3 {
+  font-size: var(--fs-lg);
+}
+.mp-empty p {
+  margin-top: var(--s-2);
+  max-width: 56ch;
+  color: var(--ink-2);
+}
+.mp-empty .btn {
+  margin-top: var(--s-5);
+}
+
+/* errors use the warning tone: red is reserved for live recording */
+.mp-alert {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-2) var(--s-3);
+  margin-bottom: var(--s-4);
+  padding: var(--s-3) var(--s-4);
+  border: 1px solid color-mix(in srgb, var(--warn) 35%, transparent);
+  border-radius: var(--r-panel);
+  background: var(--warn-soft);
+  font-size: var(--fs-sm);
+}
+.mp-alert p {
+  flex: 1 1 24ch;
+}
+
+.mp-filter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-2) var(--s-3);
+  margin-bottom: var(--s-4);
+  font-size: var(--fs-sm);
+  color: var(--ink-2);
+}
+.mp-filter strong {
+  color: var(--ink);
+}
+
+.btn.mp-mini {
+  min-height: 28px;
+  padding: 0 var(--s-2);
+  gap: var(--s-1);
+  font-size: var(--fs-xs);
+}
+.btn.mp-mini svg {
+  width: 14px;
+  height: 14px;
+}
+.btn.mp-mini .tc {
+  color: var(--ink-2);
+}
+
+.mp-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-1) var(--s-4);
+  font-size: var(--fs-sm);
+  color: var(--ink-2);
+}
+.mp-meta a {
+  color: var(--ink);
+  font-weight: 550;
+  text-decoration: none;
+}
+.mp-meta a:hover {
+  text-decoration: underline;
+  text-decoration-color: var(--ink-3);
+}
+/* play buttons in a meta line read as a small transport key, like the evidence quotes */
+.mp-meta .btn--ghost.mp-mini {
+  border-color: var(--line);
+}
+.mp-meta .btn--ghost.mp-mini:hover {
+  border-color: var(--line-strong);
+}
+.mp-meta .btn.mp-mini svg {
+  width: 11px;
+  height: 11px;
+}
+
+@media (max-width: 767px) {
+  .mp {
+    padding: var(--s-6) var(--s-4) var(--s-12);
+  }
+  .mp-head {
+    margin-bottom: var(--s-6);
+  }
+  .mp-empty {
+    padding: var(--s-6) var(--s-4);
+  }
+  .mp-skel {
+    padding: var(--s-4);
+  }
+}

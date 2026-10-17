@@ -1,0 +1,346 @@
+/* Speaker lanes: a multitrack session view. One lane per speaker, blocks where they spoke, a playhead. */
+.lanes {
+  --names-w: 184px;
+  --ruler-h: 28px;
+  --lane-h: 52px;
+  --block-h: 22px;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.lanes-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-2) var(--s-6);
+  padding: 14px var(--s-5);
+  border-bottom: 1px solid var(--line);
+}
+
+.lanes-title {
+  font-size: var(--fs-md);
+  font-weight: 620;
+}
+
+.lanes-count {
+  margin-left: var(--s-1);
+  color: var(--ink-2);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.lanes-error {
+  margin: 0;
+  padding: var(--s-2) var(--s-4);
+  background: var(--warn-soft);
+  color: var(--warn);
+  font-size: var(--fs-sm);
+  border-bottom: 1px solid var(--line);
+}
+
+.lanes-empty {
+  padding: var(--s-6) var(--s-4);
+  color: var(--ink-2);
+}
+
+.lanes-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+}
+
+.lanes-inner {
+  display: grid;
+  grid-template-columns: var(--names-w) minmax(var(--track-min, 560px), 1fr);
+  /* as wide as the tracks, so the sticky names column has room to stay put while scrolling */
+  width: max-content;
+  min-width: 100%;
+}
+
+/* names column stays put while the tracks scroll under it */
+.lanes-names {
+  position: sticky;
+  left: 0;
+  z-index: 3;
+  background: var(--surface);
+  border-right: 1px solid var(--line);
+  border-bottom-left-radius: var(--r-panel);
+}
+
+.lanes-corner {
+  height: var(--ruler-h);
+  border-bottom: 1px solid var(--line);
+}
+
+.lane-name {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  align-content: center;
+  column-gap: 10px;
+  height: var(--lane-h);
+  padding: 0 var(--s-2) 0 var(--s-4);
+  border-bottom: 1px solid var(--line);
+  min-width: 0;
+}
+.lane-avatar {
+  grid-row: 1 / 3;
+  display: grid;
+  place-items: center;
+  align-self: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--spk) 14%, var(--surface));
+  color: var(--spk-text);
+  font-size: 13px;
+  font-weight: 650;
+}
+.lane-name:last-child {
+  border-bottom: 0;
+}
+
+.lane-name-row {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  min-width: 0;
+}
+
+.lane-name-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-1);
+  min-width: 0;
+  min-height: 24px;
+  padding: 0 var(--s-1);
+  margin-left: calc(-1 * var(--s-1));
+  border: 1px solid transparent;
+  border-radius: var(--r-chip);
+  background: none;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  cursor: text;
+}
+.lane-name-btn:hover {
+  border-color: var(--line);
+  background: var(--surface-2);
+}
+.lane-name-btn--fixed,
+.lane-name-btn--fixed:hover {
+  border-color: transparent;
+  background: none;
+  cursor: default;
+}
+.lane-name-btn svg {
+  flex: none;
+  width: 13px;
+  height: 13px;
+  color: var(--ink-3);
+  opacity: 0;
+  transition: opacity var(--t-fast) var(--ease);
+}
+.lane-name:hover .lane-name-btn svg,
+.lane-name-btn:focus-visible svg {
+  opacity: 1;
+}
+.lane-name-btn:hover svg {
+  color: var(--ink);
+}
+
+.lane-name-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lane-input {
+  min-height: 28px;
+  padding: 2px var(--s-2);
+  font-size: var(--fs-sm);
+}
+
+.lane-talk {
+  color: var(--ink-3);
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* tracks */
+.lanes-tracks {
+  position: relative;
+  min-width: 0;
+}
+
+.lanes-ruler {
+  position: relative;
+  height: var(--ruler-h);
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.lanes-tick {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  padding-left: 6px;
+  border-left: 1px solid var(--line-strong);
+  color: var(--ink-3);
+  font-size: 11.5px;
+  white-space: nowrap;
+  transition: left var(--t-med) var(--ease);
+}
+
+.lanes-gridlines {
+  position: absolute;
+  top: var(--ruler-h);
+  bottom: 0;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+}
+.lanes-gridlines span {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--line);
+  transition: left var(--t-med) var(--ease);
+}
+
+.lane-track {
+  position: relative;
+  height: var(--lane-h);
+  border-bottom: 1px solid var(--line);
+  background: color-mix(in srgb, var(--spk) 3%, var(--surface-sunk));
+}
+.lane-track:last-child {
+  border-bottom: 0;
+}
+.can-scrub .lane-track,
+.can-scrub .lanes-ruler {
+  cursor: pointer;
+}
+
+.lane-block {
+  position: absolute;
+  top: calc((var(--lane-h) - var(--block-h)) / 2);
+  height: var(--block-h);
+  min-width: 3px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: var(--spk);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.22), 0 1px 2px color-mix(in srgb, var(--spk) 35%, transparent);
+  cursor: pointer;
+  z-index: 1;
+  transition:
+    left var(--t-med) var(--ease),
+    width var(--t-med) var(--ease);
+}
+.lane-block:hover {
+  background: color-mix(in srgb, var(--spk) 84%, black);
+}
+.lane-block:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  z-index: 2;
+}
+.lane-block.is-active {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+  z-index: 2;
+}
+.lane-block.is-unsure {
+  opacity: 0.55;
+}
+
+/* the one deliberate effect: a new block is laid down out of the playhead */
+.lane-block.is-fresh {
+  transform-origin: right center;
+  animation: lane-grow 480ms var(--ease) both;
+}
+@keyframes lane-grow {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.lanes-playhead {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--ink);
+  pointer-events: none;
+  z-index: 2;
+}
+.lanes-playhead[hidden] {
+  display: none;
+}
+.lanes-playhead.is-live {
+  background: var(--rec);
+}
+
+.lanes-playhead-flag {
+  position: absolute;
+  top: 3px;
+  left: 2px;
+  padding: 1px var(--s-1);
+  border-radius: var(--r-chip);
+  background: var(--ink);
+  color: var(--on-ink);
+  line-height: 1.4;
+}
+.lanes-playhead-flag:empty {
+  display: none;
+}
+.is-live .lanes-playhead-flag {
+  background: var(--rec);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lane-block.is-fresh {
+    animation: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .lanes {
+    --names-w: 128px;
+    --lane-h: 46px;
+  }
+  .lane-talk {
+    padding-left: 0;
+  }
+  .lane-talk-verb {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+  .lane-name {
+    grid-template-columns: 26px minmax(0, 1fr);
+    column-gap: 8px;
+    padding-left: var(--s-2);
+  }
+  .lane-avatar {
+    width: 26px;
+    height: 26px;
+    font-size: 12px;
+  }
+}
