@@ -1,0 +1,1756 @@
+{
+ "meetings": [
+  {
+   "id": "demo-launch-sync",
+   "title": "Self-serve launch sync",
+   "status": "ended",
+   "source": "demo",
+   "started_at": 1792062000000,
+   "ended_at": 1792062236310,
+   "duration_s": 236.31,
+   "utterance_count": 29,
+   "speaker_count": 3,
+   "has_audio": true,
+   "summary": "Trackwise cut its small-shipper plan to 3,499, and trial accounts pushed back on price. Starter moves to 3,999 with 1,000 shipments, replacing Tuesday's decision; Rahul's numbers put the margin at 55 percent. The annual discount and the November 2 launch both hold."
+  },
+  {
+   "id": "demo-pricing-review",
+   "title": "Self-serve pricing review",
+   "status": "ended",
+   "source": "demo",
+   "started_at": 1791869400000,
+   "ended_at": 1791869780270,
+   "duration_s": 380.27,
+   "utterance_count": 46,
+   "speaker_count": 4,
+   "has_audio": true,
+   "summary": "Kitepost locked self-serve pricing. Starter is 4,999 rupees a month with 1,500 shipments and 4 rupees overage, after Meera pushed for 3,999 and Rahul held the margin line. Annual billing gets 15 percent off, reviewed after 90 days. Self-serve launches Monday, November 2, pending GST registration."
+  }
+ ],
+ "details": {
+  "demo-pricing-review": {
+   "meeting": {
+    "id": "demo-pricing-review",
+    "title": "Self-serve pricing review",
+    "status": "ended",
+    "source": "demo",
+    "started_at": 1791869400000,
+    "ended_at": 1791869780270,
+    "duration_s": 380.27,
+    "utterance_count": 46,
+    "speaker_count": 4,
+    "has_audio": true,
+    "summary": "Kitepost locked self-serve pricing. Starter is 4,999 rupees a month with 1,500 shipments and 4 rupees overage, after Meera pushed for 3,999 and Rahul held the margin line. Annual billing gets 15 percent off, reviewed after 90 days. Self-serve launches Monday, November 2, pending GST registration."
+   },
+   "speakers": [
+    {
+     "track": "S1",
+     "label": "Speaker 1",
+     "name": "Priya",
+     "person_id": "p-priya",
+     "color_idx": 0,
+     "utterance_count": 15,
+     "talk_time_s": 108.4
+    },
+    {
+     "track": "S2",
+     "label": "Speaker 2",
+     "name": "Rahul",
+     "person_id": "p-rahul",
+     "color_idx": 1,
+     "utterance_count": 12,
+     "talk_time_s": 99.3
+    },
+    {
+     "track": "S3",
+     "label": "Speaker 3",
+     "name": "Meera",
+     "person_id": "p-meera",
+     "color_idx": 2,
+     "utterance_count": 12,
+     "talk_time_s": 88.7
+    },
+    {
+     "track": "S4",
+     "label": "Speaker 4",
+     "name": "Arjun",
+     "person_id": "p-arjun",
+     "color_idx": 3,
+     "utterance_count": 7,
+     "talk_time_s": 53.6
+    }
+   ],
+   "utterances": [
+    {
+     "id": "u-demo-pricing-review-000",
+     "meeting_id": "demo-pricing-review",
+     "seq": 0,
+     "speaker": "S1",
+     "speaker_name": "Priya",
+     "t_start": 0.6,
+     "t_end": 8.9,
+     "text": "Okay, let's start. Today we lock the self-serve pricing for Kitepost, so sales can quote it and Arjun's team can build billing against it.",
+     "confidence": 0.958
+    },
+    {
+     "id": "u-demo-pricing-review-001",
+     "meeting_id": "demo-pricing-review",
+     "seq": 1,
+     "speaker": "S2",
+     "speaker_name": "Rahul",
+     "t_start": 9.5,
+     "t_end": 19.95,
+     "text": "Before we get into tiers, keep one number in mind. Our cost per tracked shipment is about 1.8 rupees, once you include WhatsApp messages and map lookups.",
+     "confidence": 0.955
+    },
+    {
+     "id": "u-demo-pricing-review-002",
+     "meeting_id": "demo-pricing-review",
+     "seq": 2,
+     "speaker": "S1",
+     "speaker_name": "Priya",
+     "t_start": 20.65,
+     "t_end": 27.7,
+     "text": "Fine. So the proposal on the table is three tiers: Starter, Growth and Enterprise, with Enterprise staying sales-led.",
+     "confidence": 0.967
+    },
+    {
+     "id": "u-demo-pricing-review-003",
+     "meeting_id": "demo-pricing-review",
+     "seq": 3,
+     "speaker": "S3",
+     "speaker_name": "Meera",
+     "t_start": 28.3,
+     "t_end": 38.56,
+     "text": "And I want Starter at 3,999 rupees a month. Trackwise charges small shippers 3,999, and they are who we lose deals to.",
+     "confidence": 0.944
+    },
+    {
+     "id": "u-demo-pricing-review-004",
+     "meeting_id": "demo-pricing-review",
+     "seq": 4,
+     "speaker": "S2",
+     "speaker_name": "Rahul",
+     "t_start": 39.06,
+     "t_end": 50.28,
+     "text": "At 3,999 with fifteen hundred shipments included, a busy Starter account runs at about 32 percent margin. I can't sign off on that.",
+     "confidence": 0.934
+    },
+    {
+     "id": "u-demo-pricing-review-005",
+     "meeting_id": "demo-pricing-review",
+     "seq": 5,
+     "speaker": "S3",
+     "speaker_name": "Meera",
+     "t_start": 50.88,
+     "t_end": 57.88,
+     "text": "Most Starter accounts won't come close to fifteen hundred. The Saffron Basket pilot averaged around nine hundred shipments a month.",
+     "confidence": 0.973
+    },
+    {
+     "id": "u-demo-pricing-review-006",
+     "meeting_id": "demo-pricing-review",
+     "seq": 6,
+     "speaker": "S2",
+     "speaker_name": "Rahul",
+     "t_start": 58.38,
+     "t_end": 66.07,
+     "text": "Saffron Basket is one customer. I'd rather price for the busy accounts and be pleasantly surprised by the quiet ones.",
+     "confidence": 0.945
+    },
+    {
+     "id": "u-demo-pricing-review-007",
+     "meeting_id": "demo-pricing-review",
+     "seq": 7,
+     "speaker": "S4",
+     "speaker_name": "Arjun",
+     "t_start": 66.97,
+     "t_end": 77.19,
+     "text": "Can I add the engineering angle? If we cap included shipments and charge overage, the base price matters less, because heavy users pay their own way.",
+     "confidence": 0.949
+    },
+    {
+     "id": "u-demo-pricing-review-008",
+     "meeting_id": "demo-pricing-review",
+     "seq": 8,
+     "speaker": "S1",
+     "speaker_name": "Priya",
+     "t_start": 77.79,
+     "t_end": 83.24,
+     "text": "That's where I was going too. Rahul, what overage rate per shipment keeps us safe on margin?",
+     "confidence": 0.962
+    },
+    {
+     "id": "u-demo-pricing-review-009",
+     "meeting_id": "demo-pricing-review",
+     "seq": 9,
+     "speaker": "S2",
+     "speaker_name": "Rahul",
+     "t_start": 83.84,
+     "t_end": 91.51,
+     "text": "Four rupees per extra shipment. That's more than double our cost, and still cheaper than what Trackwise charges for overage.",
+     "confidence": 0.985
+    },
+    {
+     "id": "u-demo-pricing-review-010",
+     "meeting_id": "demo-pricing-review",
+     "seq": 10,
+     "speaker": "S3",
+     "speaker_name": "Meera",
+     "t_start": 92.01,
+     "t_end": 97.98,
+     "text": "Four rupees is fine. Customers accept overage if the dashboard shows it to them before the invoice does.",
+     "confidence": 0.966
+    },
+    {
+     "id": "u-demo-pricing-review-011",
+     "meeting_id": "demo-pricing-review",
+     "seq": 11,
+     "speaker": "S4",
+     "speaker_name": "Arjun",
+     "t_start": 98.68,
+     "t_end": 105.76,
+     "text": "Which means we need a usage meter in the product. Right now we only count shipments in the nightly billing job.",
+     "confidence": 0.959
+    },
+    {
+     "id": "u-demo-pricing-review-012",
+     "meeting_id": "demo-pricing-review",
+     "seq": 12,
+     "speaker": "S1",
+     "speaker_name": "Priya",
+     "t_start": 106.56,
+     "t_end": 117.16,
+     "text": "Okay, let me propose something concrete. Starter at 4,999 rupees a month, fifteen hundred shipments included, and four rupees per shipment after that.",
+     "confidence": 0.983
+    },
+    {
+     "id": "u-demo-pricing-review-013",
+     "meeting_id": "demo-pricing-review",
+     "seq": 13,
+     "speaker": "S3",
+     "speaker_name": "Meera",
+     "t_start": 117.86,
+     "t_end": 125.26,
+     "text": "I still think 4,999 makes the first sales call harder. But with a visible usage meter, I can sell it.",
+     "confidence": 0.93
+    },
+    {
+     "id": "u-demo-pricing-review-014",
+     "meeting_id": "demo-pricing-review",
+     "seq": 14,
+     "speaker": "S2",
+     "speaker_name": "Rahul",
+     "t_start": 125.76,
+     "t_end": 134.36,
+     "text": "I'm comfortable with 4,999. That keeps a busy Starter account at around 46 percent margin.",
+     "confidence": 0.977
+    },
+    {
+     "id": "u-demo-pricing-review-015",
+     "meeting_id": "demo-pricing-review",
+     "seq": 15,
+     "speaker": "S1",
+     "speaker_name": "Priya",
+     "t_start": 134.96,
+     "t_end": 144.01,
+     "text": "Then that's decided. We'll go with the 4,999 rupee Starter tier, with fifteen hundred shipments and four rupee overage.",
+     "confidence": 0.98
+    },
+    {
+     "id": "u-demo-pricing-review-016",
+     "meeting_id": "demo-pricing-review",
+     "seq": 16,
+     "speaker": "S4",
+     "speaker_name": "Arjun",
+     "t_start": 144.81,
+     "t_end": 152.09,
+     "text": "Noted on Starter. And for the Growth tier, are we still holding at 14,999 a month?",
+     "confidence": 0.984
+    },
+    {
+     "id": "u-demo-pricing-review-017",
+     "meeting_id": "demo-pricing-review",
+     "seq": 17,
+     "speaker": "S1",
+     "speaker_name": "Priya",
+     "t_start": 152.59,
+     "t_end": 160.8,
+     "text": "Yes, 14,999 for ten thousand shipments, plus WhatsApp delivery updates and two warehouse locations.",
+     "confidence": 0.951
+    },
+    {
+     "id": "u-demo-pricing-review-018",
+     "meeting_id": "demo-pricing-review",
+     "seq": 18,
+     "speaker": "S3",
+     "speaker_name": "Meera",
+     "t_start": 161.4,
+     "t_end": 167.42,
+     "text": "Monsoon Apparel asked about Growth last week. They run three warehouses, so two locations won't cover them.",
+     "confidence": 0.975
+    },
+    {
+     "id": "u-demo-pricing-review-019",
+     "meeting_id": "demo-pricing-review",
+     "seq": 19,
+     "speaker": "S1",
+     "speaker_name": "Priya",
+     "t_start": 167.92,
+     "t_end": 174.12,
+     "text": "Then Monsoon is an Enterprise conversation. Let's not bend the Growth tier around a single account.",
+     "confidence": 0.953
+    },
+    {
+     "id": "u-demo-pricing-review-020",
+     "meeting_id": "demo-pricing-review",
+     "seq": 20,
+     "speaker": "S3",
+     "speaker_name": "Meera",
+     "t_start": 174.72,
+     "t_end": 179.31,
+     "text": "Fair enough. I'll take Monsoon Apparel through the Enterprise proposal next week instead.",
+     "confidence": 0.984
+    },
+    {
+     "id": "u-demo-pricing-review-021",
+     "meeting_id": "demo-pricing-review",
+     "seq": 21,
+     "speaker": "S2",
+     "speaker_name": "Rahul",
+     "t_start": 180.21,
+     "t_end": 185.33,
+     "text": "Next, annual billing. Meera, you wanted twenty percent off for annual plans, right?",
+     "confidence": 0.962
+    },
+    {
+     "id": "u-demo-pricing-review-022",
+     "meeting_id": "demo-pricing-review",
+     "seq": 22,
+     "speaker": "S3",
+     "speaker_name": "Meera",
+     "t_start": 185.83,
+     "t_end": 193.05,
+     "text": "Twenty percent. Annual prepay is how we get cash up front from small businesses, and twenty is what makes people actually choose it.",
+     "confidence": 0.947
+    },
+    {
+     "id": "u-demo-pricing-review-023",
+     "meeting_id": "demo-pricing-review",
+     "seq": 23,
+     "speaker": "S2",
+     "speaker_name": "Rahul",
+     "t_start": 193.55,
+     "t_end": 201.28,
+     "text": "Twenty is too much. At twenty percent off, the Starter margin gets thin again. I'd cap the annual discount at fifteen.",
+     "confidence": 0.946
+    },
+    {
+     "id": "u-demo-pricing-review-024",
+     "meeting_id": "demo-pricing-review",
+     "seq": 24,
+     "speaker": "S3",
+     "speaker_name": "Meera",
+     "t_start": 201.78,
+     "t_end": 206.67,
+     "text": "Fifteen percent doesn't move anyone. Nobody switches to annual billing for fifteen percent.",
+     "confidence": 0.985
+    },
+    {
+     "id": "u-demo-pricing-review-025",
+     "meeting_id": "demo-pricing-review",
+     "seq": 25,
+     "speaker": "S2",
+     "speaker_name": "Rahul",
+     "t_start": 207.27,
+     "t_end": 215.39,
+     "text": "Our own data says otherwise. Forty percent of the Saffron Basket cohort picked annual billing at only twelve percent off.",
+     "confidence": 0.947
+    },
+    {
+     "id": "u-demo-pricing-review-026",
+     "meeting_id": "demo-pricing-review",
+     "seq": 26,
+     "speaker": "S4",
+     "speaker_name": "Arjun",
+     "t_start": 216.09,
+     "t_end": 222.16,
+     "text": "Is that cohort big enough to trust, though? If I remember right, it was only about thirty accounts.",
+     "confidence": 0.934
+    },
+    {
+     "id": "u-demo-pricing-review-027",
+     "meeting_id": "demo-pricing-review",
+     "seq": 27,
+     "speaker": "S2",
+     "speaker_name": "Rahul",
+     "t_start": 222.66,
+     "t_end": 229.34,
+     "text": "It was 34 accounts. Small, I agree, but it's the only real annual billing data we have so far.",
+     "confidence": 0.96
+    },
+    {
+     "id": "u-demo-pricing-review-028",
+     "meeting_id": "demo-pricing-review",
+     "seq": 28,
+     "speaker": "S1",
+     "speaker_name": "Priya",
+     "t_start": 230.14,
+     "t_end": 238.1,
+     "text": "I'm going to side with Rahul on this one. The annual discount is fifteen percent, and we revisit it after ninety days of real data.",
+     "confidence": 0.94
+    },
+    {
+     "id": "u-demo-pricing-review-029",
+     "meeting_id": "demo-pricing-review",
+     "seq": 29,
+     "speaker": "S3",
+     "speaker_name": "Meera",
+     "t_start": 238.7,
+     "t_end": 243.9,
+     "text": "Okay. I'm not thrilled, but fifteen percent with a review at ninety days is something I can live with.",
+     "confidence": 0.943
+    },
+    {
+     "id": "u-demo-pricing-review-030",
+     "meeting_id": "demo-pricing-review",
+     "seq": 30,
+     "speaker": "S4",
+     "speaker_name": "Arjun",
+     "t_start": 244.8,
+     "t_end": 252.8,
+     "text": "On the build side, the usage meter is the real blocker. Billing can't go live without it, and sales can't demo overage.",
+     "confidence": 0.933
+    },
+    {
+     "id": "u-demo-pricing-review-031",
+     "meeting_id": "demo-pricing-review",
+     "seq": 31,
+     "speaker": "S1",
+     "speaker_name": "Priya",
+     "t_start": 253.4,
+     "t_end": 259.53,
+     "text": "Arjun, can you ship the usage meter by Friday? Almost everything else on the launch plan depends on it.",
+     "confidence": 0.978
+    },
+    {
+     "id": "u-demo-pricing-review-032",
+     "meeting_id": "demo-pricing-review",
+     "seq": 32,
+     "speaker": "S4",
+     "speaker_name": "Arjun",
+     "t_start": 260.13,
+     "t_end": 266.98,
+     "text": "Friday works. I'll have it on staging Thursday night, with a warning banner at ninety percent of the plan limit.",
+     "confidence": 0.987
+    },
+    {
+     "id": "u-demo-pricing-review-033",
+     "meeting_id": "demo-pricing-review",
+     "seq": 33,
+     "speaker": "S3",
+     "speaker_name": "Meera",
+     "t_start": 267.68,
+     "t_end": 276.06,
+     "text": "For sales, I need a revised deck with the new tiers. Saffron Basket's renewal call is on Friday, so I'll send them the revised deck by Thursday.",
+     "confidence": 0.933
+    },
+    {
+     "id": "u-demo-pricing-review-034",
+     "meeting_id": "demo-pricing-review",
+     "seq": 34,
+     "speaker": "S2",
+     "speaker_name": "Rahul",
+     "t_start": 276.76,
+     "t_end": 286.5,
+     "text": "And I'll set up the billing plans in Razorpay by Wednesday: monthly and annual for both Starter and Growth. Enterprise stays on manual invoices.",
+     "confidence": 0.988
+    },
+    {
+     "id": "u-demo-pricing-review-035",
+     "meeting_id": "demo-pricing-review",
+     "seq": 35,
+     "speaker": "S1",
+     "speaker_name": "Priya",
+     "t_start": 287.3,
+     "t_end": 292.51,
+     "text": "Thanks, Rahul. Now the launch date. I want self-serve live on Monday, November second.",
+     "confidence": 0.956
+    },
+    {
+     "id": "u-demo-pricing-review-036",
+     "meeting_id": "demo-pricing-review",
+     "seq": 36,
+     "speaker": "S4",
+     "speaker_name": "Arjun",
+     "t_start": 293.11,
+     "t_end": 301.19,
+     "text": "November second is tight but doable, if the pricing page is final by next week. We need the copy to build the signup flow.",
+     "confidence": 0.943
+    },
+    {
+     "id": "u-demo-pricing-review-037",
+     "meeting_id": "demo-pricing-review",
+     "seq": 37,
+     "speaker": "S1",
+     "speaker_name": "Priya",
+     "t_start": 301.69,
+     "t_end": 308.46,
+     "text": "That one's on me. I'll draft the pricing page and the FAQ by Monday, including worked overage examples.",
+     "confidence": 0.988
+    },
+    {
+     "id": "u-demo-pricing-review-038",
+     "meeting_id": "demo-pricing-review",
+     "seq": 38,
+     "speaker": "S3",
+     "speaker_name": "Meera",
+     "t_start": 309.06,
+     "t_end": 318.7,
+     "text": "Put a real example in the FAQ. Two thousand shipments on Starter comes to 6,999 rupees in total, and people should see that math.",
+     "confidence": 0.931
+    },
+    {
+     "id": "u-demo-pricing-review-039",
+     "meeting_id": "demo-pricing-review",
+     "seq": 39,
+     "speaker": "S1",
+     "speaker_name": "Priya",
+     "t_start": 319.3,
+     "t_end": 325.0,
+     "text": "Good, that example goes in. So we're agreed: self-serve launches on Monday, November second.",
+     "confidence": 0.965
+    },
+    {
+     "id": "u-demo-pricing-review-040",
+     "meeting_id": "demo-pricing-review",
+     "seq": 40,
+     "speaker": "S2",
+     "speaker_name": "Rahul",
+     "t_start": 325.7,
+     "t_end": 333.7,
+     "text": "One risk on that date. GST invoicing through Razorpay needs our new tax registration, and that isn't confirmed yet.",
+     "confidence": 0.971
+    },
+    {
+     "id": "u-demo-pricing-review-041",
+     "meeting_id": "demo-pricing-review",
+     "seq": 41,
+     "speaker": "S1",
+     "speaker_name": "Priya",
+     "t_start": 334.2,
+     "t_end": 339.31,
+     "text": "Rahul, can you chase the tax registration and confirm it either way by next Tuesday?",
+     "confidence": 0.956
+    },
+    {
+     "id": "u-demo-pricing-review-042",
+     "meeting_id": "demo-pricing-review",
+     "seq": 42,
+     "speaker": "S2",
+     "speaker_name": "Rahul",
+     "t_start": 339.81,
+     "t_end": 348.13,
+     "text": "Yes, I'll confirm the GST registration by next Tuesday. If it slips, we launch with manual invoices for the first week.",
+     "confidence": 0.988
+    },
+    {
+     "id": "u-demo-pricing-review-043",
+     "meeting_id": "demo-pricing-review",
+     "seq": 43,
+     "speaker": "S1",
+     "speaker_name": "Priya",
+     "t_start": 348.73,
+     "t_end": 359.27,
+     "text": "Let me recap the decisions. Starter is 4,999 with fifteen hundred shipments, the annual discount is fifteen percent, and we launch on November second.",
+     "confidence": 0.942
+    },
+    {
+     "id": "u-demo-pricing-review-044",
+     "meeting_id": "demo-pricing-review",
+     "seq": 44,
+     "speaker": "S3",
+     "speaker_name": "Meera",
+     "t_start": 359.87,
+     "t_end": 372.02,
+     "text": "And the owners: Arjun has the usage meter by Friday, I have the Saffron Basket deck by Thursday, Rahul has Razorpay by Wednesday and GST by Tuesday, and Priya has the pricing page by Monday.",
+     "confidence": 0.95
+    },
+    {
+     "id": "u-demo-pricing-review-045",
+     "meeting_id": "demo-pricing-review",
+     "seq": 45,
+     "speaker": "S1",
+     "speaker_name": "Priya",
+     "t_start": 372.62,
+     "t_end": 378.77,
+     "text": "That's it. Thanks, everyone, and please use the pricing channel for anything that changes before launch.",
+     "confidence": 0.967
+    }
+   ],
+   "decisions": [
+    {
+     "id": "d-demo-pricing-review-1",
+     "meeting_id": "demo-pricing-review",
+     "text": "Starter tier at 4,999 rupees a month with 1,500 shipments included and 4 rupees per extra shipment",
+     "status": "superseded",
+     "made_at": 134.96,
+     "proposed_by": "Priya",
+     "evidence": [
+      "u-demo-pricing-review-012",
+      "u-demo-pricing-review-015"
+     ],
+     "superseded_by": "d-demo-launch-sync-1",
+     "supersedes": null
+    },
+    {
+     "id": "d-demo-pricing-review-2",
+     "meeting_id": "demo-pricing-review",
+     "text": "Growth stays at 14,999 rupees for 10,000 shipments; Monsoon Apparel is handled as an Enterprise deal",
+     "status": "active",
+     "made_at": 167.92,
+     "proposed_by": "Priya",
+     "evidence": [
+      "u-demo-pricing-review-017",
+      "u-demo-pricing-review-019"
+     ],
+     "superseded_by": null,
+     "supersedes": null
+    },
+    {
+     "id": "d-demo-pricing-review-3",
+     "meeting_id": "demo-pricing-review",
+     "text": "Annual plans get a 15 percent discount, not 20, reviewed after 90 days of data",
+     "status": "active",
+     "made_at": 238.7,
+     "proposed_by": "Priya",
+     "evidence": [
+      "u-demo-pricing-review-028",
+      "u-demo-pricing-review-029"
+     ],
+     "superseded_by": null,
+     "supersedes": null
+    },
+    {
+     "id": "d-demo-pricing-review-4",
+     "meeting_id": "demo-pricing-review",
+     "text": "Self-serve launches on Monday, November 2",
+     "status": "active",
+     "made_at": 319.3,
+     "proposed_by": "Priya",
+     "evidence": [
+      "u-demo-pricing-review-035",
+      "u-demo-pricing-review-039"
+     ],
+     "superseded_by": null,
+     "supersedes": null
+    }
+   ],
+   "action_items": [
+    {
+     "id": "a-demo-pricing-review-1",
+     "meeting_id": "demo-pricing-review",
+     "meeting_title": "Self-serve pricing review",
+     "text": "Take Monsoon Apparel through the Enterprise proposal",
+     "owner": "Meera",
+     "owner_track": "S3",
+     "due": "next week",
+     "status": "open",
+     "created_at": 1791869574720,
+     "done_at": null,
+     "evidence": [
+      "u-demo-pricing-review-020"
+     ]
+    },
+    {
+     "id": "a-demo-pricing-review-2",
+     "meeting_id": "demo-pricing-review",
+     "meeting_title": "Self-serve pricing review",
+     "text": "Ship the usage meter, on staging Thursday night, with a warning banner at 90 percent of the plan limit",
+     "owner": "Arjun",
+     "owner_track": "S4",
+     "due": "Friday",
+     "status": "open",
+     "created_at": 1791869660130,
+     "done_at": null,
+     "evidence": [
+      "u-demo-pricing-review-031",
+      "u-demo-pricing-review-032"
+     ]
+    },
+    {
+     "id": "a-demo-pricing-review-3",
+     "meeting_id": "demo-pricing-review",
+     "meeting_title": "Self-serve pricing review",
+     "text": "Send the revised pricing deck to Saffron Basket before their renewal call",
+     "owner": "Meera",
+     "owner_track": "S3",
+     "due": "Thursday",
+     "status": "done",
+     "created_at": 1791869667680,
+     "done_at": 1792062016000,
+     "evidence": [
+      "u-demo-pricing-review-033"
+     ]
+    },
+    {
+     "id": "a-demo-pricing-review-4",
+     "meeting_id": "demo-pricing-review",
+     "meeting_title": "Self-serve pricing review",
+     "text": "Set up monthly and annual Starter and Growth plans in Razorpay",
+     "owner": "Rahul",
+     "owner_track": "S2",
+     "due": "Wednesday",
+     "status": "open",
+     "created_at": 1791869676760,
+     "done_at": null,
+     "evidence": [
+      "u-demo-pricing-review-034"
+     ]
+    },
+    {
+     "id": "a-demo-pricing-review-5",
+     "meeting_id": "demo-pricing-review",
+     "meeting_title": "Self-serve pricing review",
+     "text": "Draft the pricing page and the FAQ, including worked overage examples",
+     "owner": "Priya",
+     "owner_track": "S1",
+     "due": "Monday",
+     "status": "open",
+     "created_at": 1791869701690,
+     "done_at": null,
+     "evidence": [
+      "u-demo-pricing-review-037"
+     ]
+    },
+    {
+     "id": "a-demo-pricing-review-6",
+     "meeting_id": "demo-pricing-review",
+     "meeting_title": "Self-serve pricing review",
+     "text": "Confirm the GST registration either way",
+     "owner": "Rahul",
+     "owner_track": "S2",
+     "due": "next Tuesday",
+     "status": "open",
+     "created_at": 1791869739810,
+     "done_at": null,
+     "evidence": [
+      "u-demo-pricing-review-041",
+      "u-demo-pricing-review-042"
+     ]
+    }
+   ],
+   "topics": [
+    {
+     "id": "t-starter-tier",
+     "name": "Starter tier",
+     "mentions": 12
+    },
+    {
+     "id": "t-annual-discount",
+     "name": "Annual discount",
+     "mentions": 9
+    },
+    {
+     "id": "t-overage",
+     "name": "Overage",
+     "mentions": 8
+    },
+    {
+     "id": "t-launch-date",
+     "name": "Launch date",
+     "mentions": 7
+    },
+    {
+     "id": "t-usage-meter",
+     "name": "Usage meter",
+     "mentions": 5
+    },
+    {
+     "id": "t-growth-tier",
+     "name": "Growth tier",
+     "mentions": 5
+    },
+    {
+     "id": "t-margin",
+     "name": "Margin",
+     "mentions": 4
+    },
+    {
+     "id": "t-gst-registration",
+     "name": "GST registration",
+     "mentions": 4
+    },
+    {
+     "id": "t-pricing-page",
+     "name": "Pricing page",
+     "mentions": 4
+    }
+   ],
+   "entities": [
+    {
+     "id": "e-kitepost",
+     "name": "Kitepost",
+     "kind": "org",
+     "utterances": [
+      "u-demo-pricing-review-000"
+     ]
+    },
+    {
+     "id": "e-trackwise",
+     "name": "Trackwise",
+     "kind": "competitor",
+     "utterances": [
+      "u-demo-pricing-review-003",
+      "u-demo-pricing-review-009"
+     ]
+    },
+    {
+     "id": "e-saffron-basket",
+     "name": "Saffron Basket",
+     "kind": "customer",
+     "utterances": [
+      "u-demo-pricing-review-005",
+      "u-demo-pricing-review-006",
+      "u-demo-pricing-review-025",
+      "u-demo-pricing-review-033",
+      "u-demo-pricing-review-044"
+     ]
+    },
+    {
+     "id": "e-monsoon-apparel",
+     "name": "Monsoon Apparel",
+     "kind": "customer",
+     "utterances": [
+      "u-demo-pricing-review-018",
+      "u-demo-pricing-review-019",
+      "u-demo-pricing-review-020"
+     ]
+    },
+    {
+     "id": "e-razorpay",
+     "name": "Razorpay",
+     "kind": "vendor",
+     "utterances": [
+      "u-demo-pricing-review-034",
+      "u-demo-pricing-review-040",
+      "u-demo-pricing-review-044"
+     ]
+    },
+    {
+     "id": "e-whatsapp",
+     "name": "WhatsApp",
+     "kind": "product",
+     "utterances": [
+      "u-demo-pricing-review-001",
+      "u-demo-pricing-review-017"
+     ]
+    }
+   ],
+   "topic_links": [
+    [
+     "u-demo-pricing-review-002",
+     "t-starter-tier"
+    ],
+    [
+     "u-demo-pricing-review-003",
+     "t-starter-tier"
+    ],
+    [
+     "u-demo-pricing-review-004",
+     "t-starter-tier"
+    ],
+    [
+     "u-demo-pricing-review-005",
+     "t-starter-tier"
+    ],
+    [
+     "u-demo-pricing-review-012",
+     "t-starter-tier"
+    ],
+    [
+     "u-demo-pricing-review-014",
+     "t-starter-tier"
+    ],
+    [
+     "u-demo-pricing-review-015",
+     "t-starter-tier"
+    ],
+    [
+     "u-demo-pricing-review-016",
+     "t-starter-tier"
+    ],
+    [
+     "u-demo-pricing-review-023",
+     "t-starter-tier"
+    ],
+    [
+     "u-demo-pricing-review-034",
+     "t-starter-tier"
+    ],
+    [
+     "u-demo-pricing-review-038",
+     "t-starter-tier"
+    ],
+    [
+     "u-demo-pricing-review-043",
+     "t-starter-tier"
+    ],
+    [
+     "u-demo-pricing-review-007",
+     "t-overage"
+    ],
+    [
+     "u-demo-pricing-review-008",
+     "t-overage"
+    ],
+    [
+     "u-demo-pricing-review-009",
+     "t-overage"
+    ],
+    [
+     "u-demo-pricing-review-010",
+     "t-overage"
+    ],
+    [
+     "u-demo-pricing-review-012",
+     "t-overage"
+    ],
+    [
+     "u-demo-pricing-review-015",
+     "t-overage"
+    ],
+    [
+     "u-demo-pricing-review-030",
+     "t-overage"
+    ],
+    [
+     "u-demo-pricing-review-037",
+     "t-overage"
+    ],
+    [
+     "u-demo-pricing-review-021",
+     "t-annual-discount"
+    ],
+    [
+     "u-demo-pricing-review-022",
+     "t-annual-discount"
+    ],
+    [
+     "u-demo-pricing-review-023",
+     "t-annual-discount"
+    ],
+    [
+     "u-demo-pricing-review-024",
+     "t-annual-discount"
+    ],
+    [
+     "u-demo-pricing-review-025",
+     "t-annual-discount"
+    ],
+    [
+     "u-demo-pricing-review-027",
+     "t-annual-discount"
+    ],
+    [
+     "u-demo-pricing-review-028",
+     "t-annual-discount"
+    ],
+    [
+     "u-demo-pricing-review-034",
+     "t-annual-discount"
+    ],
+    [
+     "u-demo-pricing-review-043",
+     "t-annual-discount"
+    ],
+    [
+     "u-demo-pricing-review-011",
+     "t-usage-meter"
+    ],
+    [
+     "u-demo-pricing-review-013",
+     "t-usage-meter"
+    ],
+    [
+     "u-demo-pricing-review-030",
+     "t-usage-meter"
+    ],
+    [
+     "u-demo-pricing-review-031",
+     "t-usage-meter"
+    ],
+    [
+     "u-demo-pricing-review-044",
+     "t-usage-meter"
+    ],
+    [
+     "u-demo-pricing-review-031",
+     "t-launch-date"
+    ],
+    [
+     "u-demo-pricing-review-035",
+     "t-launch-date"
+    ],
+    [
+     "u-demo-pricing-review-036",
+     "t-launch-date"
+    ],
+    [
+     "u-demo-pricing-review-039",
+     "t-launch-date"
+    ],
+    [
+     "u-demo-pricing-review-042",
+     "t-launch-date"
+    ],
+    [
+     "u-demo-pricing-review-043",
+     "t-launch-date"
+    ],
+    [
+     "u-demo-pricing-review-045",
+     "t-launch-date"
+    ],
+    [
+     "u-demo-pricing-review-004",
+     "t-margin"
+    ],
+    [
+     "u-demo-pricing-review-008",
+     "t-margin"
+    ],
+    [
+     "u-demo-pricing-review-014",
+     "t-margin"
+    ],
+    [
+     "u-demo-pricing-review-023",
+     "t-margin"
+    ],
+    [
+     "u-demo-pricing-review-040",
+     "t-gst-registration"
+    ],
+    [
+     "u-demo-pricing-review-041",
+     "t-gst-registration"
+    ],
+    [
+     "u-demo-pricing-review-042",
+     "t-gst-registration"
+    ],
+    [
+     "u-demo-pricing-review-044",
+     "t-gst-registration"
+    ],
+    [
+     "u-demo-pricing-review-036",
+     "t-pricing-page"
+    ],
+    [
+     "u-demo-pricing-review-037",
+     "t-pricing-page"
+    ],
+    [
+     "u-demo-pricing-review-038",
+     "t-pricing-page"
+    ],
+    [
+     "u-demo-pricing-review-044",
+     "t-pricing-page"
+    ],
+    [
+     "u-demo-pricing-review-002",
+     "t-growth-tier"
+    ],
+    [
+     "u-demo-pricing-review-016",
+     "t-growth-tier"
+    ],
+    [
+     "u-demo-pricing-review-018",
+     "t-growth-tier"
+    ],
+    [
+     "u-demo-pricing-review-019",
+     "t-growth-tier"
+    ],
+    [
+     "u-demo-pricing-review-034",
+     "t-growth-tier"
+    ]
+   ],
+   "audio": "/demo/audio/01-pricing-review.m4a"
+  },
+  "demo-launch-sync": {
+   "meeting": {
+    "id": "demo-launch-sync",
+    "title": "Self-serve launch sync",
+    "status": "ended",
+    "source": "demo",
+    "started_at": 1792062000000,
+    "ended_at": 1792062236310,
+    "duration_s": 236.31,
+    "utterance_count": 29,
+    "speaker_count": 3,
+    "has_audio": true,
+    "summary": "Trackwise cut its small-shipper plan to 3,499, and trial accounts pushed back on price. Starter moves to 3,999 with 1,000 shipments, replacing Tuesday's decision; Rahul's numbers put the margin at 55 percent. The annual discount and the November 2 launch both hold."
+   },
+   "speakers": [
+    {
+     "track": "S1",
+     "label": "Speaker 1",
+     "name": "Priya",
+     "person_id": "p-priya",
+     "color_idx": 0,
+     "utterance_count": 12,
+     "talk_time_s": 85.0
+    },
+    {
+     "track": "S2",
+     "label": "Speaker 2",
+     "name": "Meera",
+     "person_id": "p-meera",
+     "color_idx": 2,
+     "utterance_count": 9,
+     "talk_time_s": 67.3
+    },
+    {
+     "track": "S3",
+     "label": "Speaker 3",
+     "name": "Rahul",
+     "person_id": "p-rahul",
+     "color_idx": 1,
+     "utterance_count": 8,
+     "talk_time_s": 65.0
+    }
+   ],
+   "utterances": [
+    {
+     "id": "u-demo-launch-sync-000",
+     "meeting_id": "demo-launch-sync",
+     "seq": 0,
+     "speaker": "S1",
+     "speaker_name": "Priya",
+     "t_start": 0.6,
+     "t_end": 7.69,
+     "text": "Quick launch sync. Arjun is heads down on the usage meter today, so it's the three of us. Meera, how did the deck land?",
+     "confidence": 0.952
+    },
+    {
+     "id": "u-demo-launch-sync-001",
+     "meeting_id": "demo-launch-sync",
+     "seq": 1,
+     "speaker": "S2",
+     "speaker_name": "Meera",
+     "t_start": 8.29,
+     "t_end": 15.27,
+     "text": "The revised deck went to Saffron Basket yesterday, so that one is done. But their reaction to the Starter price was not great.",
+     "confidence": 0.942
+    },
+    {
+     "id": "u-demo-launch-sync-002",
+     "meeting_id": "demo-launch-sync",
+     "seq": 2,
+     "speaker": "S3",
+     "speaker_name": "Rahul",
+     "t_start": 15.77,
+     "t_end": 21.07,
+     "text": "What did they actually say? Was it the price itself, or the shipment limit that bothered them?",
+     "confidence": 0.982
+    },
+    {
+     "id": "u-demo-launch-sync-003",
+     "meeting_id": "demo-launch-sync",
+     "seq": 3,
+     "speaker": "S2",
+     "speaker_name": "Meera",
+     "t_start": 21.57,
+     "t_end": 34.9,
+     "text": "The price. Trackwise just cut its small-shipper plan from 3,999 to 3,499, so at 4,999 we're over forty percent more expensive.",
+     "confidence": 0.98
+    },
+    {
+     "id": "u-demo-launch-sync-004",
+     "meeting_id": "demo-launch-sync",
+     "seq": 4,
+     "speaker": "S1",
+     "speaker_name": "Priya",
+     "t_start": 35.5,
+     "t_end": 40.74,
+     "text": "Is that just one customer pushing back, or are we hearing the same thing from other accounts?",
+     "confidence": 0.978
+    },
+    {
+     "id": "u-demo-launch-sync-005",
+     "meeting_id": "demo-launch-sync",
+     "seq": 5,
+     "speaker": "S2",
+     "speaker_name": "Meera",
+     "t_start": 41.24,
+     "t_end": 47.15,
+     "text": "Other accounts too. Two of the five trial accounts that signed up this week asked for a price under four thousand.",
+     "confidence": 0.969
+    },
+    {
+     "id": "u-demo-launch-sync-006",
+     "meeting_id": "demo-launch-sync",
+     "seq": 6,
+     "speaker": "S3",
+     "speaker_name": "Rahul",
+     "t_start": 47.95,
+     "t_end": 59.33,
+     "text": "I expected this, so I ran the numbers again last night. If Starter includes one thousand shipments instead of fifteen hundred, 3,999 still works.",
+     "confidence": 0.953
+    },
+    {
+     "id": "u-demo-launch-sync-007",
+     "meeting_id": "demo-launch-sync",
+     "seq": 7,
+     "speaker": "S1",
+     "speaker_name": "Priya",
+     "t_start": 59.93,
+     "t_end": 66.1,
+     "text": "Walk us through it, because on Tuesday you said 3,999 was below your floor.",
+     "confidence": 0.973
+    },
+    {
+     "id": "u-demo-launch-sync-008",
+     "meeting_id": "demo-launch-sync",
+     "seq": 8,
+     "speaker": "S3",
+     "speaker_name": "Rahul",
+     "t_start": 66.6,
+     "t_end": 80.14,
+     "text": "A thousand shipments cost us about eighteen hundred rupees. At 3,999 that's a 55 percent margin, which is better than the 46 percent we accepted on Tuesday.",
+     "confidence": 0.968
+    },
+    {
+     "id": "u-demo-launch-sync-009",
+     "meeting_id": "demo-launch-sync",
+     "seq": 9,
+     "speaker": "S2",
+     "speaker_name": "Meera",
+     "t_start": 80.84,
+     "t_end": 86.14,
+     "text": "And heavy users still pay four rupees per shipment above a thousand, so the busy accounts are covered.",
+     "confidence": 0.963
+    },
+    {
+     "id": "u-demo-launch-sync-010",
+     "meeting_id": "demo-launch-sync",
+     "seq": 10,
+     "speaker": "S1",
+     "speaker_name": "Priya",
+     "t_start": 86.74,
+     "t_end": 92.26,
+     "text": "My worry is that a thousand shipments looks small next to Trackwise. What does their plan include?",
+     "confidence": 0.965
+    },
+    {
+     "id": "u-demo-launch-sync-011",
+     "meeting_id": "demo-launch-sync",
+     "seq": 11,
+     "speaker": "S2",
+     "speaker_name": "Meera",
+     "t_start": 92.76,
+     "t_end": 100.34,
+     "text": "The same thousand shipments. But they charge seven rupees for overage, so above about twelve hundred shipments a month we're the cheaper option.",
+     "confidence": 0.988
+    },
+    {
+     "id": "u-demo-launch-sync-012",
+     "meeting_id": "demo-launch-sync",
+     "seq": 12,
+     "speaker": "S3",
+     "speaker_name": "Rahul",
+     "t_start": 101.04,
+     "t_end": 109.53,
+     "text": "Then I'm fine moving Starter to 3,999 with a thousand shipments. Overage stays at four rupees.",
+     "confidence": 0.943
+    },
+    {
+     "id": "u-demo-launch-sync-013",
+     "meeting_id": "demo-launch-sync",
+     "seq": 13,
+     "speaker": "S1",
+     "speaker_name": "Priya",
+     "t_start": 110.13,
+     "t_end": 122.57,
+     "text": "Okay, let's change it. Starter moves from 4,999 to 3,999 a month, with one thousand shipments included. This replaces what we decided on Tuesday.",
+     "confidence": 0.969
+    },
+    {
+     "id": "u-demo-launch-sync-014",
+     "meeting_id": "demo-launch-sync",
+     "seq": 14,
+     "speaker": "S2",
+     "speaker_name": "Meera",
+     "t_start": 123.37,
+     "t_end": 128.02,
+     "text": "Good. That makes my first calls a lot easier, especially when we're up against Trackwise.",
+     "confidence": 0.966
+    },
+    {
+     "id": "u-demo-launch-sync-015",
+     "meeting_id": "demo-launch-sync",
+     "seq": 15,
+     "speaker": "S3",
+     "speaker_name": "Rahul",
+     "t_start": 128.52,
+     "t_end": 133.5,
+     "text": "The annual discount stays at fifteen percent, though. I don't want to reopen that one.",
+     "confidence": 0.952
+    },
+    {
+     "id": "u-demo-launch-sync-016",
+     "meeting_id": "demo-launch-sync",
+     "seq": 16,
+     "speaker": "S1",
+     "speaker_name": "Priya",
+     "t_start": 134.1,
+     "t_end": 138.81,
+     "text": "Agreed, fifteen percent stands. So what has to change downstream before launch?",
+     "confidence": 0.974
+    },
+    {
+     "id": "u-demo-launch-sync-017",
+     "meeting_id": "demo-launch-sync",
+     "seq": 17,
+     "speaker": "S3",
+     "speaker_name": "Rahul",
+     "t_start": 139.41,
+     "t_end": 148.55,
+     "text": "The Starter plan in Razorpay needs to change. I'll update it to 3,999 with the new shipment limit by Monday.",
+     "confidence": 0.981
+    },
+    {
+     "id": "u-demo-launch-sync-018",
+     "meeting_id": "demo-launch-sync",
+     "seq": 18,
+     "speaker": "S1",
+     "speaker_name": "Priya",
+     "t_start": 149.25,
+     "t_end": 158.18,
+     "text": "And I'm still drafting the pricing page, so it'll go out with 3,999 and the thousand shipment cap. That's still on track for Monday.",
+     "confidence": 0.959
+    },
+    {
+     "id": "u-demo-launch-sync-019",
+     "meeting_id": "demo-launch-sync",
+     "seq": 19,
+     "speaker": "S2",
+     "speaker_name": "Meera",
+     "t_start": 158.78,
+     "t_end": 170.32,
+     "text": "Change the FAQ example as well. Two thousand shipments on the new Starter would be 3,999 plus four thousand, so 7,999 rupees.",
+     "confidence": 0.951
+    },
+    {
+     "id": "u-demo-launch-sync-020",
+     "meeting_id": "demo-launch-sync",
+     "seq": 20,
+     "speaker": "S1",
+     "speaker_name": "Priya",
+     "t_start": 170.92,
+     "t_end": 178.51,
+     "text": "Yes, I'll use that. Someone needs to tell Arjun, because the usage meter warning was set at ninety percent of fifteen hundred.",
+     "confidence": 0.961
+    },
+    {
+     "id": "u-demo-launch-sync-021",
+     "meeting_id": "demo-launch-sync",
+     "seq": 21,
+     "speaker": "S3",
+     "speaker_name": "Rahul",
+     "t_start": 179.01,
+     "t_end": 185.02,
+     "text": "Ninety percent of a thousand is nine hundred. That's a config value, isn't it, not a rebuild?",
+     "confidence": 0.98
+    },
+    {
+     "id": "u-demo-launch-sync-022",
+     "meeting_id": "demo-launch-sync",
+     "seq": 22,
+     "speaker": "S1",
+     "speaker_name": "Priya",
+     "t_start": 185.52,
+     "t_end": 192.89,
+     "text": "It should be config. I'll message Arjun today so the meter warns at nine hundred shipments, and he can still ship it on Friday.",
+     "confidence": 0.937
+    },
+    {
+     "id": "u-demo-launch-sync-023",
+     "meeting_id": "demo-launch-sync",
+     "seq": 23,
+     "speaker": "S2",
+     "speaker_name": "Meera",
+     "t_start": 193.59,
+     "t_end": 200.8,
+     "text": "I'll email Saffron Basket and the two trial accounts with the new Starter price by tomorrow morning, ahead of their renewal call.",
+     "confidence": 0.934
+    },
+    {
+     "id": "u-demo-launch-sync-024",
+     "meeting_id": "demo-launch-sync",
+     "seq": 24,
+     "speaker": "S1",
+     "speaker_name": "Priya",
+     "t_start": 201.6,
+     "t_end": 205.72,
+     "text": "Does the November second launch date still hold with all of these changes?",
+     "confidence": 0.973
+    },
+    {
+     "id": "u-demo-launch-sync-025",
+     "meeting_id": "demo-launch-sync",
+     "seq": 25,
+     "speaker": "S3",
+     "speaker_name": "Rahul",
+     "t_start": 206.22,
+     "t_end": 212.36,
+     "text": "It holds. The GST registration is still pending, but I'll know by Tuesday, as planned.",
+     "confidence": 0.953
+    },
+    {
+     "id": "u-demo-launch-sync-026",
+     "meeting_id": "demo-launch-sync",
+     "seq": 26,
+     "speaker": "S1",
+     "speaker_name": "Priya",
+     "t_start": 213.06,
+     "t_end": 224.77,
+     "text": "Good. So to recap, Starter is now 3,999 a month with a thousand shipments, overage is four rupees, annual stays at fifteen percent, and we launch November second.",
+     "confidence": 0.978
+    },
+    {
+     "id": "u-demo-launch-sync-027",
+     "meeting_id": "demo-launch-sync",
+     "seq": 27,
+     "speaker": "S2",
+     "speaker_name": "Meera",
+     "t_start": 225.37,
+     "t_end": 230.21,
+     "text": "And the Saffron Basket deck is done, with the price update going out to them tomorrow morning.",
+     "confidence": 0.951
+    },
+    {
+     "id": "u-demo-launch-sync-028",
+     "meeting_id": "demo-launch-sync",
+     "seq": 28,
+     "speaker": "S1",
+     "speaker_name": "Priya",
+     "t_start": 230.71,
+     "t_end": 234.81,
+     "text": "Right, that's everything. Thanks, both of you. See you at Monday's standup.",
+     "confidence": 0.971
+    }
+   ],
+   "decisions": [
+    {
+     "id": "d-demo-launch-sync-1",
+     "meeting_id": "demo-launch-sync",
+     "text": "Starter tier moves from 4,999 to 3,999 rupees a month with 1,000 shipments included; overage stays at 4 rupees",
+     "status": "active",
+     "made_at": 110.13,
+     "proposed_by": "Priya",
+     "evidence": [
+      "u-demo-launch-sync-012",
+      "u-demo-launch-sync-013"
+     ],
+     "superseded_by": null,
+     "supersedes": "d-demo-pricing-review-1"
+    },
+    {
+     "id": "d-demo-launch-sync-2",
+     "meeting_id": "demo-launch-sync",
+     "text": "Annual discount stays at 15 percent",
+     "status": "active",
+     "made_at": 134.1,
+     "proposed_by": "Rahul",
+     "evidence": [
+      "u-demo-launch-sync-015",
+      "u-demo-launch-sync-016"
+     ],
+     "superseded_by": null,
+     "supersedes": null
+    },
+    {
+     "id": "d-demo-launch-sync-3",
+     "meeting_id": "demo-launch-sync",
+     "text": "The self-serve launch on November 2 still holds",
+     "status": "active",
+     "made_at": 206.22,
+     "proposed_by": "Rahul",
+     "evidence": [
+      "u-demo-launch-sync-024",
+      "u-demo-launch-sync-025"
+     ],
+     "superseded_by": null,
+     "supersedes": null
+    }
+   ],
+   "action_items": [
+    {
+     "id": "a-demo-launch-sync-1",
+     "meeting_id": "demo-launch-sync",
+     "meeting_title": "Self-serve launch sync",
+     "text": "Update the Starter plan in Razorpay to 3,999 with the 1,000-shipment limit",
+     "owner": "Rahul",
+     "owner_track": "S3",
+     "due": "Monday",
+     "status": "open",
+     "created_at": 1792062139410,
+     "done_at": null,
+     "evidence": [
+      "u-demo-launch-sync-017"
+     ]
+    },
+    {
+     "id": "a-demo-launch-sync-2",
+     "meeting_id": "demo-launch-sync",
+     "meeting_title": "Self-serve launch sync",
+     "text": "Message Arjun so the usage meter warns at 900 shipments",
+     "owner": "Priya",
+     "owner_track": "S1",
+     "due": "today",
+     "status": "open",
+     "created_at": 1792062185520,
+     "done_at": null,
+     "evidence": [
+      "u-demo-launch-sync-022"
+     ]
+    },
+    {
+     "id": "a-demo-launch-sync-3",
+     "meeting_id": "demo-launch-sync",
+     "meeting_title": "Self-serve launch sync",
+     "text": "Email Saffron Basket and the two trial accounts the new Starter price",
+     "owner": "Meera",
+     "owner_track": "S2",
+     "due": "tomorrow morning",
+     "status": "open",
+     "created_at": 1792062193590,
+     "done_at": null,
+     "evidence": [
+      "u-demo-launch-sync-023"
+     ]
+    }
+   ],
+   "topics": [
+    {
+     "id": "t-starter-tier",
+     "name": "Starter tier",
+     "mentions": 8
+    },
+    {
+     "id": "t-overage",
+     "name": "Overage",
+     "mentions": 4
+    },
+    {
+     "id": "t-launch-date",
+     "name": "Launch date",
+     "mentions": 4
+    },
+    {
+     "id": "t-usage-meter",
+     "name": "Usage meter",
+     "mentions": 3
+    },
+    {
+     "id": "t-annual-discount",
+     "name": "Annual discount",
+     "mentions": 2
+    },
+    {
+     "id": "t-pricing-page",
+     "name": "Pricing page",
+     "mentions": 2
+    },
+    {
+     "id": "t-margin",
+     "name": "Margin",
+     "mentions": 1
+    },
+    {
+     "id": "t-gst-registration",
+     "name": "GST registration",
+     "mentions": 1
+    }
+   ],
+   "entities": [
+    {
+     "id": "e-trackwise",
+     "name": "Trackwise",
+     "kind": "competitor",
+     "utterances": [
+      "u-demo-launch-sync-003",
+      "u-demo-launch-sync-010",
+      "u-demo-launch-sync-014"
+     ]
+    },
+    {
+     "id": "e-saffron-basket",
+     "name": "Saffron Basket",
+     "kind": "customer",
+     "utterances": [
+      "u-demo-launch-sync-001",
+      "u-demo-launch-sync-023",
+      "u-demo-launch-sync-027"
+     ]
+    },
+    {
+     "id": "e-razorpay",
+     "name": "Razorpay",
+     "kind": "vendor",
+     "utterances": [
+      "u-demo-launch-sync-017"
+     ]
+    }
+   ],
+   "topic_links": [
+    [
+     "u-demo-launch-sync-001",
+     "t-starter-tier"
+    ],
+    [
+     "u-demo-launch-sync-006",
+     "t-starter-tier"
+    ],
+    [
+     "u-demo-launch-sync-012",
+     "t-starter-tier"
+    ],
+    [
+     "u-demo-launch-sync-013",
+     "t-starter-tier"
+    ],
+    [
+     "u-demo-launch-sync-017",
+     "t-starter-tier"
+    ],
+    [
+     "u-demo-launch-sync-019",
+     "t-starter-tier"
+    ],
+    [
+     "u-demo-launch-sync-023",
+     "t-starter-tier"
+    ],
+    [
+     "u-demo-launch-sync-026",
+     "t-starter-tier"
+    ],
+    [
+     "u-demo-launch-sync-009",
+     "t-overage"
+    ],
+    [
+     "u-demo-launch-sync-011",
+     "t-overage"
+    ],
+    [
+     "u-demo-launch-sync-012",
+     "t-overage"
+    ],
+    [
+     "u-demo-launch-sync-026",
+     "t-overage"
+    ],
+    [
+     "u-demo-launch-sync-015",
+     "t-annual-discount"
+    ],
+    [
+     "u-demo-launch-sync-026",
+     "t-annual-discount"
+    ],
+    [
+     "u-demo-launch-sync-000",
+     "t-usage-meter"
+    ],
+    [
+     "u-demo-launch-sync-020",
+     "t-usage-meter"
+    ],
+    [
+     "u-demo-launch-sync-022",
+     "t-usage-meter"
+    ],
+    [
+     "u-demo-launch-sync-000",
+     "t-launch-date"
+    ],
+    [
+     "u-demo-launch-sync-016",
+     "t-launch-date"
+    ],
+    [
+     "u-demo-launch-sync-024",
+     "t-launch-date"
+    ],
+    [
+     "u-demo-launch-sync-026",
+     "t-launch-date"
+    ],
+    [
+     "u-demo-launch-sync-008",
+     "t-margin"
+    ],
+    [
+     "u-demo-launch-sync-025",
+     "t-gst-registration"
+    ],
+    [
+     "u-demo-launch-sync-018",
+     "t-pricing-page"
+    ],
+    [
+     "u-demo-launch-sync-019",
+     "t-pricing-page"
+    ]
+   ],
+   "audio": "/demo/audio/02-launch-sync.m4a"
+  }
+ },
+ "people": [
+  {
+   "id": "p-priya",
+   "name": "Priya",
+   "role": "Head of Product",
+   "meetings": 2,
+   "utterances": 27,
+   "talk_time_s": 193.4,
+   "open_items": 2
+  },
+  {
+   "id": "p-rahul",
+   "name": "Rahul",
+   "role": "Finance Manager",
+   "meetings": 2,
+   "utterances": 20,
+   "talk_time_s": 164.3,
+   "open_items": 3
+  },
+  {
+   "id": "p-meera",
+   "name": "Meera",
+   "role": "Sales Lead",
+   "meetings": 2,
+   "utterances": 21,
+   "talk_time_s": 156.0,
+   "open_items": 2
+  },
+  {
+   "id": "p-arjun",
+   "name": "Arjun",
+   "role": "Engineering Lead",
+   "meetings": 1,
+   "utterances": 7,
+   "talk_time_s": 53.6,
+   "open_items": 1
+  }
+ ]
+}

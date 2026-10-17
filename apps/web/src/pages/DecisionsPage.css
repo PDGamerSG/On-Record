@@ -1,0 +1,108 @@
+.dc-list {
+  display: grid;
+  gap: var(--s-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dc {
+  padding: var(--s-5);
+}
+
+/* status chip: the chrome stays monochrome, so "current" is the brighter one */
+.dc-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: var(--s-3);
+  padding: 0 9px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-round);
+  color: var(--ink-3);
+  font-size: 11.5px;
+  font-weight: 600;
+  line-height: 20px;
+}
+.dc-status::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.dc-status--current {
+  border-color: color-mix(in srgb, var(--ok) 30%, transparent);
+  background: var(--ok-soft);
+  color: var(--ok);
+}
+
+.dc-text {
+  max-width: 60ch;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.dc-entry--head .dc-text {
+  font-size: var(--fs-lg);
+  line-height: 1.35;
+  font-variation-settings: var(--display-casual);
+}
+
+.dc-meta {
+  margin-top: var(--s-2);
+}
+
+.dc-evidence {
+  display: grid;
+  gap: var(--s-4);
+  margin: var(--s-4) 0 var(--s-1);
+  padding: 0;
+  list-style: none;
+}
+
+/* history: earlier versions hang off a vertical rule, each marked with a small square splice */
+.dc-history {
+  margin: var(--s-5) 0 0 var(--s-1);
+  padding: var(--s-1) 0 0 var(--s-5);
+  border-left: 1px solid var(--line-strong);
+  list-style: none;
+}
+.dc-history__item {
+  position: relative;
+  padding-bottom: var(--s-4);
+}
+.dc-history__item:last-child {
+  padding-bottom: var(--s-1);
+}
+.dc-history__item::before {
+  content: "";
+  position: absolute;
+  left: calc(-1 * var(--s-5) - 4px);
+  top: 6px;
+  width: 7px;
+  height: 7px;
+  border: 1px solid var(--line-strong);
+  border-radius: 1px;
+  background: var(--surface);
+}
+.dc-history .dc-text {
+  color: var(--ink-2);
+  font-weight: 500;
+}
+.dc-replaced {
+  margin-bottom: var(--s-1);
+  font-size: var(--fs-sm);
+  color: var(--ink-2);
+}
+
+@media (max-width: 767px) {
+  .dc {
+    padding: var(--s-4);
+  }
+  .dc-history {
+    padding-left: var(--s-4);
+  }
+  .dc-history__item::before {
+    left: calc(-1 * var(--s-4) - 4px);
+  }
+}

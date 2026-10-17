@@ -1,0 +1,22 @@
+{
+  "unit_mm": 100,
+  "spindle": [
+    -0.35,
+    0.1
+  ],
+  "pivot": [
+    1.6,
+    1.0
+  ],
+  "tip_local": [
+    2.27461,
+    -0.16751,
+    -0.181
+  ],
+  "rest_angle": -1.62316,
+  "record_r": 1.524,
+  "groove_out": 1.46,
+  "groove_in": 0.62,
+  "label_r": 0.5,
+  "record_top": 0.75
+}

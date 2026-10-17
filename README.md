@@ -2,11 +2,23 @@
 
 A meeting assistant that connects what was said to the person who said it.
 
-This repository is being assembled in feature-sized PRs from [Who Said What Brain](https://github.com/Hydra-Of-Malice/hack-october-who-said-what-brain). It currently includes shared Python contracts, graph storage and queries, audio decoding and transcription, text embeddings, hybrid meeting retrieval, and local and hosted text model adapters. Live recording, the assistant, HTTP server, and web interface follow in separate branches.
+This repository is being assembled in feature-sized PRs from [Who Said What Brain](https://github.com/Hydra-Of-Malice/hack-october-who-said-what-brain). It currently includes shared Python contracts, graph storage and queries, audio decoding and transcription, text embeddings, hybrid meeting retrieval, local and hosted text model adapters, and the web interface. Live recording, the assistant, and the HTTP server follow in separate branches.
 
 The display name lives in `brand.json`. `.env.example` lists the configuration the application will use; keep local values in an ignored `.env` file.
 
 See [the source notes](docs/UPSTREAM.md) for the original snapshot and attribution. The code is licensed under [Apache 2.0](LICENSE).
+
+## Web app
+
+The web interface lives in `apps/web`. It has a landing page with a 3D turntable pressed from a demo meeting, and the app: meetings, the meeting room (speaker lanes, transcript and extracted decisions and action items), commitments, decisions, people, the graph, and spoken questions. It needs Node 20.19 or 22.12 and later. Until the HTTP server arrives it runs on two bundled demo meetings.
+
+```bash
+cd apps/web
+npm ci
+npm run dev        # http://localhost:5173
+```
+
+`npm run build` type-checks and builds; `npm run lint` runs oxlint. [`apps/web/README.md`](apps/web/README.md) lists the routes and how to rebuild the 3D assets, and [`docs/DESIGN.md`](docs/DESIGN.md) holds the design notes.
 
 ## Python setup
 
@@ -17,7 +29,7 @@ uv sync --project apps/api --frozen
 uv run --project apps/api python -c "from wsw_brain.brand import product_name; print(product_name())"
 ```
 
-The package uses Python 3.12. It currently provides configuration, shared data contracts, and an in-process event bus. The HTTP server and web interface arrive in later PRs, so there is no application to start yet.
+The package uses Python 3.12. It currently provides configuration, shared data contracts, and an in-process event bus. The HTTP server arrives in a later PR; until then the web app runs on bundled demo data.
 
 ## Offline text embeddings
 
@@ -104,8 +116,6 @@ Application code can use the cached `get_llm()` factory instead of constructing 
 `GeminiLLM` maps system, user, assistant, and tool messages to the Google GenAI content model. It supports JSON responses and function declarations, skips thought parts in responses, validates candidate and tool-call shapes, and retries once in compatibility mode if a served model rejects system instructions or JSON response configuration. Gemini text models report `supports_audio=False`; native audio remains a separate local runtime feature.
 
 `OpenAICompatLLM` targets OpenAI-compatible `/v1/chat/completions` endpoints. Set `WSW_LLM_PROVIDER=openai`, `WSW_OPENAI_BASE_URL`, `WSW_OPENAI_API_KEY` when required by the endpoint, and `WSW_OPENAI_MODEL`. It preserves assistant tool-call IDs and tool results, supports JSON response mode, validates completion and function-call shapes, and reports bounded network errors. The adapter does not claim native audio support.
-
-Model calls share a bounded `ModelGate` per endpoint. Two generations may run concurrently by default; six ordinary callers may wait, and later callers fail fast instead of creating an unbounded queue. Waiting calls time out after 90 seconds. Use `llm_priority()` around extraction or other required work so it is scheduled ahead of ordinary questions. The gate covers local, hosted-compatible, and Gemini requests and never changes the request payload.
 
 The transport tests require neither a running model server nor a model download:
 
