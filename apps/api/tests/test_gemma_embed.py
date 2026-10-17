@@ -10,7 +10,7 @@ import numpy as np
 import pytest
 from tokenizers import Tokenizer, models, pre_tokenizers
 
-from wsw_brain.brain import GemmaEmbedder
+from wsw_brain.brain import GemmaEmbedder, HashEmbedder, get_embedder
 from wsw_brain.brain import embed as embed_module
 from wsw_brain.config import Settings
 
@@ -20,7 +20,10 @@ REPO = "tests/tiny-embeddings"
 
 @pytest.fixture(params=["token_embeddings.onnx", "pooled_embedding.onnx"])
 def local_model(request, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
-    cfg = Settings(_env_file=None, WSW_MODELS_DIR=tmp_path / "models", WSW_EMBED_DIM=4)
+    cfg = Settings(
+        _env_file=None, WSW_MODELS_DIR=tmp_path / "models", WSW_EMBED_DIM=4,
+        WSW_EMBED_REPO=REPO, WSW_EMBEDDER="gemma",
+    )
     monkeypatch.setattr(embed_module, "settings", lambda: cfg)
     folder = cfg.models_dir / REPO.replace("/", "--")
     (folder / "onnx").mkdir(parents=True)
@@ -33,6 +36,13 @@ def local_model(request, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Pat
     tokenizer.pre_tokenizer = pre_tokenizers.WhitespaceSplit()
     tokenizer.save(str(folder / "tokenizer.json"))
     return folder
+
+
+@pytest.fixture(autouse=True)
+def clear_factory_cache():
+    get_embedder.cache_clear()
+    yield
+    get_embedder.cache_clear()
 
 
 def test_gemma_uses_distinct_document_and_query_prompts(local_model: Path) -> None:
@@ -138,3 +148,57 @@ def test_incomplete_snapshot_is_reported(tmp_path: Path, monkeypatch: pytest.Mon
 
     with pytest.raises(FileNotFoundError, match="lacks"):
         embed_module._snapshot_dir(REPO)
+
+
+def test_factory_reuses_the_configured_model(local_model: Path) -> None:
+    embedder = get_embedder()
+
+    assert isinstance(embedder, GemmaEmbedder)
+    assert embedder is get_embedder()
+    assert embedder.embed_query("alpha") == pytest.approx([3 / math.sqrt(34), 5 / math.sqrt(34), 0, 0])
+
+
+def test_hash_setting_never_loads_a_model(monkeypatch: pytest.MonkeyPatch) -> None:
+    cfg = Settings(_env_file=None, WSW_EMBEDDER="hash", WSW_EMBED_DIM=32)
+    monkeypatch.setattr(embed_module, "settings", lambda: cfg)
+
+    def unexpected_model(*args, **kwargs):
+        pytest.fail("hash mode must not attempt to load or download a model")
+
+    monkeypatch.setattr(embed_module, "GemmaEmbedder", unexpected_model)
+
+    embedder = get_embedder()
+
+    assert isinstance(embedder, HashEmbedder)
+    assert len(embedder.embed_query("pricing deck")) == 32
+    assert embedder is get_embedder()
+
+
+def test_download_failure_returns_hash_vectors_and_logs_the_reason(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture,
+) -> None:
+    cfg = Settings(_env_file=None, WSW_MODELS_DIR=tmp_path / "models", WSW_EMBED_DIM=16, WSW_EMBEDDER="gemma")
+    monkeypatch.setattr(embed_module, "settings", lambda: cfg)
+
+    def unavailable(*args, **kwargs):
+        raise OSError("offline")
+
+    monkeypatch.setattr("huggingface_hub.snapshot_download", unavailable)
+
+    embedder = get_embedder()
+
+    assert isinstance(embedder, HashEmbedder)
+    assert embedder.embed_documents(["pricing deck"]) == HashEmbedder(16).embed_documents(["pricing deck"])
+    assert "offline" in caplog.text and "using HashEmbedder" in caplog.text
+
+
+def test_invalid_local_model_falls_back_to_hash_vectors(
+    local_model: Path, caplog: pytest.LogCaptureFixture,
+) -> None:
+    (local_model / "onnx" / "model_quantized.onnx").write_bytes(b"invalid model")
+
+    embedder = get_embedder()
+
+    assert isinstance(embedder, HashEmbedder)
+    assert len(embedder.embed_query("pricing deck")) == 4
+    assert "using HashEmbedder" in caplog.text

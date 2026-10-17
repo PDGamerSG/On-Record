@@ -6,11 +6,13 @@ import hashlib
 import itertools
 import logging
 import re
+from functools import lru_cache
 from pathlib import Path
 
 import numpy as np
 
 from ..config import settings
+from ..contracts import Embedder
 
 log = logging.getLogger(__name__)
 QUERY_PROMPT = "task: search result | query: {text}"
@@ -153,3 +155,19 @@ class HashEmbedder:
             vec[0] = 1.0
             return vec.tolist()
         return (vec / norm).tolist()
+
+
+@lru_cache(maxsize=1)
+def get_embedder() -> Embedder:
+    """Load the configured provider once, falling back to hashing if model loading fails."""
+    cfg = settings()
+    if cfg.embedder == "gemma":
+        try:
+            embedder = GemmaEmbedder()
+            log.info("embedder: %s (%d-d)", embedder.name, embedder.dim)
+            return embedder
+        except Exception as exc:  # noqa: BLE001 - preserve offline operation, but report the cause
+            log.warning("EmbeddingGemma unavailable (%s: %s); using HashEmbedder", type(exc).__name__, exc)
+    else:
+        log.info("WSW_EMBEDDER=%s; using HashEmbedder", cfg.embedder)
+    return HashEmbedder(cfg.embed_dim)
