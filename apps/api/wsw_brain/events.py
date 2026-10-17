@@ -37,6 +37,11 @@ class EventBus:
 
     def publish(self, type_: str, data: dict[str, Any], meeting_id: str | None = None) -> dict[str, Any]:
         """Thread-safe: may be called from listener worker threads."""
+        _require_non_empty_text(type_, "event type")
+        if not isinstance(data, dict):
+            raise TypeError("event data must be a dictionary")
+        if meeting_id is not None:
+            _require_non_empty_text(meeting_id, "meeting_id")
         event = {"id": next(self._ids), "type": type_, "meeting_id": meeting_id, "ts": time.time(), "data": data}
         loop = self._loop
         if loop is not None and loop.is_running():
@@ -75,3 +80,8 @@ class EventBus:
 
 
 bus = EventBus()
+
+
+def _require_non_empty_text(value: object, field: str) -> None:
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError(f"{field} must be a non-empty string")

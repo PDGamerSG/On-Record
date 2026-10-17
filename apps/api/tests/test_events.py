@@ -3,6 +3,23 @@ from __future__ import annotations
 from wsw_brain.events import EventBus
 
 
+def test_publish_rejects_invalid_event_payloads() -> None:
+    bus = EventBus()
+
+    for event_type, data, meeting_id, field, error_type in [
+        ("", {}, None, "type", ValueError),
+        (" ", {}, None, "type", ValueError),
+        ("meeting.started", [], None, "data", TypeError),
+        ("meeting.started", {}, " ", "meeting_id", ValueError),
+    ]:
+        try:
+            bus.publish(event_type, data, meeting_id=meeting_id)  # type: ignore[arg-type]
+        except error_type as exc:
+            assert field in str(exc)
+        else:
+            raise AssertionError(f"publish should reject invalid {field}")
+
+
 def test_subscribe_filters_replay_by_meeting() -> None:
     bus = EventBus()
     bus.publish("meeting.started", {"title": "One"}, meeting_id="m1")
