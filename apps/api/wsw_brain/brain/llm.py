@@ -6,11 +6,18 @@ the matching tool_call_id. Helpers let later adapters share the same exchange.
 
 from __future__ import annotations
 
+import asyncio
+import contextlib
+import heapq
+import itertools
 import json
 import logging
 import re
+import threading
 import time
 import uuid
+from collections.abc import AsyncIterator, Iterator
+from contextvars import ContextVar
 from functools import lru_cache
 from typing import Any
 
@@ -23,6 +30,7 @@ log = logging.getLogger(__name__)
 
 OLLAMA_TIMEOUT = httpx.Timeout(connect=5.0, read=180.0, write=60.0, pool=5.0)
 PROBE_TIMEOUT_S = 2.0
+_priority: ContextVar[int] = ContextVar("wsw_llm_priority", default=0)
 _THOUGHT_BLOCK = re.compile(r"^\s*(?:<\|channel>thought.*?<channel\|>|<think>.*?</think>)", re.DOTALL)
 _THINK_OPTION_ERROR = re.compile(
     r"(?:\b(?:unsupported|unrecognized|unknown|invalid|unexpected)\b.{0,32}\bthink(?:ing)?\b|"
@@ -35,6 +43,108 @@ _EVIDENCE_LINE = re.compile(r"^\[u:([^\]]+)\]\s*(.+)$", re.MULTILINE)
 
 class LLMError(RuntimeError):
     """A model call failed or returned an unusable response."""
+
+
+@contextlib.contextmanager
+def llm_priority(level: int = 1) -> Iterator[None]:
+    """Mark model work as important so it moves ahead of ordinary queued questions."""
+    token = _priority.set(level)
+    try:
+        yield
+    finally:
+        _priority.reset(token)
+
+
+class ModelGate:
+    """Bound concurrent model calls and schedule higher-priority work first."""
+
+    def __init__(self, slots: int, max_waiting: int, wait_s: float) -> None:
+        if slots < 1 or max_waiting < 0 or wait_s <= 0:
+            raise ValueError("model gate limits must be positive, with max_waiting non-negative")
+        self.slots = slots
+        self.max_waiting = max_waiting
+        self.wait_s = wait_s
+        self._lock = threading.Lock()
+        self._busy = 0
+        self._waiters: list[tuple[int, int, asyncio.Future[None], asyncio.AbstractEventLoop]] = []
+        self._sequence = itertools.count()
+
+    @property
+    def busy(self) -> int:
+        return self._busy
+
+    @property
+    def waiting(self) -> int:
+        return sum(1 for _, _, future, _ in self._waiters if not future.done())
+
+    @contextlib.asynccontextmanager
+    async def slot(self) -> AsyncIterator[None]:
+        await self._acquire()
+        try:
+            yield
+        finally:
+            self._release()
+
+    async def _acquire(self) -> None:
+        priority = _priority.get()
+        loop = asyncio.get_running_loop()
+        with self._lock:
+            if self._busy < self.slots and not any(not item[2].done() for item in self._waiters):
+                self._busy += 1
+                return
+            normal_waiting = sum(
+                1 for item_priority, _, future, _ in self._waiters if item_priority >= 0 and not future.done()
+            )
+            if priority <= 0 and normal_waiting >= self.max_waiting:
+                raise LLMError("the language model is busy; try again in a moment")
+            future: asyncio.Future[None] = loop.create_future()
+            heapq.heappush(self._waiters, (-priority, next(self._sequence), future, loop))
+        try:
+            await asyncio.wait_for(future, self.wait_s)
+        except BaseException as exc:
+            with self._lock:
+                granted = future.done() and not future.cancelled()
+                future.cancel()
+                self._waiters = [item for item in self._waiters if item[2] is not future]
+                heapq.heapify(self._waiters)
+            if granted:
+                self._release()
+            if isinstance(exc, TimeoutError):
+                raise LLMError(f"waited {self.wait_s:.0f} s for the language model; it is busy") from None
+            raise
+
+    def _release(self) -> None:
+        with self._lock:
+            while self._waiters:
+                _, _, future, loop = heapq.heappop(self._waiters)
+                if future.done():
+                    continue
+                try:
+                    loop.call_soon_threadsafe(self._grant, future)
+                except RuntimeError:
+                    continue
+                return
+            self._busy = max(0, self._busy - 1)
+
+    def _grant(self, future: asyncio.Future[None]) -> None:
+        if future.done():
+            self._release()
+        else:
+            future.set_result(None)
+
+
+_gates: dict[str, ModelGate] = {}
+_gates_lock = threading.Lock()
+
+
+def model_gate(key: str) -> ModelGate:
+    """Return the process-wide gate for one model endpoint."""
+    with _gates_lock:
+        gate = _gates.get(key)
+        if gate is None:
+            cfg = settings()
+            gate = _gates[key] = ModelGate(cfg.model_slots, cfg.model_max_waiting, cfg.model_queue_wait_s)
+        return gate
 
 
 def strip_thoughts(text: str) -> str:
@@ -182,7 +292,9 @@ class OllamaLLM:
             return LLMError(message)
 
         try:
-            async with httpx.AsyncClient(timeout=OLLAMA_TIMEOUT, transport=self._transport) as client:
+            async with model_gate(self.base_url).slot(), httpx.AsyncClient(
+                timeout=OLLAMA_TIMEOUT, transport=self._transport
+            ) as client:
                 response = await client.post(url, json=payload)
                 if (
                     response.status_code == 400
@@ -307,9 +419,10 @@ class GeminiLLM:
             automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True) if tools else None,
             response_mime_type="application/json" if json_mode and not self._compat else None,
         )
-        return await self._client.aio.models.generate_content(
-            model=self.model, contents=contents, config=config
-        )
+        async with model_gate(f"gemini:{self.model}").slot():
+            return await self._client.aio.models.generate_content(
+                model=self.model, contents=contents, config=config
+            )
 
 
 def _is_feature_rejection(exc: Exception) -> bool:
@@ -461,7 +574,9 @@ class OpenAICompatLLM:
             return LLMError(message)
 
         try:
-            async with httpx.AsyncClient(timeout=OLLAMA_TIMEOUT, transport=self._transport) as client:
+            async with model_gate(self.url).slot(), httpx.AsyncClient(
+                timeout=OLLAMA_TIMEOUT, transport=self._transport
+            ) as client:
                 response = await client.post(self.url, json=payload, headers=self._headers)
                 retry_payload = self._compatibility_payload(payload, response)
                 if retry_payload is not None:
