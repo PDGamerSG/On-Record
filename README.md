@@ -105,6 +105,8 @@ Application code can use the cached `get_llm()` factory instead of constructing 
 
 `OpenAICompatLLM` targets OpenAI-compatible `/v1/chat/completions` endpoints. Set `WSW_LLM_PROVIDER=openai`, `WSW_OPENAI_BASE_URL`, `WSW_OPENAI_API_KEY` when required by the endpoint, and `WSW_OPENAI_MODEL`. It preserves assistant tool-call IDs and tool results, supports JSON response mode, validates completion and function-call shapes, and reports bounded network errors. The adapter does not claim native audio support.
 
+Model calls share a bounded `ModelGate` per endpoint. Two generations may run concurrently by default; six ordinary callers may wait, and later callers fail fast instead of creating an unbounded queue. Waiting calls time out after 90 seconds. Use `llm_priority()` around extraction or other required work so it is scheduled ahead of ordinary questions. The gate covers local, hosted-compatible, and Gemini requests and never changes the request payload.
+
 The transport tests require neither a running model server nor a model download:
 
 ```bash
