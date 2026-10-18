@@ -96,7 +96,7 @@ sequenceDiagram
     Drawer->>Speech: cancel
 ```
 
-Sources: apps/web/src/audio/question.ts:1-6; apps/web/src/api/client.ts:95-100; apps/web/src/components/ask/AskDrawer.tsx:157-195, apps/web/src/components/ask/AskDrawer.tsx:219-268; apps/web/src/components/ask/speech.ts:1-5; apps/api/wsw_brain/brain/agent_api.py:38-40; apps/api/wsw_brain/app.py:19-20, apps/api/wsw_brain/app.py:44.
+Sources: apps/web/src/audio/question.ts:1-6; apps/web/src/api/client.ts:95-100; apps/web/src/components/ask/AskDrawer.tsx:157-195, apps/web/src/components/ask/AskDrawer.tsx:219-268; apps/web/src/components/ask/speech.ts:1-5; apps/api/wsw_brain/routes/agent.py:38-40; apps/api/wsw_brain/app.py:19-20, apps/api/wsw_brain/app.py:44.
 
 ### Document ingest
 
@@ -142,7 +142,7 @@ sequenceDiagram
     end
 ```
 
-Sources: apps/api/wsw_brain/documents/api.py:35-51, apps/api/wsw_brain/documents/api.py:91-121, apps/api/wsw_brain/documents/api.py:159-215; apps/api/wsw_brain/documents/ingest.py:69-75, apps/api/wsw_brain/documents/ingest.py:87-160, apps/api/wsw_brain/documents/ingest.py:186-190; apps/api/wsw_brain/documents/app.py:25.
+Sources: apps/api/wsw_brain/routes/documents.py:35-51, apps/api/wsw_brain/routes/documents.py:91-121, apps/api/wsw_brain/routes/documents.py:159-215; apps/api/wsw_brain/documents/ingest.py:69-75, apps/api/wsw_brain/documents/ingest.py:87-160, apps/api/wsw_brain/documents/ingest.py:186-190; apps/api/wsw_brain/documents/app.py:25.
 
 ### Document Ask with translation and speech
 
@@ -182,7 +182,7 @@ sequenceDiagram
     Speak-->>Client: audio/wav
 ```
 
-Sources: apps/api/wsw_brain/documents/api.py:56, apps/api/wsw_brain/documents/api.py:91-95, apps/api/wsw_brain/documents/api.py:240-274; apps/api/wsw_brain/documents/answer.py:118-167; apps/api/wsw_brain/sarvam.py:34-38, apps/api/wsw_brain/sarvam.py:78-130, apps/api/wsw_brain/sarvam.py:156-158.
+Sources: apps/api/wsw_brain/routes/documents.py:56, apps/api/wsw_brain/routes/documents.py:91-95, apps/api/wsw_brain/routes/documents.py:240-274; apps/api/wsw_brain/documents/answer.py:118-167; apps/api/wsw_brain/sarvam.py:34-38, apps/api/wsw_brain/sarvam.py:78-130, apps/api/wsw_brain/sarvam.py:156-158.
 
 ## Activity diagrams
 
@@ -256,7 +256,7 @@ flowchart TD
     L -. error .-> FAIL
 ```
 
-Sources: apps/api/wsw_brain/documents/api.py:114-121, apps/api/wsw_brain/documents/api.py:159-194; apps/api/wsw_brain/documents/ingest.py:87-160, apps/api/wsw_brain/documents/ingest.py:186-191.
+Sources: apps/api/wsw_brain/routes/documents.py:114-121, apps/api/wsw_brain/routes/documents.py:159-194; apps/api/wsw_brain/documents/ingest.py:87-160, apps/api/wsw_brain/documents/ingest.py:186-191.
 
 ### Ask with no-evidence fallback
 
@@ -370,7 +370,7 @@ stateDiagram-v2
     failed --> [*]: DELETE /api/documents/jobs/{id} or pruned
 ```
 
-Sources: apps/api/wsw_brain/documents/api.py:35-51, apps/api/wsw_brain/documents/api.py:159-194, apps/api/wsw_brain/documents/api.py:218-226, apps/api/wsw_brain/documents/api.py:290-293.
+Sources: apps/api/wsw_brain/routes/documents.py:35-51, apps/api/wsw_brain/routes/documents.py:159-194, apps/api/wsw_brain/routes/documents.py:218-226, apps/api/wsw_brain/routes/documents.py:290-293.
 
 ### ModelGate slot
 

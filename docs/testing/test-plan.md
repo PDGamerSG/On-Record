@@ -109,7 +109,7 @@ The workflow has read-only contents permission and cancels superseded runs on th
 |---|---|---|
 | No web tests, and CI does not type-check, build or lint `apps/web` (.github/workflows/checks.yml:15-57; no `test` script in apps/web/package.json:6-11) | Web regressions are found only by hand | FR-029 to FR-031, FR-045 to FR-054, NFR-018 to NFR-021, NFR-023 |
 | Routes the web client calls are not served by the main app, and no test checks the client against the server (apps/api/wsw_brain/app.py:14-41, apps/web/src/api/client.ts:59-118) | Live mode cannot work; nothing fails in CI | FR-002, FR-005, FR-006, FR-011, FR-022, FR-023, FR-029, FR-046 |
-| The SSE frame carries only the payload while the client expects a whole event (apps/api/wsw_brain/event_stream.py:22-23, apps/web/src/api/events.ts:94). `test_app.py` pins the server side only | Live updates would be dropped by the client | FR-045, NFR-012 |
+| The SSE frame carries only the payload while the client expects a whole event (apps/api/wsw_brain/routes/event_stream.py:22-23, apps/web/src/api/events.ts:94). `test_app.py` pins the server side only | Live updates would be dropped by the client | FR-045, NFR-012 |
 | `IngestPipeline` is tested only with an in-memory store, not against FalkorDB, and no test starts it from an entrypoint | The wiring gap (no entrypoint constructs it) is not detected | FR-060 to FR-062, NFR-026 |
 | No test of Gemma native-audio transcription (apps/api/wsw_brain/brain/gemma.py:169-186) and no voice route to test | Spoken questions are unverified | FR-014, FR-030 |
 | Model-backed listener tests are expected to skip in CI | Listener regressions may pass CI | FR-001, FR-007 to FR-010, NFR-004 |

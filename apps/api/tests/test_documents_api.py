@@ -8,7 +8,7 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from pypdf import PdfWriter
 
-from wsw_brain.documents import api as routes
+from wsw_brain.routes import documents as routes
 
 
 def make_pdf(pages: int) -> bytes:

@@ -45,7 +45,7 @@ flowchart LR
 | `wsw_brain/brain/` | Text embeddings, hybrid retrieval, and the text model adapters (Ollama, Gemini, OpenAI-compatible, Sarvam, fake) |
 | `wsw_brain/documents/` | Document upload, digitising, chunking, search and answers |
 | `wsw_brain/app.py`, `cli.py` | The HTTP application (`create_app()`), and the launcher that runs it with Uvicorn |
-| `wsw_brain/event_stream.py` | `GET /api/events`: the event bus as Server-Sent Events |
+| `wsw_brain/routes/event_stream.py` | `GET /api/events`: the event bus as Server-Sent Events |
 
 In development, Vite serves the web app on port 5173 and proxies `/api` and `/ws` to `WSW_API_URL` (default `http://127.0.0.1:8000`). For an API hosted elsewhere, build the web app with `VITE_API_BASE` set to its origin.
 
@@ -83,7 +83,7 @@ The server pushes changes to the browser over **Server-Sent Events (SSE)**, a on
 {"id": 42, "type": "utterance.created", "meeting_id": "m1", "ts": 1760000000.5, "data": {}}
 ```
 
-`GET /api/events` (`wsw_brain/event_stream.py`) sends each event as one SSE frame. The id goes on the `id:` line and the type on the `event:` line, and the `data:` line carries only `data` as JSON; `meeting_id` and `ts` are not sent. When no event has arrived for 15 s, the endpoint sends a `: keep-alive` comment.
+`GET /api/events` (`wsw_brain/routes/event_stream.py`) sends each event as one SSE frame. The id goes on the `id:` line and the type on the `event:` line, and the `data:` line carries only `data` as JSON; `meeting_id` and `ts` are not sent. When no event has arrived for 15 s, the endpoint sends a `: keep-alive` comment.
 
 The web client (`src/api/events.ts`) currently parses each frame's `data:` line as the whole event object, so the two sides have to be reconciled before live mode can work.
 
@@ -162,7 +162,7 @@ The server-side pieces that exist today:
 - **`brain/llm.py`.** The text model adapters, the `get_llm()` provider factory, and `ModelGate`, which limits how many generations run at once against each endpoint.
 - **`documents/answer.py`.** The same approach for uploaded documents: it cites passages as `[d:<chunk id>]` and can check them against meetings.
 
-- **`brain/agent.py`.** `MeetingAgent` ties them together for a typed question, as below. `brain/agent_api.py` serves it at `POST /api/agent/ask`.
+- **`brain/agent.py`.** `MeetingAgent` ties them together for a typed question, as below. `routes/agent.py` serves it at `POST /api/agent/ask`.
 
 ```mermaid
 sequenceDiagram

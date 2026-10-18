@@ -2,8 +2,8 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from wsw_brain.app import create_app
-from wsw_brain.brain.agent_api import create_router
 from wsw_brain.contracts import AskResult
+from wsw_brain.routes.agent import create_router
 
 
 class StubAgent:

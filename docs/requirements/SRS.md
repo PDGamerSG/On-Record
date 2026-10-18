@@ -48,7 +48,7 @@ Four facts limit what is reachable today. Rows below refer to them by these labe
 - **G4.** `IngestPipeline` (`apps/api/wsw_brain/ingest/pipeline.py:55`, PR #75) is the only production caller of the graph insight writer, the extractor and the summariser, and the only production publisher of bus events. No entrypoint constructs it: not `apps/api/wsw_brain/app.py`, not `apps/api/wsw_brain/cli.py`, not any script ("No HTTP route starts the pipeline yet", `README.md:346`).
 - **G7.** The PR #76 `GemmaClient` (`apps/api/wsw_brain/brain/gemma.py:81`) is used only by `scripts/bench_gemma.py:17` and tests. The server selects models through `get_llm()` (`apps/api/wsw_brain/brain/llm.py:891`).
 
-Two more apply to single features: SSE frames carry only the payload, while the client expects a whole event (G5, `apps/api/wsw_brain/event_stream.py:22-23`, `apps/web/src/api/events.ts:94`), and documents are served only by `apps/api/wsw_brain/documents/app.py:21-25` (G6).
+Two more apply to single features: SSE frames carry only the payload, while the client expects a whole event (G5, `apps/api/wsw_brain/routes/event_stream.py:22-23`, `apps/web/src/api/events.ts:94`), and documents are served only by `apps/api/wsw_brain/documents/app.py:21-25` (G6).
 
 ### 2.2 Product functions
 
@@ -148,7 +148,7 @@ All rows are served only by `wsw_brain.documents.app` (G6).
 | FR-032 | Accept PDF, PNG, JPEG or ZIP up to 25 MB and 100 pages, detect type from magic bytes, split into parts of ≤10 pages. | Implemented | `apps/api/wsw_brain/documents/split.py:73-177` | Test |
 | FR-033 | Digitise parts with Sarvam Document AI, polling and retrying. | Implemented | `apps/api/wsw_brain/documents/sarvam.py:51-162` | Test |
 | FR-034 | Chunk pages into passages of ≤1200 characters, embed and store them. | Implemented | `apps/api/wsw_brain/documents/store.py:174-219` | Test |
-| FR-035 | Run ingestion as a background job with progress, listing and deletion. | Implemented | `apps/api/wsw_brain/documents/api.py:159-226` | Test |
+| FR-035 | Run ingestion as a background job with progress, listing and deletion. | Implemented | `apps/api/wsw_brain/routes/documents.py:159-226` | Test |
 | FR-036 | Add a Gemma 4 description to uploaded images. | Implemented | `apps/api/wsw_brain/documents/vision.py:15-43` | Test |
 | FR-037 | Search documents with full-text and vectors; Indian scripts by substring. | Implemented | `apps/api/wsw_brain/documents/store.py:252-286` | Test |
 | FR-038 | Answer only from passages with `[d:…]` citations, optionally with meetings, noting conflicts and which is newer. | Implemented | `apps/api/wsw_brain/documents/answer.py:118-194` | Test |
@@ -167,7 +167,7 @@ All rows are served only by `wsw_brain.documents.app` (G6).
 | ID | Requirement | Status | Evidence | Verification |
 |---|---|---|---|---|
 | FR-043 | Provide an in-process event bus with 500-event replay and bounded subscriber queues. | Implemented: only publisher is the unwired pipeline (G4) | `apps/api/wsw_brain/events.py:1-139` | Test |
-| FR-044 | Stream events at `GET /api/events` as SSE with `since_id` and keep-alive. | Implemented | `apps/api/wsw_brain/event_stream.py:14-67` | Test |
+| FR-044 | Stream events at `GET /api/events` as SSE with `since_id` and keep-alive. | Implemented | `apps/api/wsw_brain/routes/event_stream.py:14-67` | Test |
 | FR-045 | Consume events in the web app with backoff and update the views. | Partial: frame mismatch (G5); no publisher runs | `apps/web/src/api/events.ts:23-100` | Inspection |
 
 ### 3.10 Web app pages and demo mode
@@ -219,7 +219,7 @@ All rows are served only by `wsw_brain.documents.app` (G6).
 | NFR-013 | Security | Mark outside material as untrusted in every prompt (`UNTRUSTED_NOTE`). | Implemented | `apps/api/wsw_brain/brain/llm.py:35-39` | Test |
 | NFR-014 | Integrity | Cite only retrieved or in-window evidence. | Partial: Implemented for documents; agent and extractor unwired | `apps/api/wsw_brain/documents/answer.py:155-157`, `apps/api/wsw_brain/brain/agent.py:148-163` | Test |
 | NFR-015 | Security | Parameterise all Cypher values; redact connection URLs. | Implemented | `apps/api/wsw_brain/graph/cypher.py:1-2`, `apps/api/wsw_brain/graph/store.py:1180-1181` | Inspection |
-| NFR-016 | Input validation | Bound and validate questions, uploads and images. | Implemented | `apps/api/wsw_brain/brain/agent_api.py:13-17`, `apps/api/wsw_brain/documents/api.py:114-121` | Test |
+| NFR-016 | Input validation | Bound and validate questions, uploads and images. | Implemented | `apps/api/wsw_brain/routes/agent.py:13-17`, `apps/api/wsw_brain/routes/documents.py:114-121` | Test |
 | NFR-017 | Security | Protect mutating routes with a token, limits and allowed hosts; restrict CORS. | Planned: no authentication; documents CORS is `*` | `.env.example:56-61`, `apps/api/wsw_brain/documents/app.py:22-24` | Inspection |
 | NFR-027 | Security | Send hosted API keys only in headers or the SDK, never in URLs. | Partial: `GemmaClient` puts the Gemini key in `?key=` (benchmark only, G7) | `apps/api/wsw_brain/brain/gemma.py:239` | Inspection |
 | NFR-018 | Accessibility | Dialogs use `role="dialog"`, trap focus and close on Escape. | Implemented | `apps/web/src/components/ask/useFocusTrap.ts:1-2` | Demonstration |
@@ -286,7 +286,7 @@ flowchart LR
   uc6 --> falkor
 ```
 
-Sources: `apps/web/src/components/meeting/StartMeeting.tsx:28`, `apps/web/src/components/meeting/UploadRecording.tsx:42`, `apps/web/src/components/ask/AskDrawer.tsx:296`, `apps/web/src/components/ask/useVoiceQuestion.ts:1-4`, `apps/api/wsw_brain/documents/api.py:159`, `apps/web/src/App.tsx:43-46`, `apps/api/wsw_brain/brain/llm.py:856-895`, `apps/api/wsw_brain/app.py:14-41`, `apps/api/wsw_brain/ingest/pipeline.py:55`.
+Sources: `apps/web/src/components/meeting/StartMeeting.tsx:28`, `apps/web/src/components/meeting/UploadRecording.tsx:42`, `apps/web/src/components/ask/AskDrawer.tsx:296`, `apps/web/src/components/ask/useVoiceQuestion.ts:1-4`, `apps/api/wsw_brain/routes/documents.py:159`, `apps/web/src/App.tsx:43-46`, `apps/api/wsw_brain/brain/llm.py:856-895`, `apps/api/wsw_brain/app.py:14-41`, `apps/api/wsw_brain/ingest/pipeline.py:55`.
 
 | UC | Actor and trigger | Main flow | Key alternate flows | Related FRs | Status |
 |---|---|---|---|---|---|

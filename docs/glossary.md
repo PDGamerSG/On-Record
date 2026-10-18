@@ -49,7 +49,7 @@ Terms used across the On Record code and documentation, with the file that defin
 | Speaker confidence | How sure the listener is about who spoke (not transcription confidence), 0-1 | `apps/web/src/api/types.ts:40`; `apps/api/wsw_brain/contracts.py:46` |
 | Speaker label | Display form "Speaker N" of a track | `apps/api/wsw_brain/graph/text.py:86-88` |
 | Speaker track | Meeting-scoped voice label `S1`, `S2`, … assigned by clustering | `apps/api/wsw_brain/contracts.py:42`; `apps/api/wsw_brain/listen/speakers.py:264` |
-| SSE | Server-Sent Events stream at `/api/events` | `apps/api/wsw_brain/event_stream.py:1`; `apps/api/wsw_brain/event_stream.py:45-51` |
+| SSE | Server-Sent Events stream at `/api/events` | `apps/api/wsw_brain/routes/event_stream.py:1`; `apps/api/wsw_brain/routes/event_stream.py:45-51` |
 | Supersession | A later decision replacing an earlier one: `(new)-[:SUPERSEDES]->(old)`, with the old one marked superseded | `apps/api/wsw_brain/graph/store.py:461-466`; `apps/api/wsw_brain/graph/store.py:555-578` |
 | Talkback / hands-free | Voice-question capture modes: hold, toggle, or VAD-triggered | `apps/web/src/components/ask/useVoiceQuestion.ts:1-4` |
 | Topic / Entity / Mention | Short noun phrases and named things (product, customer, vendor, org, other) linked from utterances by `MENTIONS` | `apps/api/wsw_brain/brain/extract.py:27-29`; `apps/api/wsw_brain/graph/store.py:64`; `apps/api/wsw_brain/graph/store.py:653-665` |

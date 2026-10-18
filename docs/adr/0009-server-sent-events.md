@@ -6,7 +6,7 @@ While a meeting runs, the browser needs new utterances, speaker merges, insights
 
 ## Decision
 
-Writers publish to an in-process event bus, and the Server-Sent Events (SSE) endpoint `GET /api/events` fans events out to browsers (apps/api/wsw_brain/events.py:1-3). `format_sse` writes the id on the `id:` line, the type on the `event:` line and only the payload on the `data:` line (apps/api/wsw_brain/event_stream.py:20-23). A `: keep-alive` comment goes out after 15 s without events (apps/api/wsw_brain/event_stream.py:16-17). The web client uses `EventSource` and reconnects with `?since_id=` (apps/web/src/api/events.ts:60-63). The event list is in [ARCHITECTURE.md](../ARCHITECTURE.md).
+Writers publish to an in-process event bus, and the Server-Sent Events (SSE) endpoint `GET /api/events` fans events out to browsers (apps/api/wsw_brain/events.py:1-3). `format_sse` writes the id on the `id:` line, the type on the `event:` line and only the payload on the `data:` line (apps/api/wsw_brain/routes/event_stream.py:20-23). A `: keep-alive` comment goes out after 15 s without events (apps/api/wsw_brain/routes/event_stream.py:16-17). The web client uses `EventSource` and reconnects with `?since_id=` (apps/web/src/api/events.ts:60-63). The event list is in [ARCHITECTURE.md](../ARCHITECTURE.md).
 
 ## Status
 
@@ -32,6 +32,6 @@ Not recorded in the repository.
 ## Sources
 
 - apps/api/wsw_brain/events.py:1-3
-- apps/api/wsw_brain/event_stream.py:16-23
+- apps/api/wsw_brain/routes/event_stream.py:16-23
 - apps/web/src/api/events.ts:60-63
 - docs/ARCHITECTURE.md:86-88

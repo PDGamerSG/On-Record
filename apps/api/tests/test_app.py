@@ -2,8 +2,8 @@ import pytest
 from fastapi.testclient import TestClient
 
 from wsw_brain.app import create_app
-from wsw_brain.event_stream import _event_stream, events
 from wsw_brain.events import EventBus
+from wsw_brain.routes.event_stream import _event_stream, events
 
 
 def test_health_endpoint_returns_without_external_services() -> None:
@@ -117,7 +117,7 @@ async def test_idle_disconnect_closes_subscription_without_waiting_for_heartbeat
         awaitable.close()
         raise TimeoutError
 
-    monkeypatch.setattr("wsw_brain.event_stream.asyncio.wait_for", immediate_timeout)
+    monkeypatch.setattr("wsw_brain.routes.event_stream.asyncio.wait_for", immediate_timeout)
     stream = _event_stream(DisconnectingRequest(), subscription)
 
     with pytest.raises(StopAsyncIteration):

@@ -55,7 +55,7 @@ class EventBus:
     subscribe). A full queue drops new events, and that client re-syncs over REST.
 
     publish() can be called from any thread once bind_loop() has the server's event loop; the SSE endpoint
-    (event_stream.py) binds it when a browser connects. publish() then delivers on that loop, directly when
+    (routes/event_stream.py) binds it when a browser connects. publish() then delivers on that loop, directly when
     already on it or with call_soon_threadsafe from another thread, because asyncio queues are not
     thread-safe. Without a running bound loop it delivers in the calling thread, which suits tests and
     scripts.

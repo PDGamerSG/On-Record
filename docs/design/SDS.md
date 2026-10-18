@@ -39,7 +39,7 @@ The system context (users, the browser client, FalkorDB, local and hosted model 
 | `wsw_brain.brain` | Model adapters, embeddings, extraction, summary, hybrid retrieval, grounded Q&A agent | `get_llm` apps/api/wsw_brain/brain/llm.py:891; `MeetingAgent` apps/api/wsw_brain/brain/agent.py:27 | Partial: `MeetingAgent` is never constructed in production code (apps/api/wsw_brain/app.py:44) |
 | `wsw_brain.graph` | The only FalkorDB client; all Cypher; id and text helpers | `GraphStore` apps/api/wsw_brain/graph/store.py:114 | Implemented |
 | `wsw_brain.listen` | Audio decoding, VAD (voice activity detection), ASR (automatic speech recognition) adapters, speaker clustering, `LiveSession` | `LiveSession` apps/api/wsw_brain/listen/session.py:101; `process_file` apps/api/wsw_brain/listen/file_pipeline.py:27 | Partial: no HTTP or WebSocket route feeds a session |
-| `wsw_brain.documents` | Document upload, splitting, Sarvam Document AI, chunking, storage, retrieval and answers | `router` apps/api/wsw_brain/documents/api.py:31; standalone app apps/api/wsw_brain/documents/app.py:21 | Implemented (served by the standalone documents app) |
+| `wsw_brain.documents` | Document upload, splitting, Sarvam Document AI, chunking, storage, retrieval and answers | `router` apps/api/wsw_brain/routes/documents.py:31; standalone app apps/api/wsw_brain/documents/app.py:21 | Implemented (served by the standalone documents app) |
 | `apps/web/src` | React client with a live mode and a bundled demo mode | `api` proxy apps/web/src/api/client.ts:108 | Implemented |
 
 Sources: inventory of modules at `8943885`; apps/api/wsw_brain/brain/__init__.py:3-25; apps/api/wsw_brain/listen/__init__.py:3-18; apps/api/wsw_brain/documents/__init__.py:3-15.
@@ -193,20 +193,20 @@ classDiagram
 
 *Logical view: the documents package, from upload job to stored chunks and retrieval.*
 
-Sources: apps/api/wsw_brain/documents/ingest.py:42, apps/api/wsw_brain/documents/ingest.py:69, apps/api/wsw_brain/documents/ingest.py:87; apps/api/wsw_brain/documents/sarvam.py:40, apps/api/wsw_brain/documents/sarvam.py:51; apps/api/wsw_brain/documents/store.py:153; apps/api/wsw_brain/documents/answer.py:60; apps/api/wsw_brain/documents/split.py:39-63; apps/api/wsw_brain/documents/api.py:36; apps/api/wsw_brain/sarvam.py:64.
+Sources: apps/api/wsw_brain/documents/ingest.py:42, apps/api/wsw_brain/documents/ingest.py:69, apps/api/wsw_brain/documents/ingest.py:87; apps/api/wsw_brain/documents/sarvam.py:40, apps/api/wsw_brain/documents/sarvam.py:51; apps/api/wsw_brain/documents/store.py:153; apps/api/wsw_brain/documents/answer.py:60; apps/api/wsw_brain/documents/split.py:39-63; apps/api/wsw_brain/routes/documents.py:36; apps/api/wsw_brain/sarvam.py:64.
 
 ## 4. Dependency viewpoint
 
 ```mermaid
 flowchart LR
     app["app.py"] --> agent["brain.agent"]
-    app --> agent_api["brain.agent_api"]
+    app --> agent_api["routes.agent"]
     app --> brand["brand"]
-    app --> event_stream["event_stream"]
+    app --> event_stream["routes.event_stream"]
     app --> events["events"]
     event_stream --> events
     config["config"] --> brand
-    pipeline["pipeline.py"] --> extract["brain.extract"]
+    pipeline["ingest.pipeline"] --> extract["brain.extract"]
     pipeline --> summary["brain.summary"]
     pipeline --> config
     pipeline --> contracts["contracts"]
@@ -227,7 +227,7 @@ flowchart LR
     store --> text["graph.text"]
     session["listen.session"] --> speakers["listen.speakers"]
     session --> factory["listen.factory"]
-    docs_api["documents.api"] --> ingest["documents.ingest"]
+    docs_api["routes.documents"] --> ingest["documents.ingest"]
     docs_api --> answer["documents.answer"]
     docs_api --> sarvam["sarvam"]
     answer --> retrieve
@@ -236,7 +236,7 @@ flowchart LR
 
 *Module dependency view (a UML package dependency diagram drawn as a flowchart): selected internal imports; every adapter also imports `contracts`, which is left out where it would only add edges.*
 
-Sources: apps/api/wsw_brain/app.py:7-11; apps/api/wsw_brain/event_stream.py:13; apps/api/wsw_brain/config.py:12; apps/api/wsw_brain/ingest/pipeline.py:26-32; apps/api/wsw_brain/brain/agent.py:14-16; apps/api/wsw_brain/brain/agent_api.py:10; apps/api/wsw_brain/brain/extract.py:11-12; apps/api/wsw_brain/brain/summary.py:9-11; apps/api/wsw_brain/brain/llm.py:29-30; apps/api/wsw_brain/brain/embed.py:14-15; apps/api/wsw_brain/brain/gemma.py:18-19; apps/api/wsw_brain/brain/retrieve.py:12; apps/api/wsw_brain/graph/store.py:41-58; apps/api/wsw_brain/listen/session.py:40-44; apps/api/wsw_brain/documents/api.py:20-28; apps/api/wsw_brain/documents/answer.py:15-19; apps/api/wsw_brain/documents/ingest.py:17-21.
+Sources: apps/api/wsw_brain/app.py:7-11; apps/api/wsw_brain/routes/event_stream.py:13; apps/api/wsw_brain/config.py:12; apps/api/wsw_brain/ingest/pipeline.py:26-32; apps/api/wsw_brain/brain/agent.py:14-16; apps/api/wsw_brain/routes/agent.py:10; apps/api/wsw_brain/brain/extract.py:11-12; apps/api/wsw_brain/brain/summary.py:9-11; apps/api/wsw_brain/brain/llm.py:29-30; apps/api/wsw_brain/brain/embed.py:14-15; apps/api/wsw_brain/brain/gemma.py:18-19; apps/api/wsw_brain/brain/retrieve.py:12; apps/api/wsw_brain/graph/store.py:41-58; apps/api/wsw_brain/listen/session.py:40-44; apps/api/wsw_brain/routes/documents.py:20-28; apps/api/wsw_brain/documents/answer.py:15-19; apps/api/wsw_brain/documents/ingest.py:17-21.
 
 Two properties hold: `contracts.py`, `graph/cypher.py`, `graph/text.py` and `documents/split.py` import nothing from `wsw_brain`, and `app.py` does not import `ingest/pipeline.py` or `documents`.
 
@@ -251,7 +251,7 @@ Node labels, relationships, indexes, id formats and time units are in [data-mode
 | Protocols and adapters | `ASR`, `FileASR`, `SpeakerEmbedder`, `LLM`, `Embedder` (apps/api/wsw_brain/contracts.py:87-320) | Adapters satisfy a protocol structurally: `FasterWhisperASR` (apps/api/wsw_brain/listen/asr.py:14) and `SaarasASR` (apps/api/wsw_brain/listen/sarvam_asr.py:41) for ASR; five `LLM` adapters in apps/api/wsw_brain/brain/llm.py; two embedders in apps/api/wsw_brain/brain/embed.py. Fakes (`FakeLLM`, `HashEmbedder`) keep tests and offline runs model-free. |
 | Factory functions | `select_llm` / `get_llm` (apps/api/wsw_brain/brain/llm.py:856, apps/api/wsw_brain/brain/llm.py:891); `get_embedder` (apps/api/wsw_brain/brain/embed.py:174); `get_speaker_embedder`, `speaker_clusterer` (apps/api/wsw_brain/listen/factory.py:24-29); `make_client` (apps/api/wsw_brain/brain/gemma.py:307) | Callers ask a factory for a protocol instance built from `Settings`; provider choice stays out of consumers. `make_client` is unused in production. |
 | Gate (bounded admission) | `ModelGate` (apps/api/wsw_brain/brain/llm.py:67), one per endpoint key (apps/api/wsw_brain/brain/llm.py:157-164) | Limits concurrent model calls; priority work (`llm_priority`, apps/api/wsw_brain/brain/llm.py:58) is served first and never refused. |
-| Event bus with replay | `EventBus` singleton `bus` (apps/api/wsw_brain/events.py:50, apps/api/wsw_brain/events.py:134) and `GET /api/events` (apps/api/wsw_brain/event_stream.py:45) | Publishers do not know subscribers; a late subscriber replays recent events. Only `IngestPipeline` publishes, and it is not wired (apps/api/wsw_brain/ingest/pipeline.py:157, apps/api/wsw_brain/ingest/pipeline.py:304). |
+| Event bus with replay | `EventBus` singleton `bus` (apps/api/wsw_brain/events.py:50, apps/api/wsw_brain/events.py:134) and `GET /api/events` (apps/api/wsw_brain/routes/event_stream.py:45) | Publishers do not know subscribers; a late subscriber replays recent events. Only `IngestPipeline` publishes, and it is not wired (apps/api/wsw_brain/ingest/pipeline.py:157, apps/api/wsw_brain/ingest/pipeline.py:304). |
 | Single gateway | `GraphStore` is the only FalkorDB client (apps/api/wsw_brain/graph/store.py:1); `DocumentStore` reuses its connection (apps/api/wsw_brain/documents/store.py:153) | Retries and error mapping in one place. |
 | Demo proxy (web) | `api` is a JavaScript `Proxy` that routes each call to `demoApi` or `realApi` (apps/web/src/api/client.ts:1-3, apps/web/src/api/client.ts:108-110) | The mode is resolved at start-up (apps/web/src/api/mode.ts:25), so the proxy decides per call. Demo data is bundled (apps/web/src/api/demo/fixtures.json). |
 
@@ -298,9 +298,9 @@ Sequence diagrams (Ask, document upload, live ingest) and state machines (ingest
 | FalkorDB client | connect 3 s, socket 60 s, health check 30 s, 2 retries with backoff | apps/api/wsw_brain/graph/store.py:149-154 |
 | FalkorDB server | query timeout 5000 ms default, 20000 ms max; 500 queued queries | docker-compose.yml:8 |
 | Full-text scan | 2000 utterances | apps/api/wsw_brain/graph/store.py:70 |
-| Search `k` | 1-500 (meetings); 1-200 store, 1-20 route (documents) | apps/api/wsw_brain/graph/store.py:797; apps/api/wsw_brain/documents/store.py:254; apps/api/wsw_brain/documents/api.py:237 |
+| Search `k` | 1-500 (meetings); 1-200 store, 1-20 route (documents) | apps/api/wsw_brain/graph/store.py:797; apps/api/wsw_brain/documents/store.py:254; apps/api/wsw_brain/routes/documents.py:237 |
 | Event bus | replay 500 events, queue 2000 per subscriber | apps/api/wsw_brain/events.py:64 |
-| SSE | poll 1 s, keep-alive 15 s | apps/api/wsw_brain/event_stream.py:16-17 |
+| SSE | poll 1 s, keep-alive 15 s | apps/api/wsw_brain/routes/event_stream.py:16-17 |
 | Ingest writer | flush every 1.0 s or 8 utterances; 3 write attempts on `GraphUnavailable` | apps/api/wsw_brain/ingest/pipeline.py:64-65; apps/api/wsw_brain/ingest/pipeline.py:39-40 |
 | Ingest shutdown | `stop()`/`aclose()` 15 s; `flush()` 60 s | apps/api/wsw_brain/ingest/pipeline.py:92; apps/api/wsw_brain/ingest/pipeline.py:102; apps/api/wsw_brain/ingest/pipeline.py:171 |
 | Extraction output | 5 decisions, 8 action items, 8 topics, 10 entities; max_tokens 1800 | apps/api/wsw_brain/brain/extract.py:16-19; apps/api/wsw_brain/brain/extract.py:667-669 |
@@ -308,7 +308,7 @@ Sequence diagrams (Ask, document upload, live ingest) and state machines (ingest
 | File pipeline | max file 2 h; 2 concurrent files | apps/api/wsw_brain/listen/file_pipeline.py:20-22 |
 | Document upload | 25 MB, 100 pages, 10 pages per part, 3 parts in parallel | apps/api/wsw_brain/config.py:45-49 |
 | Document AI job | poll 2 s, timeout 300 s, 3 attempts on 429/502/503/504 | apps/api/wsw_brain/documents/sarvam.py:59-60; apps/api/wsw_brain/documents/sarvam.py:130-140 |
-| Ingest job retention | 3600 s | apps/api/wsw_brain/documents/api.py:32 |
+| Ingest job retention | 3600 s | apps/api/wsw_brain/routes/documents.py:32 |
 | Image to Gemma | 7 MiB, PNG or JPEG | apps/api/wsw_brain/documents/vision.py:15 |
 | Embedding (EmbeddingGemma) | 4 threads, 256 tokens, batch 16, CPU | apps/api/wsw_brain/brain/embed.py:53-55 |
 | Web SSE reconnect | `min(10000, 500×2^retry)` ms | apps/web/src/api/events.ts:86 |

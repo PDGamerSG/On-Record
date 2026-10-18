@@ -73,33 +73,33 @@ Status: Implemented, except `/api/agent/ask`, which is Partial (the route works 
 | GET | `/healthz` | none | `{"status": "ok"}` | none | `apps/api/wsw_brain/app.py:22-24` |
 | GET | `/api/status` | none | `{"status": "ok", "product": <product name>}` | none | `apps/api/wsw_brain/app.py:26-28` |
 | GET | `/api/capabilities` | none | `{"product", "api_version": "v1", "features": ["status", "documents", "events"]}`, plus `"agent"` when an agent is mounted | none | `apps/api/wsw_brain/app.py:30-39` |
-| GET | `/api/events` | query `since_id` integer ≥ 0 (default 0), `meeting_id` string (optional) | `text/event-stream` (see [Server-Sent Events](#server-sent-events)) | 422 for `since_id < 0` (validation) or when the bus rejects the subscription | `apps/api/wsw_brain/event_stream.py:45-67` |
-| POST | `/api/agent/ask` (agent mounted only) | JSON `AskRequest`: `question` 1-2000 chars, `session_id` 1-100 chars (default `"default"`), `meeting_id` ≤ 200 chars or null, `k` 1-20 (default 8) | JSON `AskResponse`: `answer`, `citations[]`, `actions[]`, `tool_trace[]`, `cypher[]`, `model`, `provider`, `session_id`, `timings`, `transcript?`, `transcript_provider?` | 422 validation. Exceptions from `MeetingAgent.ask` are not caught by the router; their status code is [unverified] | `apps/api/wsw_brain/brain/agent_api.py:13-48` |
+| GET | `/api/events` | query `since_id` integer ≥ 0 (default 0), `meeting_id` string (optional) | `text/event-stream` (see [Server-Sent Events](#server-sent-events)) | 422 for `since_id < 0` (validation) or when the bus rejects the subscription | `apps/api/wsw_brain/routes/event_stream.py:45-67` |
+| POST | `/api/agent/ask` (agent mounted only) | JSON `AskRequest`: `question` 1-2000 chars, `session_id` 1-100 chars (default `"default"`), `meeting_id` ≤ 200 chars or null, `k` 1-20 (default 8) | JSON `AskResponse`: `answer`, `citations[]`, `actions[]`, `tool_trace[]`, `cypher[]`, `model`, `provider`, `session_id`, `timings`, `transcript?`, `transcript_provider?` | 422 validation. Exceptions from `MeetingAgent.ask` are not caught by the router; their status code is [unverified] | `apps/api/wsw_brain/routes/agent.py:13-48` |
 
 `/api/capabilities` always lists `"documents"` (`apps/api/wsw_brain/app.py:32`), but the main app does not serve `/api/documents`. Clients should not read that feature flag as meaning the route exists on the same server.
 
 ## Documents app routes
 
-All paths are under the `/api/documents` prefix (`apps/api/wsw_brain/documents/api.py:31`). Status: Implemented. Route order matters: `/status`, `/jobs` and `/search` are declared before `/{doc_id}`, so they are not captured as document ids.
+All paths are under the `/api/documents` prefix (`apps/api/wsw_brain/routes/documents.py:31`). Status: Implemented. Route order matters: `/status`, `/jobs` and `/search` are declared before `/{doc_id}`, so they are not captured as document ids.
 
 | Method | Path | Request | Response | Errors | Source |
 |---|---|---|---|---|---|
-| GET | `/api/documents/status` | none | `sarvam_configured`, `digitiser`, `llm {provider, model}`, `embedder`, `part_pages`, `max_pages`, `max_mb`, `language` | none | `apps/api/wsw_brain/documents/api.py:124-138` |
-| POST | `/api/documents/split` | multipart `file` | `filename`, `kind`, `pages`, `part_pages`, `parts[]`; does not call Sarvam | 413 file too large, 400 empty file, 400 `DocumentError` | `apps/api/wsw_brain/documents/api.py:141-156` |
-| POST | `/api/documents` | multipart `file`, form `title` (default `""`), `language` (default `""`) | `{"job": <job view>, "pages", "parts"}`; ingestion continues as a background asyncio task | 413, 400, 400 `DocumentError`, 503 without `SARVAM_API_KEY` | `apps/api/wsw_brain/documents/api.py:159-194` |
-| GET | `/api/documents/jobs` | query `status` (`running`, `done`, `failed`, optional), `limit` 1-100 (default 50) | list of job views | 422 validation | `apps/api/wsw_brain/documents/api.py:197-207` |
-| GET | `/api/documents/jobs/{job_id}` | path `job_id` | job view, with the last 50 events | 404 no such job | `apps/api/wsw_brain/documents/api.py:210-215` |
-| DELETE | `/api/documents/jobs/{job_id}` | path `job_id` | `{"deleted": true}` | 404 no such job, 409 job still running | `apps/api/wsw_brain/documents/api.py:218-226` |
-| GET | `/api/documents` | none | list of document dicts | 503 graph database unavailable | `apps/api/wsw_brain/documents/api.py:229-231` |
-| GET | `/api/documents/search` | query `q` (required), `doc_id` (optional), `k` (default 8, clamped to 1-20) | list of chunk hits | 503 graph database unavailable | `apps/api/wsw_brain/documents/api.py:234-237` |
-| POST | `/api/documents/ask` | JSON `AskBody`: `question` 1-2000 chars, `doc_id?`, `k` 1-20 (default 6), `language` matching `^[a-z]{2,3}-IN$`, `include_meetings` boolean | answer dict, plus `translated_answer`, `answer_language`, `translated_by` or `translation_error`, and `timings.translate_ms` when a translation is requested | 422 validation, 503 graph unavailable, 503 translation requested without a Sarvam key. A failed or timed-out translation is not an error: the answer returns with `translation_error` | `apps/api/wsw_brain/documents/api.py:59-66`, `apps/api/wsw_brain/documents/api.py:240-262` |
-| POST | `/api/documents/speak` | JSON `SpeakBody`: `text` 1-5000 chars, `language` (default `en-IN`), `speaker` `^[a-z_]{2,40}$` (default `priya`), `pace` 0.5-2.0 | `audio/wav` body, header `x-spoken-by: Sarvam Bulbul v3` | 422 validation, 400 `ValueError`, 502 `SarvamSpeechError`, 503 without a Sarvam key | `apps/api/wsw_brain/documents/api.py:69-73`, `apps/api/wsw_brain/documents/api.py:265-274` |
-| GET | `/api/documents/{doc_id}` | path `doc_id` | document with its chunks | 404 no such document, 503 graph unavailable | `apps/api/wsw_brain/documents/api.py:277-282` |
-| DELETE | `/api/documents/{doc_id}` | path `doc_id` | `{"deleted": <bool>}` | 503 graph unavailable | `apps/api/wsw_brain/documents/api.py:285-287` |
+| GET | `/api/documents/status` | none | `sarvam_configured`, `digitiser`, `llm {provider, model}`, `embedder`, `part_pages`, `max_pages`, `max_mb`, `language` | none | `apps/api/wsw_brain/routes/documents.py:124-138` |
+| POST | `/api/documents/split` | multipart `file` | `filename`, `kind`, `pages`, `part_pages`, `parts[]`; does not call Sarvam | 413 file too large, 400 empty file, 400 `DocumentError` | `apps/api/wsw_brain/routes/documents.py:141-156` |
+| POST | `/api/documents` | multipart `file`, form `title` (default `""`), `language` (default `""`) | `{"job": <job view>, "pages", "parts"}`; ingestion continues as a background asyncio task | 413, 400, 400 `DocumentError`, 503 without `SARVAM_API_KEY` | `apps/api/wsw_brain/routes/documents.py:159-194` |
+| GET | `/api/documents/jobs` | query `status` (`running`, `done`, `failed`, optional), `limit` 1-100 (default 50) | list of job views | 422 validation | `apps/api/wsw_brain/routes/documents.py:197-207` |
+| GET | `/api/documents/jobs/{job_id}` | path `job_id` | job view, with the last 50 events | 404 no such job | `apps/api/wsw_brain/routes/documents.py:210-215` |
+| DELETE | `/api/documents/jobs/{job_id}` | path `job_id` | `{"deleted": true}` | 404 no such job, 409 job still running | `apps/api/wsw_brain/routes/documents.py:218-226` |
+| GET | `/api/documents` | none | list of document dicts | 503 graph database unavailable | `apps/api/wsw_brain/routes/documents.py:229-231` |
+| GET | `/api/documents/search` | query `q` (required), `doc_id` (optional), `k` (default 8, clamped to 1-20) | list of chunk hits | 503 graph database unavailable | `apps/api/wsw_brain/routes/documents.py:234-237` |
+| POST | `/api/documents/ask` | JSON `AskBody`: `question` 1-2000 chars, `doc_id?`, `k` 1-20 (default 6), `language` matching `^[a-z]{2,3}-IN$`, `include_meetings` boolean | answer dict, plus `translated_answer`, `answer_language`, `translated_by` or `translation_error`, and `timings.translate_ms` when a translation is requested | 422 validation, 503 graph unavailable, 503 translation requested without a Sarvam key. A failed or timed-out translation is not an error: the answer returns with `translation_error` | `apps/api/wsw_brain/routes/documents.py:59-66`, `apps/api/wsw_brain/routes/documents.py:240-262` |
+| POST | `/api/documents/speak` | JSON `SpeakBody`: `text` 1-5000 chars, `language` (default `en-IN`), `speaker` `^[a-z_]{2,40}$` (default `priya`), `pace` 0.5-2.0 | `audio/wav` body, header `x-spoken-by: Sarvam Bulbul v3` | 422 validation, 400 `ValueError`, 502 `SarvamSpeechError`, 503 without a Sarvam key | `apps/api/wsw_brain/routes/documents.py:69-73`, `apps/api/wsw_brain/routes/documents.py:265-274` |
+| GET | `/api/documents/{doc_id}` | path `doc_id` | document with its chunks | 404 no such document, 503 graph unavailable | `apps/api/wsw_brain/routes/documents.py:277-282` |
+| DELETE | `/api/documents/{doc_id}` | path `doc_id` | `{"deleted": <bool>}` | 503 graph unavailable | `apps/api/wsw_brain/routes/documents.py:285-287` |
 
-Error bodies use FastAPI's `{"detail": ...}` shape. The 413 and 400 upload checks are in `apps/api/wsw_brain/documents/api.py:114-121`; the 503 for a missing key in `apps/api/wsw_brain/documents/api.py:86` (digitiser) and `apps/api/wsw_brain/documents/api.py:94` (translation and speech); graph errors become 503 in `apps/api/wsw_brain/documents/api.py:107-111`.
+Error bodies use FastAPI's `{"detail": ...}` shape. The 413 and 400 upload checks are in `apps/api/wsw_brain/routes/documents.py:114-121`; the 503 for a missing key in `apps/api/wsw_brain/routes/documents.py:86` (digitiser) and `apps/api/wsw_brain/routes/documents.py:94` (translation and speech); graph errors become 503 in `apps/api/wsw_brain/routes/documents.py:107-111`.
 
-Ingestion jobs live in an in-process dict (`apps/api/wsw_brain/documents/api.py:51`), so they are lost on restart and are not shared between worker processes. Finished jobs older than `JOB_TTL_S = 3600` seconds are pruned (`apps/api/wsw_brain/documents/api.py:32`, `apps/api/wsw_brain/documents/api.py:290-294`).
+Ingestion jobs live in an in-process dict (`apps/api/wsw_brain/routes/documents.py:51`), so they are lost on restart and are not shared between worker processes. Finished jobs older than `JOB_TTL_S = 3600` seconds are pruned (`apps/api/wsw_brain/routes/documents.py:32`, `apps/api/wsw_brain/routes/documents.py:290-294`).
 
 ## Server-Sent Events
 
@@ -109,18 +109,18 @@ Ingestion jobs live in an in-process dict (`apps/api/wsw_brain/documents/api.py:
 
 | Parameter | Type | Default | Meaning | Source |
 |---|---|---|---|---|
-| `since_id` | integer ≥ 0 | 0 | Replay buffered events with an id greater than this before streaming new ones | `apps/api/wsw_brain/event_stream.py:48` |
-| `meeting_id` | string | none | Deliver only events for this meeting | `apps/api/wsw_brain/event_stream.py:49` |
+| `since_id` | integer ≥ 0 | 0 | Replay buffered events with an id greater than this before streaming new ones | `apps/api/wsw_brain/routes/event_stream.py:48` |
+| `meeting_id` | string | none | Deliver only events for this meeting | `apps/api/wsw_brain/routes/event_stream.py:49` |
 
 The bus keeps the last 500 events for replay and gives each subscriber a queue of 2000; when a subscriber's queue is full, new events for it are dropped (`apps/api/wsw_brain/events.py:53-55`, `apps/api/wsw_brain/events.py:64`, `apps/api/wsw_brain/events.py:108-109`).
 
 ### Response headers
 
-`Content-Type: text/event-stream`, `Cache-Control: no-cache`, `Connection: keep-alive`, `X-Accel-Buffering: no` (`apps/api/wsw_brain/event_stream.py:59-66`).
+`Content-Type: text/event-stream`, `Cache-Control: no-cache`, `Connection: keep-alive`, `X-Accel-Buffering: no` (`apps/api/wsw_brain/routes/event_stream.py:59-66`).
 
 ### Frame format
 
-Each event is one frame (`apps/api/wsw_brain/event_stream.py:20-23`):
+Each event is one frame (`apps/api/wsw_brain/routes/event_stream.py:20-23`):
 
 ```text
 id: 42
@@ -137,7 +137,7 @@ The full envelope on the bus is `{"id": int, "type": str, "meeting_id": str | nu
 
 ### Keep-alive and disconnect
 
-The stream polls its queue every `QUEUE_POLL_S = 1.0` seconds and sends the comment line `: keep-alive` after `KEEP_ALIVE_S = 15.0` seconds without events (`apps/api/wsw_brain/event_stream.py:16-17`, `apps/api/wsw_brain/event_stream.py:32-38`). The loop stops when the client disconnects, and the subscription is closed (`apps/api/wsw_brain/event_stream.py:31`, `apps/api/wsw_brain/event_stream.py:41-42`).
+The stream polls its queue every `QUEUE_POLL_S = 1.0` seconds and sends the comment line `: keep-alive` after `KEEP_ALIVE_S = 15.0` seconds without events (`apps/api/wsw_brain/routes/event_stream.py:16-17`, `apps/api/wsw_brain/routes/event_stream.py:32-38`). The loop stops when the client disconnects, and the subscription is closed (`apps/api/wsw_brain/routes/event_stream.py:31`, `apps/api/wsw_brain/routes/event_stream.py:41-42`).
 
 ### Event types
 
@@ -188,4 +188,4 @@ The web client parses the `data` line as the whole envelope and reads `id` and `
 | GET | `/api/sessions/{id}` | path | Planned | `apps/web/src/api/client.ts:102` |
 | WebSocket | `/ws/meetings/{id}/audio` | audio stream | Planned | `apps/web/src/api/client.ts:112-118` |
 
-The client's `POST /api/ask` is the nearest match to the server's `POST /api/agent/ask` (`apps/api/wsw_brain/brain/agent_api.py:38-40`), but the paths differ and the server route is mounted only with an injected agent. No server has a voice route. The same gaps are listed in [../ARCHITECTURE.md](../ARCHITECTURE.md) under "What is not in the repository yet".
+The client's `POST /api/ask` is the nearest match to the server's `POST /api/agent/ask` (`apps/api/wsw_brain/routes/agent.py:38-40`), but the paths differ and the server route is mounted only with an injected agent. No server has a voice route. The same gaps are listed in [../ARCHITECTURE.md](../ARCHITECTURE.md) under "What is not in the repository yet".

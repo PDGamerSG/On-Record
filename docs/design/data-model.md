@@ -267,7 +267,7 @@ flowchart LR
     LLM -- "answers, vectors" --> P
 ```
 
-Sources: apps/api/wsw_brain/documents/app.py:21-25, apps/api/wsw_brain/documents/api.py:159-287, apps/api/wsw_brain/documents/ingest.py:133-157, scripts/seed_demo_meetings.py:22-42, apps/api/wsw_brain/app.py:44, apps/api/wsw_brain/ingest/pipeline.py:209-447.
+Sources: apps/api/wsw_brain/documents/app.py:21-25, apps/api/wsw_brain/routes/documents.py:159-287, apps/api/wsw_brain/documents/ingest.py:133-157, scripts/seed_demo_meetings.py:22-42, apps/api/wsw_brain/app.py:44, apps/api/wsw_brain/ingest/pipeline.py:209-447.
 
 *DFD level 1: the processes inside the API and which of them read or write each part of the graph.*
 
@@ -303,6 +303,6 @@ flowchart TB
     P5 -. "save_turn" .-> D4
 ```
 
-Sources: apps/api/wsw_brain/documents/api.py:159-194, apps/api/wsw_brain/documents/api.py:240-262, apps/api/wsw_brain/documents/ingest.py:87-157, apps/api/wsw_brain/documents/answer.py:60-118, apps/api/wsw_brain/listen/file_pipeline.py:27-81, apps/api/wsw_brain/ingest/pipeline.py:118-143, apps/api/wsw_brain/ingest/pipeline.py:334-423, apps/api/wsw_brain/graph/store.py:461, apps/api/wsw_brain/graph/store.py:889-896, scripts/seed_demo_meetings.py:26-42.
+Sources: apps/api/wsw_brain/routes/documents.py:159-194, apps/api/wsw_brain/routes/documents.py:240-262, apps/api/wsw_brain/documents/ingest.py:87-157, apps/api/wsw_brain/documents/answer.py:60-118, apps/api/wsw_brain/listen/file_pipeline.py:27-81, apps/api/wsw_brain/ingest/pipeline.py:118-143, apps/api/wsw_brain/ingest/pipeline.py:334-423, apps/api/wsw_brain/graph/store.py:461, apps/api/wsw_brain/graph/store.py:889-896, scripts/seed_demo_meetings.py:26-42.
 
 Process 1 and 2 run only under the standalone documents app (apps/api/wsw_brain/documents/app.py:25); the main app lists `documents` as a feature but does not serve `/api/documents` (apps/api/wsw_brain/app.py:32). Process 2 reads meeting lines through the shared retriever when `include_meetings` is set (apps/api/wsw_brain/documents/answer.py:93). Because process 4 is not wired, the only meeting data in a running graph is what the seed script writes: meetings, speakers, names, utterances and summaries, without decisions or action items (scripts/seed_demo_meetings.py:6).

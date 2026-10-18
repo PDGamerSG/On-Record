@@ -5,10 +5,10 @@ from __future__ import annotations
 from fastapi import FastAPI
 
 from .brain.agent import MeetingAgent
-from .brain.agent_api import create_router as create_agent_router
 from .brand import product_name
-from .event_stream import router as event_stream_router
 from .events import EventBus, bus
+from .routes.agent import create_router as create_agent_router
+from .routes.event_stream import router as event_stream_router
 
 
 def create_app(event_bus: EventBus | None = None, meeting_agent: MeetingAgent | None = None) -> FastAPI:

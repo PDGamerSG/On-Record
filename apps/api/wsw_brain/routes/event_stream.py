@@ -10,7 +10,7 @@ from typing import Any
 from fastapi import APIRouter, HTTPException, Query, Request
 from fastapi.responses import StreamingResponse
 
-from .events import EventBus, EventSubscription
+from ..events import EventBus, EventSubscription
 
 router = APIRouter()
 QUEUE_POLL_S = 1.0

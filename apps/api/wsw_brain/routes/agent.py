@@ -7,7 +7,7 @@ from typing import Any
 from fastapi import APIRouter
 from pydantic import BaseModel, Field
 
-from .agent import MeetingAgent
+from ..brain.agent import MeetingAgent
 
 
 class AskRequest(BaseModel):
