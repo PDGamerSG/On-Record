@@ -283,7 +283,7 @@ cd apps/web && npm run dev    # the Documents page proxies /api to port 8000
 | `GET /api/documents/jobs/{id}` | Job progress: split, each digitised part, chunk, embed, store, summary |
 | `GET /api/documents`, `GET/DELETE /api/documents/{id}` | List, read (with chunks) and delete documents |
 | `GET /api/documents/search?q=` | Fused full-text and vector passage search |
-| `POST /api/documents/ask` | Gemma 4 answer with page citations; `include_meetings` adds meeting lines; `language` (e.g. `kn-IN`) adds a translation, with `translated_by` naming the model. A failed or slow translation (over 20 seconds) returns the answer with `translation_error` |
+| `POST /api/documents/ask` | Gemma 4 answer with page citations; `include_meetings` adds meeting lines; `language` (e.g. `kn-IN`) adds a translation, with `translated_by` naming the model. A failed or slow translation (over 20 seconds) returns the answer with `translation_error`. `checks` reports the sentences and numbers the answer checks removed (`WSW_ANSWER_CHECKS`) |
 | `POST /api/documents/speak` | Read text aloud with Bulbul v3 (`audio/wav`) |
 | `GET /api/documents/status` | Configured digitiser, model, embedder and limits |
 

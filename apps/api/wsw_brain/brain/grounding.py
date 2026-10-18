@@ -11,13 +11,19 @@ Answers are read aloud, so a wrong amount or date cannot be taken back. Two rule
 
 from __future__ import annotations
 
+import logging
 import re
 import unicodedata
-from collections.abc import Iterable
+from collections.abc import Awaitable, Callable, Iterable
 from dataclasses import dataclass, field
+from typing import Any
 
 from ..graph.text import STOPWORDS, content_tokens, normalise
+from .llm import LLMError
 
+log = logging.getLogger(__name__)
+
+MODES = ("enforce", "report", "off")  # WSW_ANSWER_CHECKS
 MIN_OVERLAP = 3
 _NUMBER = re.compile(r"\d+(?:[.,]\d+)*")
 _MARKER = re.compile(r"\[(?:[du]):[^\]\s]+\]")
@@ -114,3 +120,47 @@ def check_answer(
             checked.unsupported_numbers |= missing
             checked.number_sentences.append(sentence)
     return checked
+
+
+def check_mode(mode: str) -> str:
+    if mode not in MODES:
+        raise ValueError(f"answer_checks must be one of {', '.join(MODES)}, got {mode!r}")
+    return mode
+
+
+def retry_message(numbers: str, marker: str) -> str:
+    """The follow-up user turn that asks the model to correct `numbers` (already joined for display)."""
+    return (
+        f"These numbers in your answer do not appear in the evidence you cited: {numbers}. Answer again using "
+        f"only numbers that appear in the evidence, and cite each statement with its {marker} marker."
+    )
+
+
+async def apply_checks(
+    answer: str,
+    evidence: dict[str, str],
+    citations: re.Pattern[str] | Iterable[re.Pattern[str]],
+    mode: str,
+    ask_again: Callable[[str], Awaitable[str]],
+) -> tuple[str, dict[str, Any]]:
+    """Check `answer` in `mode` ("enforce" or "report"). In "enforce", unsupported numbers make one call to
+    `ask_again(numbers)`, which returns a new answer with only retrieved citations; sentences that still
+    carry unsupported numbers are then dropped. "report" returns `answer` unchanged. Returns the answer to
+    use and {"mode", "retried", "withheld": [sentences], "unsupported_numbers": [numbers]}."""
+    patterns = [citations] if isinstance(citations, re.Pattern) else list(citations)
+    checked = check_answer(answer, evidence, patterns)
+    retried = False
+    if checked.unsupported_numbers and mode == "enforce":
+        retried = True
+        try:
+            checked = check_answer(
+                await ask_again(", ".join(sorted(checked.unsupported_numbers))), evidence, patterns
+            )
+        except LLMError as exc:  # the first answer stands, minus the sentences with unsupported numbers
+            log.warning("re-asking for supported numbers failed: %s", exc)
+    flagged = sorted(checked.unsupported_numbers)
+    final = checked.without_unsupported_numbers() if flagged else checked
+    if final.withheld:
+        log.info("answer check (%s) withholds %d sentence(s): %s", mode, len(final.withheld), final.withheld)
+    details = {"mode": mode, "retried": retried, "withheld": final.withheld, "unsupported_numbers": flagged}
+    return (final.text if mode == "enforce" else answer), details
