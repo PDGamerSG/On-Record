@@ -196,6 +196,8 @@ sequenceDiagram
 
 The request's `k` (1 to 20, default 8) is how many fused hits the agent retrieves as evidence; `question` can be up to 2000 characters. The agent keeps the last six question-and-answer pairs of each session in memory; it does not write `Turn` nodes. Its `actions` list is always empty, and its `timings` keys are `retrieval_ms`, `model_ms` and `total_ms`. Before the drawer can use the agent, two gaps need closing: the drawer posts to `/api/ask` rather than `/api/agent/ask`, and spoken questions have no server route.
 
+Both answer paths run the answer checks in `brain/grounding.py` before they return. Every number in a sentence must appear in the evidence that sentence cites, compared without thousands separators and with Indian-script digits read as ASCII. An uncited sentence is kept only if it is not a factual claim or shares at least three content words with the evidence. On an unsupported number the model is asked once more at temperature 0; sentences that still fail are dropped, and an answer left empty becomes the usual "not found" reply. `MeetingAgent` adds a `check_answer` entry to `tool_trace`, and `answer_question()` returns `checks`. `WSW_ANSWER_CHECKS=report` keeps answers unchanged and only records what would be removed.
+
 ## Graph schema
 
 Everything lives in one FalkorDB graph, named by `WSW_GRAPH` (default `wsw_demo`). Meeting statements are in `graph/cypher.py` and document statements in `documents/store.py`. Values are always passed as query parameters.

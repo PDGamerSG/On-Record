@@ -46,6 +46,7 @@ Both folder defaults are relative to the repository root.
 | `WSW_OLLAMA_URL` | `http://127.0.0.1:11434` | Local Ollama server | `brain/llm.py` |
 | `WSW_OLLAMA_MODEL` | `gemma4:12b-it-qat` | Ollama model tag (install with `ollama pull gemma4:12b-it-qat`) | `brain/llm.py`, `brain/gemma.py` |
 | `WSW_QUESTION_AUDIO` | `auto` | Which runtime will transcribe spoken questions: `auto`, `ollama` (Gemma 4 audio input) or `whisper` | *Not read yet* |
+| `WSW_ANSWER_CHECKS` | `enforce` | Answer checks: `enforce` removes sentences and numbers the evidence does not support, `report` only logs and traces them, `off` skips them | `brain/agent.py`, `documents/answer.py` |
 
 ### Request queue
 

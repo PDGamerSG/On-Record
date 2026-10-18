@@ -11,7 +11,9 @@ import re
 import time
 from typing import Any
 
+from ..config import settings
 from ..contracts import LLM, AskResult
+from .grounding import apply_checks, check_mode, retry_message
 from .llm import UNTRUSTED_NOTE
 from .retrieve import Retriever
 
@@ -27,12 +29,20 @@ _SYSTEM_PROMPT += UNTRUSTED_NOTE
 class MeetingAgent:
     """Coordinate retrieval and grounded language-model answers for meeting questions."""
 
-    def __init__(self, llm: LLM, retriever: Retriever, *, history_turns: int = 6) -> None:
+    def __init__(
+        self,
+        llm: LLM,
+        retriever: Retriever,
+        *,
+        history_turns: int = 6,
+        answer_checks: str | None = None,
+    ) -> None:
         if history_turns <= 0:
             raise ValueError("history_turns must be positive")
         self.llm = llm
         self.retriever = retriever
         self.history_turns = history_turns
+        self.answer_checks = check_mode(answer_checks or settings().answer_checks)
         self._history: dict[str, list[dict[str, str]]] = {}
 
     async def ask(
@@ -78,6 +88,10 @@ class MeetingAgent:
         response = await self.llm.chat(messages, temperature=0.1, max_tokens=500)
         model_ms = round((time.perf_counter() - model_started) * 1000, 1)
         answer, citations = _ground(response.text, hits)
+        if self.answer_checks != "off":
+            checked_answer, check = await self._check(answer, hits, messages, response.text)
+            tool_trace.append(check)
+            answer, citations = _ground(checked_answer, hits)
         answer = answer or _FALLBACK
         self._remember(session_id, question, answer)
         return self._result(
@@ -92,6 +106,32 @@ class MeetingAgent:
             model=response.model,
             provider=response.provider,
         )
+
+    async def _check(
+        self, answer: str, hits: list[dict[str, Any]], messages: list[dict[str, Any]], reply: str
+    ) -> tuple[str, dict[str, Any]]:
+        """Apply the answer checks (brain/grounding.py). Returns the answer to use and the check_answer
+        trace entry."""
+        started = time.perf_counter()
+        evidence = {str(hit.get("utterance_id") or hit.get("id")): str(hit.get("text") or "") for hit in hits}
+
+        async def ask_again(numbers: str) -> str:
+            retry = [
+                *messages,
+                {"role": "assistant", "content": reply},
+                {"role": "user", "content": retry_message(numbers, "[u:<utterance_id>]")},
+            ]
+            response = await self.llm.chat(retry, temperature=0.0, max_tokens=500)
+            return _ground(response.text, hits)[0]
+
+        checked, details = await apply_checks(answer, evidence, _CITATION, self.answer_checks, ask_again)
+        entry = {
+            "tool": "check_answer",
+            "args": details,
+            "result_count": len(details["withheld"]),
+            "ms": round((time.perf_counter() - started) * 1000, 1),
+        }
+        return checked, entry
 
     def clear_session(self, session_id: str) -> None:
         """Forget conversation context for a session."""

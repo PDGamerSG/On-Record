@@ -12,14 +12,17 @@ import re
 import time
 from typing import Any
 
+from ..brain.grounding import apply_checks, check_mode, retry_message
 from ..brain.llm import UNTRUSTED_NOTE
 from ..brain.retrieve import rrf_fuse
+from ..config import settings
 from ..contracts import LLM, Embedder
 from .split import Chunk
 from .store import DocumentStore
 
 log = logging.getLogger(__name__)
 
+NO_ANSWER = "The uploaded documents do not mention that."
 _CITATION = re.compile(r"\[d:([^\]\s]+)\]")
 _MEETING_CITATION = re.compile(r"\[u:([^\]\s]+)\]")
 _GROUPED_CITATION = re.compile(r"\[\s*([du]:[^\]\s,;]+(?:\s*[,;]\s*[du]:[^\]\s,;]+)+)\s*\]")
@@ -124,8 +127,13 @@ async def answer_question(
     k: int = 6,
     meetings: Any | None = None,
     meeting_k: int = 6,
+    answer_checks: str | None = None,
 ) -> dict[str, Any]:
-    """Answer from document passages, and from meeting lines too when a meeting `Retriever` is given."""
+    """Answer from document passages, and from meeting lines too when a meeting `Retriever` is given.
+
+    The answer checks (brain/grounding.py, WSW_ANSWER_CHECKS unless `answer_checks` is given) see both
+    passages and meeting lines as evidence; their result is returned under "checks"."""
+    mode = check_mode(answer_checks or settings().answer_checks)
     started = time.perf_counter()
     hits = retriever.retrieve(question, k, doc_id)
     meeting_hits: list[dict[str, Any]] = []
@@ -137,25 +145,43 @@ async def answer_question(
             log.warning("meeting retrieval for a document question failed: %r", exc)
     retrieval_ms = round((time.perf_counter() - started) * 1000, 1)
     if not hits and not meeting_hits:
-        return {"answer": "The uploaded documents do not mention that.", "citations": [], "hits": [],
+        return {"answer": NO_ANSWER, "citations": [], "hits": [],
                 "meeting_citations": [], "meeting_hits": [], "model": None, "provider": None,
                 "timings": {"retrieval_ms": retrieval_ms}}
     context = f"Passages:\n\n{passages(hits)}" if hits else "Passages: none"
     if meetings is not None:
         context += f"\n\nMeeting lines:\n{meeting_lines(meeting_hits) if meeting_hits else 'none'}"
-    result = await llm.chat(
-        [
-            {"role": "system", "content": ANSWER_WITH_MEETINGS_SYSTEM if meetings is not None else ANSWER_SYSTEM},
-            {"role": "user", "content": f"{context}\n\nQuestion: {question.strip()}"},
-        ],
-        temperature=0.1,
-        max_tokens=800,
-    )
+    messages = [
+        {"role": "system", "content": ANSWER_WITH_MEETINGS_SYSTEM if meetings is not None else ANSWER_SYSTEM},
+        {"role": "user", "content": f"{context}\n\nQuestion: {question.strip()}"},
+    ]
+    result = await llm.chat(messages, temperature=0.1, max_tokens=800)
     by_id = {hit["id"]: hit for hit in hits}
     by_utterance = {hit["utterance_id"]: hit for hit in meeting_hits}
-    answer = _CITATION.sub(lambda m: m.group(0) if m.group(1) in by_id else "", split_grouped_citations(result.text))
-    answer = _MEETING_CITATION.sub(lambda m: m.group(0) if m.group(1) in by_utterance else "", answer).strip()
-    return {
+    answer = _retrieved_citations_only(result.text, by_id, by_utterance)
+    timings = {"retrieval_ms": retrieval_ms, "model_ms": result.latency_ms}
+    checks: dict[str, Any] | None = None
+    if mode != "off":
+        checks_started = time.perf_counter()
+        evidence = {**{h["id"]: str(h.get("text") or "") for h in hits},
+                    **{h["utterance_id"]: str(h.get("text") or "") for h in meeting_hits}}  # fmt: skip
+
+        async def ask_again(numbers: str) -> str:
+            retry = await llm.chat(
+                [*messages, {"role": "assistant", "content": result.text},
+                 {"role": "user", "content": retry_message(numbers, "[d:...] or [u:...]")}],
+                temperature=0.0,
+                max_tokens=800,
+            )  # fmt: skip
+            return _retrieved_citations_only(retry.text, by_id, by_utterance)
+
+        answer, details = await apply_checks(
+            answer, evidence, (_CITATION, _MEETING_CITATION), mode, ask_again
+        )
+        answer = answer or NO_ANSWER
+        checks = {**details, "withheld": len(details["withheld"]), "withheld_sentences": details["withheld"]}
+        timings["check_ms"] = round((time.perf_counter() - checks_started) * 1000, 1)
+    response = {
         "answer": answer,
         "citations": _cited(_CITATION, answer, by_id),
         "hits": hits,
@@ -163,8 +189,19 @@ async def answer_question(
         "meeting_hits": meeting_hits,
         "model": result.model,
         "provider": result.provider,
-        "timings": {"retrieval_ms": retrieval_ms, "model_ms": result.latency_ms},
+        "timings": timings,
     }
+    if checks is not None:
+        response["checks"] = checks
+    return response
+
+
+def _retrieved_citations_only(
+    text: str, by_id: dict[str, dict[str, Any]], by_utterance: dict[str, dict[str, Any]]
+) -> str:
+    """Drop citations of passages or meeting lines that were not retrieved."""
+    answer = _CITATION.sub(lambda m: m.group(0) if m.group(1) in by_id else "", split_grouped_citations(text))
+    return _MEETING_CITATION.sub(lambda m: m.group(0) if m.group(1) in by_utterance else "", answer).strip()
 
 
 def _meeting_hits(meetings: Any, question: str, doc_hits: list[dict[str, Any]], k: int) -> list[dict[str, Any]]:

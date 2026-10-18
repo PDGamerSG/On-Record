@@ -53,6 +53,9 @@ class Settings(BaseSettings):
     model_queue_wait_s: float = Field(90.0, gt=0, alias="WSW_MODEL_QUEUE_WAIT_S")
     # Which runtime hears spoken questions natively. "ollama" = Gemma 4 E4B audio input; "whisper" = server ASR.
     question_audio: Literal["auto", "ollama", "whisper"] = Field("auto", alias="WSW_QUESTION_AUDIO")
+    # Answer checks (brain/grounding.py): "enforce" removes unsupported sentences and numbers, "report" only
+    # logs and traces them, "off" skips the checks.
+    answer_checks: Literal["enforce", "report", "off"] = Field("enforce", alias="WSW_ANSWER_CHECKS")
 
     # Embeddings: EmbeddingGemma-300m ONNX, or a deterministic hashing fallback.
     embedder: Literal["gemma", "hash"] = Field("gemma", alias="WSW_EMBEDDER")
