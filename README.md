@@ -150,7 +150,7 @@ How to use each part of `wsw_brain`. The settings they read are listed in [CONFI
 Start the dependency-free API shell locally with:
 
 ```bash
-uv run --project apps/api python -m wsw_brain.cli
+uv run --project apps/api python -m wsw_brain
 ```
 
 The launcher binds to `127.0.0.1:8000` by default; pass `--host`, `--port`, or `--reload` for local development overrides.
