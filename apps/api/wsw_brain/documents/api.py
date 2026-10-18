@@ -14,7 +14,7 @@ from dataclasses import dataclass, field
 from functools import lru_cache
 from typing import Annotated, Any, Literal
 
-from fastapi import APIRouter, File, Form, HTTPException, Response, UploadFile
+from fastapi import APIRouter, File, Form, HTTPException, Query, Response, UploadFile
 from pydantic import BaseModel, Field
 
 from ..brain import Retriever, get_embedder, get_llm
@@ -194,13 +194,16 @@ async def upload(
 
 
 @router.get("/jobs")
-def list_jobs(status: Literal["running", "done", "failed"] | None = None) -> list[dict[str, Any]]:
+def list_jobs(
+    status: Literal["running", "done", "failed"] | None = None,
+    limit: int = Query(50, ge=1, le=100),
+) -> list[dict[str, Any]]:
     """List recent document ingestion jobs for clients that need a job overview."""
     _prune_jobs()
     jobs = sorted(_jobs.values(), key=lambda item: item.started_at, reverse=True)
     if status is not None:
         jobs = [job for job in jobs if job.status == status]
-    return [job.view() for job in jobs]
+    return [job.view() for job in jobs[:limit]]
 
 
 @router.get("/jobs/{job_id}")
