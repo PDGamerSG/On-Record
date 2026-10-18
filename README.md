@@ -133,6 +133,8 @@ CI does not check the web app yet; run `npm run lint` and `npm run build` in `ap
 
 ## Documentation
 
+The [documentation index](docs/README.md) lists every document, including the requirements specification, architecture and design descriptions, API reference, test plan, threat model, [user guide](docs/user-guide.md) and [glossary](docs/glossary.md).
+
 - [Architecture](docs/ARCHITECTURE.md): how the web app, the API and the graph fit together, the data flows, and the graph schema.
 - [Configuration](docs/CONFIGURATION.md): every environment variable, its default, and what reads it.
 - [Troubleshooting](docs/TROUBLESHOOTING.md): Docker, Colima, Node and Python setup problems.
