@@ -163,6 +163,21 @@ function RoomReady({ id, room, meeting }: { id: string; room: MeetingRoomApi; me
     if (pending) seekTo(pending.t, pending.utterance_id);
   }, [id, seekTo]);
 
+  // ?t=<seconds>&u=<utterance id>: a shared link to a moment, such as a meeting line cited by a document answer.
+  // Seek once, after the transcript has loaded, without starting playback.
+  const linkT = params.get("t");
+  const linkU = params.get("u") ?? undefined;
+  const linked = useRef<string | null>(null);
+  const hasUtterances = state.utterances.length > 0;
+  useEffect(() => {
+    const t = Number(linkT);
+    if (linkT === null || !Number.isFinite(t) || t < 0 || !hasUtterances) return;
+    const key = `${id}:${linkT}:${linkU ?? ""}`;
+    if (linked.current === key) return;
+    linked.current = key;
+    seekTo(t, linkU, false);
+  }, [id, linkT, linkU, hasUtterances, seekTo]);
+
   // ?live=1: the person just pressed "Start a live meeting", so begin capturing. The timer skips StrictMode's throwaway mount.
   const wantCapture = params.get("live") === "1";
   const autoTried = useRef(false);

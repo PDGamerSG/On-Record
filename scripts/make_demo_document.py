@@ -15,7 +15,8 @@ import sys
 import textwrap
 from pathlib import Path
 
-DEFAULT_OUT = Path(__file__).resolve().parents[1] / "data" / "kitepost-pricing-policy.pdf"
+# The web app serves this copy as the "Try the sample" document on the Documents page.
+DEFAULT_OUT = Path(__file__).resolve().parents[1] / "apps" / "web" / "public" / "samples" / "kitepost-pricing-policy.pdf"
 
 PAGES: list[tuple[str, list[str]]] = [
     ("Kitepost Self-Serve Pricing Policy", [

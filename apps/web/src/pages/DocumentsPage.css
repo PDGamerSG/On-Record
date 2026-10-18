@@ -1,0 +1,892 @@
+/* Documents: upload (with the visible split plan), library, ask, and the selected document. Shares memoryPages.css. */
+
+.dx-status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-1) 0;
+  color: var(--ink-3);
+  font-size: var(--fs-xs);
+}
+.dx-status span + span::before {
+  content: "·";
+  margin: 0 var(--s-2);
+  color: var(--line-strong);
+}
+
+/* section heads inside panels */
+.dx-sec-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--s-1) var(--s-3);
+  margin-bottom: var(--s-4);
+}
+.dx-sec-head h2 {
+  font-size: var(--fs-md);
+  font-weight: 650;
+}
+.dx-hint {
+  color: var(--ink-3);
+  font-size: var(--fs-sm);
+}
+
+.dx-note {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  margin-top: var(--s-3);
+  color: var(--ink-2);
+  font-size: var(--fs-sm);
+}
+.dx-note svg {
+  flex: none;
+  width: 16px;
+  height: 16px;
+}
+.dx-note--warn {
+  color: var(--warn);
+}
+.dx-alert {
+  margin: var(--s-3) 0 0;
+}
+.dx-muted {
+  color: var(--ink-3);
+  font-size: var(--fs-sm);
+}
+
+/* provenance labels: which model did what */
+.dx-prov {
+  margin-top: var(--s-3);
+  color: var(--ink-3);
+  font-size: var(--fs-xs);
+}
+.dx-prov .tc {
+  color: var(--ink-3);
+}
+.dx-prov--top {
+  margin: 0 0 var(--s-2);
+  font-weight: 550;
+  color: var(--ink-2);
+}
+
+/* model-written text */
+.dx-prose {
+  max-width: var(--measure);
+  overflow-wrap: anywhere;
+}
+.dx-prose > * + * {
+  margin-top: var(--s-2);
+}
+.dx-prose p {
+  white-space: pre-line;
+}
+.dx-prose ul,
+.dx-prose ol {
+  margin-bottom: 0;
+  padding-left: var(--s-5);
+}
+.dx-prose li + li {
+  margin-top: var(--s-1);
+}
+.dx-prose strong {
+  font-weight: 620;
+}
+
+.dx-field {
+  display: grid;
+  flex: 1 1 220px;
+  gap: var(--s-1);
+  min-width: 0;
+}
+.dx-field--narrow {
+  flex: 0 1 220px;
+}
+.dx-field--inline {
+  flex: 0 1 auto;
+}
+.dx-field .field {
+  min-height: 40px;
+}
+.dx-label {
+  color: var(--ink-2);
+  font-size: var(--fs-xs);
+  font-weight: 550;
+}
+.dx-select {
+  width: auto;
+  max-width: 100%;
+  padding-right: var(--s-8);
+  cursor: pointer;
+}
+.dx-field--inline .dx-select {
+  max-width: 260px;
+}
+
+/* ---- upload ---------------------------------------------------------------------------------- */
+.dx-upload {
+  padding: var(--s-5);
+}
+
+.dx-drop {
+  display: grid;
+  justify-items: center;
+  gap: var(--s-1);
+  padding: var(--s-8) var(--s-5);
+  border: 1.5px dashed var(--line-strong);
+  border-radius: var(--r-panel);
+  background: var(--dots), var(--surface-sunk);
+  text-align: center;
+  cursor: pointer;
+  transition:
+    border-color var(--t-fast) var(--ease),
+    background-color var(--t-fast) var(--ease);
+}
+.dx-sample {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-2) var(--s-3);
+  margin-top: var(--s-3);
+}
+.dx-sample .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-1);
+}
+.dx-drop:hover {
+  border-color: var(--ink-3);
+}
+.dx-drop:focus-within {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+.dx-drop.is-over {
+  border-color: var(--focus);
+  background: var(--dots), color-mix(in srgb, var(--focus) 8%, var(--surface-sunk));
+}
+.dx-drop__icon {
+  width: 28px;
+  height: 28px;
+  margin-bottom: var(--s-1);
+  color: var(--ink-2);
+}
+.dx-drop__title {
+  font-weight: 600;
+}
+.dx-drop__hint {
+  max-width: 56ch;
+  color: var(--ink-2);
+  font-size: var(--fs-sm);
+}
+
+.dx-file {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-2) var(--s-3);
+  padding: var(--s-3) var(--s-4);
+  border: 1px solid var(--line);
+  border-radius: var(--r-ctl);
+  background: var(--surface-sunk);
+}
+.dx-file__icon {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  color: var(--ink-2);
+}
+.dx-file__text {
+  flex: 1 1 24ch;
+  min-width: 0;
+}
+.dx-file__name {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.dx-file__meta {
+  color: var(--ink-2);
+  font-size: var(--fs-xs);
+  font-variant-numeric: tabular-nums;
+}
+
+/* the split plan: one key per part, as wide as its share of the pages */
+.dx-plan {
+  margin-top: var(--s-4);
+}
+.dx-plan__lead {
+  margin-bottom: var(--s-3);
+  color: var(--ink-2);
+  font-size: var(--fs-sm);
+}
+.dx-parts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.dx-part {
+  display: grid;
+  flex-basis: 0;
+  gap: 2px;
+  min-width: 132px;
+  padding: var(--s-2) var(--s-3);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-ctl);
+  background: var(--surface);
+  transition:
+    background var(--t-med) var(--ease-out),
+    border-color var(--t-med) var(--ease-out);
+}
+.dx-part__name {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.dx-part__state {
+  display: flex;
+  align-items: center;
+  gap: var(--s-1);
+  color: var(--ink-2);
+  font-size: var(--fs-xs);
+}
+.dx-part__state svg {
+  flex: none;
+  width: 14px;
+  height: 14px;
+}
+.dx-part__state .tc {
+  color: var(--ink-3);
+}
+.dx-part.is-working {
+  border-style: dashed;
+  border-color: var(--ink-3);
+  background: var(--surface-2);
+}
+.dx-part.is-done {
+  border-color: color-mix(in srgb, var(--ok) 35%, transparent);
+  background: var(--ok-soft);
+}
+.dx-part.is-done .dx-part__state {
+  color: var(--ok);
+}
+.dx-part.is-failed,
+.dx-part.is-stopped {
+  border-color: color-mix(in srgb, var(--warn) 40%, transparent);
+  background: var(--warn-soft);
+}
+.dx-part.is-failed .dx-part__state {
+  color: var(--warn);
+}
+
+.dx-ingest {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--s-3);
+  margin-top: var(--s-4);
+}
+.dx-ingest__go {
+  min-height: 40px;
+  padding: 0 var(--s-6);
+}
+
+/* live progress: one row per pipeline step */
+.dx-progress {
+  margin-top: var(--s-4);
+}
+.dx-steps {
+  display: grid;
+  gap: var(--s-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.dx-step {
+  display: grid;
+  grid-template-columns: 18px minmax(9rem, auto) minmax(0, 1fr);
+  align-items: center;
+  gap: var(--s-3);
+  min-height: 26px;
+  color: var(--ink-3);
+  font-size: var(--fs-sm);
+}
+.dx-step__dot {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+}
+.dx-step__dot::before {
+  content: "";
+  grid-area: 1 / 1;
+  width: 8px;
+  height: 8px;
+  border: 1.5px solid var(--line-strong);
+  border-radius: 50%;
+}
+.dx-step__dot svg {
+  grid-area: 1 / 1;
+  width: 16px;
+  height: 16px;
+}
+.dx-step.is-active .dx-step__dot::before,
+.dx-step.is-done .dx-step__dot::before,
+.dx-step.is-failed .dx-step__dot::before {
+  display: none;
+}
+.dx-step__label {
+  font-weight: 550;
+}
+.dx-step__detail {
+  overflow-wrap: anywhere;
+}
+.dx-step.is-active,
+.dx-step.is-done {
+  color: var(--ink);
+}
+.dx-step.is-active .dx-step__detail,
+.dx-step.is-done .dx-step__detail {
+  color: var(--ink-2);
+}
+.dx-step.is-done .dx-step__dot {
+  color: var(--ok);
+}
+.dx-step.is-failed {
+  color: var(--warn);
+}
+
+.dx-result {
+  margin-top: var(--s-4);
+  padding-top: var(--s-4);
+  border-top: 1px solid var(--line);
+}
+.dx-result__head {
+  margin-bottom: var(--s-3);
+}
+.dx-result .btn {
+  margin-top: var(--s-4);
+}
+
+/* ---- library + document ---------------------------------------------------------------------- */
+.dx-main {
+  display: grid;
+  grid-template-columns: minmax(240px, 300px) minmax(0, 1fr);
+  align-items: start;
+  gap: var(--s-4);
+  margin-top: var(--s-4);
+}
+.dx-col {
+  display: grid;
+  gap: var(--s-4);
+  min-width: 0;
+}
+
+.dx-lib {
+  padding: 0 var(--s-2) var(--s-2);
+}
+.dx-lib__h {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  margin: 0 calc(-1 * var(--s-2)) var(--s-2);
+  padding: var(--s-3) var(--s-4);
+  border-bottom: 1px solid var(--line);
+  font-size: var(--fs-md);
+  font-weight: 650;
+}
+.dx-lib__skel {
+  display: grid;
+  gap: var(--s-3);
+  padding: var(--s-3) var(--s-2);
+}
+.dx-lib__empty {
+  padding: var(--s-3) var(--s-2);
+  color: var(--ink-2);
+  font-size: var(--fs-sm);
+}
+.dx-lib__list {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.dx-lib .dx-alert {
+  margin: var(--s-2) 0;
+}
+
+.dx-doc {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-3);
+  width: 100%;
+  padding: var(--s-2) var(--s-3);
+  border: 1px solid transparent;
+  border-radius: var(--r-ctl);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background var(--t-fast) var(--ease),
+    border-color var(--t-fast) var(--ease);
+}
+.dx-doc:hover {
+  background: var(--surface-2);
+}
+.dx-doc.is-on {
+  border-color: var(--line-strong);
+  background: var(--surface-2);
+}
+.dx-doc__icon {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  color: var(--ink-2);
+}
+.dx-doc.is-on .dx-doc__icon {
+  color: var(--ink);
+}
+.dx-doc__text {
+  display: grid;
+  min-width: 0;
+}
+.dx-doc__title {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.dx-doc__meta {
+  color: var(--ink-3);
+  font-size: var(--fs-xs);
+  font-variant-numeric: tabular-nums;
+}
+
+.dx-view {
+  padding: var(--s-5);
+}
+.dx-view__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--s-3);
+}
+.dx-view__titles {
+  flex: 1 1 30ch;
+  min-width: 0;
+}
+.dx-view__titles h2 {
+  font-size: var(--fs-xl);
+  overflow-wrap: anywhere;
+}
+.dx-view__meta {
+  margin-top: var(--s-2);
+  gap: var(--s-1) var(--s-3);
+  font-variant-numeric: tabular-nums;
+}
+.dx-view__prov {
+  margin-top: var(--s-2);
+}
+.dx-h3 {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  margin-bottom: var(--s-2);
+  color: var(--ink-2);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+}
+.dx-view__summary {
+  margin-top: var(--s-5);
+}
+.dx-view__chunks {
+  margin-top: var(--s-6);
+}
+
+.dx-chunks {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--line);
+}
+.dx-chunk {
+  border-bottom: 1px solid var(--line);
+}
+.dx-chunk summary {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-3);
+  padding: var(--s-2) var(--s-1);
+  border-radius: var(--r-chip);
+  list-style: none;
+  cursor: pointer;
+}
+.dx-chunk summary::-webkit-details-marker {
+  display: none;
+}
+.dx-chunk summary::before {
+  content: "";
+  flex: none;
+  align-self: center;
+  width: 6px;
+  height: 6px;
+  border-right: 1.5px solid var(--ink-3);
+  border-bottom: 1.5px solid var(--ink-3);
+  transform: rotate(-45deg);
+  transition: transform var(--t-fast) var(--ease);
+}
+.dx-chunk[open] summary::before {
+  transform: rotate(45deg);
+}
+.dx-chunk summary:hover {
+  background: var(--surface-2);
+}
+.dx-chunk__pages {
+  flex: none;
+  min-width: 4.5rem;
+  color: var(--ink-3);
+}
+.dx-chunk__heading {
+  min-width: 0;
+  font-size: var(--fs-sm);
+  font-weight: 550;
+  overflow-wrap: anywhere;
+}
+.dx-chunk__text {
+  max-width: var(--measure);
+  padding: 0 var(--s-1) var(--s-4) calc(var(--s-1) + 6px + var(--s-3) + 4.5rem + var(--s-3));
+  color: var(--ink-2);
+  font-size: var(--fs-sm);
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+/* ---- ask ------------------------------------------------------------------------------------- */
+.dx-ask {
+  padding: var(--s-5);
+}
+.dx-ask__form {
+  display: grid;
+  gap: var(--s-3);
+}
+.dx-ask__q {
+  resize: vertical;
+  min-height: 64px;
+  line-height: var(--lh-ui);
+}
+.dx-ask__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--s-3);
+}
+.dx-ask__go {
+  min-height: 40px;
+  margin-left: auto;
+  padding: 0 var(--s-6);
+}
+
+.dx-answer {
+  margin-top: var(--s-5);
+  padding-top: var(--s-5);
+  border-top: 1px solid var(--line);
+}
+.dx-answer__q {
+  display: grid;
+  gap: 2px;
+  margin-bottom: var(--s-4);
+}
+.dx-answer__qtext {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.dx-answer__block + .dx-answer__block,
+.dx-answer__block + .dx-alert {
+  margin-top: var(--s-4);
+}
+.dx-answer__text {
+  line-height: 1.6;
+}
+.dx-answer__text--lead {
+  font-size: var(--fs-lg);
+  line-height: 1.6;
+}
+
+/* a citation inside the answer: a small page key that jumps to the passage below */
+.dx-chip {
+  display: inline-flex;
+  align-items: center;
+  margin: 0 0 0 3px;
+  padding: 0 6px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-chip);
+  background: var(--surface-2);
+  color: var(--ink-2);
+  font-family: var(--font-mono);
+  font-variation-settings: var(--ui-mono);
+  font-size: 11px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  line-height: 18px;
+  vertical-align: 1px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background var(--t-fast) var(--ease),
+    color var(--t-fast) var(--ease),
+    border-color var(--t-fast) var(--ease);
+}
+.dx-chip:hover {
+  border-color: var(--ink-3);
+  background: var(--ink);
+  color: var(--on-ink);
+}
+
+.dx-orig {
+  margin-top: var(--s-4);
+  padding: var(--s-3) var(--s-4);
+  border: 1px solid var(--line);
+  border-radius: var(--r-ctl);
+  background: var(--surface-sunk);
+}
+.dx-orig summary {
+  color: var(--ink-2);
+  font-size: var(--fs-sm);
+  font-weight: 550;
+  cursor: pointer;
+}
+.dx-orig[open] summary {
+  margin-bottom: var(--s-3);
+}
+
+.dx-listen {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-1) var(--s-2);
+  margin-top: var(--s-3);
+}
+.dx-listen .btn--ghost.mp-mini {
+  border-color: var(--line);
+}
+.dx-listen .btn--ghost.mp-mini:hover {
+  border-color: var(--line-strong);
+}
+.dx-listen__by {
+  color: var(--ink-3);
+  font-size: var(--fs-2xs);
+}
+
+.dx-cites {
+  margin-top: var(--s-5);
+}
+.dx-cites__h {
+  margin-bottom: var(--s-2);
+  color: var(--ink-2);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+}
+.dx-cites__list {
+  display: grid;
+  gap: var(--s-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.dx-cite {
+  padding: var(--s-3) var(--s-4);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--line-strong);
+  border-radius: var(--r-chip);
+  background: var(--surface-sunk);
+  scroll-margin: var(--s-6);
+  transition:
+    background var(--t-med) var(--ease-out),
+    border-color var(--t-med) var(--ease-out);
+}
+.dx-cite:focus {
+  outline: none;
+}
+.dx-cite:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+.dx-cite.is-flash {
+  border-color: color-mix(in srgb, var(--focus) 40%, transparent);
+  border-left-color: var(--focus);
+  background: color-mix(in srgb, var(--focus) 9%, var(--surface));
+}
+.dx-cite__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--s-1) var(--s-3);
+  font-size: var(--fs-xs);
+  color: var(--ink-3);
+}
+.dx-cite__pages {
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-variation-settings: var(--ui-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: 550;
+}
+.dx-cite__doc,
+.dx-cite__heading {
+  color: var(--ink-2);
+  font-weight: 550;
+}
+.dx-cite__via {
+  margin-left: auto;
+}
+.dx-cite__text {
+  margin-top: var(--s-1);
+  font-size: var(--fs-sm);
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+/* "Also check meetings" */
+.dx-check {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  min-height: 40px;
+  font-size: var(--fs-sm);
+  color: var(--ink-2);
+  cursor: pointer;
+}
+
+/* example questions: quiet keys under the form */
+.dx-examples {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  margin-top: var(--s-3);
+}
+.dx-example {
+  padding: 3px var(--s-3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-round);
+  background: var(--surface);
+  color: var(--ink-2);
+  font-size: var(--fs-xs);
+  cursor: pointer;
+  transition:
+    background var(--t-fast) var(--ease),
+    border-color var(--t-fast) var(--ease),
+    color var(--t-fast) var(--ease);
+}
+.dx-example:hover:not(:disabled) {
+  border-color: var(--line-strong);
+  background: var(--surface-2);
+  color: var(--ink);
+}
+.dx-example:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* a meeting citation: the moment someone said it, opens the meeting at that line */
+.dx-chip--meeting {
+  font-family: var(--font-ui);
+  font-variation-settings: normal;
+  text-decoration: none;
+  white-space: normal;
+}
+
+/* "Meetings changed this": the answer leans on both a document and a newer meeting */
+.dx-changed {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--s-1) var(--s-2);
+  margin-bottom: var(--s-4);
+  padding: var(--s-2) var(--s-3);
+  border-left: 3px solid var(--warn);
+  border-radius: var(--r-chip);
+  background: var(--warn-soft);
+  color: var(--ink-2);
+  font-size: var(--fs-sm);
+}
+.dx-changed__tag {
+  color: var(--warn);
+  font-size: var(--fs-2xs);
+  font-weight: 650;
+  letter-spacing: var(--track-eyebrow);
+  text-transform: uppercase;
+}
+
+.dx-cite--meeting {
+  border-left-color: var(--ink-3);
+}
+.dx-cite__who {
+  color: var(--ink);
+  font-weight: 600;
+}
+a.dx-cite__doc {
+  text-decoration: none;
+}
+a.dx-cite__doc:hover {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: var(--ink-3);
+}
+.dx-cite__meta .tc {
+  color: var(--ink-3);
+}
+.dx-cite__quote {
+  margin: var(--s-1) 0 0;
+  font-size: var(--fs-md);
+  overflow-wrap: anywhere;
+}
+
+/* ---- offline --------------------------------------------------------------------------------- */
+.dx-cmd {
+  margin: var(--s-3) 0 0;
+  padding: var(--s-3) var(--s-4);
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--r-ctl);
+  background: var(--surface-sunk);
+  font-family: var(--font-mono);
+  font-variation-settings: var(--ui-mono);
+  font-size: var(--fs-xs);
+  white-space: pre;
+}
+.dx-cmd code {
+  font: inherit;
+}
+
+@media (max-width: 899px) {
+  .dx-main {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 767px) {
+  .dx-upload,
+  .dx-ask,
+  .dx-view {
+    padding: var(--s-4);
+  }
+  .dx-drop {
+    padding: var(--s-6) var(--s-4);
+  }
+  .dx-step {
+    grid-template-columns: 18px minmax(0, 1fr);
+  }
+  .dx-step__detail {
+    grid-column: 2;
+  }
+  .dx-chunk__text {
+    padding-left: var(--s-4);
+  }
+  .dx-ask__go {
+    margin-left: 0;
+  }
+}

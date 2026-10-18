@@ -2,6 +2,7 @@ import { useEffect, useState, type MouseEvent, type ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
   CheckSquareIcon,
+  FileTextIcon,
   GraphIcon,
   MagnifyingGlassIcon,
   MicrophoneIcon,
@@ -37,6 +38,7 @@ const NAV: NavItem[] = [
   { to: "/decisions", label: "Decisions", icon: SignpostIcon, match: (p) => p.startsWith("/decisions"), countKey: "decisions" },
   { to: "/people", label: "People", icon: UsersThreeIcon, match: (p) => p.startsWith("/people"), countKey: "people" },
   { to: "/graph", label: "Graph", icon: GraphIcon, match: (p) => p.startsWith("/graph") },
+  { to: "/documents", label: "Documents", icon: FileTextIcon, match: (p) => p.startsWith("/documents") },
 ];
 
 const isMac = typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform);
