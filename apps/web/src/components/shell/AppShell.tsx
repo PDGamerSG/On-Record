@@ -165,6 +165,19 @@ export default function AppShell({ children }: { children: ReactNode }) {
     return () => document.removeEventListener("keydown", onKey);
   }, [railOpen]);
 
+  // Ask and the palette open over the page, but the open rail and its backdrop sit above both, so the rail steps
+  // aside first. Listening for the open events also covers the "/" and Cmd+K shortcuts.
+  useEffect(() => {
+    if (!railOpen) return;
+    const close = () => setRailOpen(false);
+    window.addEventListener("wsw:ask-open", close);
+    window.addEventListener("wsw:palette-open", close);
+    return () => {
+      window.removeEventListener("wsw:ask-open", close);
+      window.removeEventListener("wsw:palette-open", close);
+    };
+  }, [railOpen]);
+
   const counts: Record<RailCountKey, number> = {
     meetings: railData.meetings.length,
     commitments: railData.commitments.length,
