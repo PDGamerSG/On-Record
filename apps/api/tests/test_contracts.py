@@ -168,3 +168,13 @@ def test_insights_accepts_valid_entities_and_mentions() -> None:
 
     assert insights.entities[0]["name"] == "Acme"
     assert insights.mentions["m1:u00001"] == ["Acme", "Launch"]
+
+
+def test_insights_normalizes_entity_and_mention_references() -> None:
+    insights = Insights(
+        entities=[{"name": "  Acme\n Inc  ", "kind": " VENDOR "}],
+        mentions={" m1:u00001 ": [" Acme\n Inc ", " Launch "]},
+    )
+
+    assert insights.entities == [{"name": "Acme Inc", "kind": "vendor"}]
+    assert insights.mentions == {"m1:u00001": ["Acme Inc", "Launch"]}
