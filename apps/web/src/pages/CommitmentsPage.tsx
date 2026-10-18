@@ -4,11 +4,10 @@ import { PlayIcon } from "@phosphor-icons/react";
 import { api } from "../api/client";
 import { useBusEvents } from "../api/events";
 import type { ActionItem, Utterance } from "../api/types";
-import { timecode, when } from "../lib/format";
+import { speakerIndex, timecode, when } from "../lib/format";
 import { errorText, loadDetails, utteranceIndex, utteranceStart } from "../components/ask/meetingData";
 import { useJump, meetingPath } from "../components/ask/useJump";
 import { useLiveRefresh } from "../components/ask/useLiveRefresh";
-import { useSpeakerColour } from "../components/meeting/stripCache";
 import "./memoryPages.css";
 import "./CommitmentsPage.css";
 
@@ -268,7 +267,6 @@ interface RowProps {
 
 function CommitmentRow({ item, evidence, onToggle, onPlay }: RowProps) {
   const done = item.status === "done";
-  const colour = useSpeakerColour(item.meeting_id, evidence?.speaker);
   const id = `cm-item-${item.id}`;
   return (
     <li className={`cm-item${done ? " is-done" : ""}`}>
@@ -288,7 +286,7 @@ function CommitmentRow({ item, evidence, onToggle, onPlay }: RowProps) {
           </button>
         </div>
         {evidence ? (
-          <blockquote className={`quote cm-quote spk spk-${colour}`}>
+          <blockquote className={`quote cm-quote spk spk-${speakerIndex(evidence.speaker)}`}>
             <span className="visually-hidden">{evidence.speaker_name ?? "Speaker"} said: </span>
             {evidence.text}
           </blockquote>

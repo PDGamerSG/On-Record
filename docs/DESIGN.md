@@ -22,7 +22,7 @@ A recording studio in daylight. Warm paper behind white panels, hairline borders
 - Primary buttons are ink (white text on near-black), not coloured.
 - Fewer words. Every section makes one point in one or two sentences; details sit behind a click ("Why this answer", the status popover).
 
-**Night session.** The same studio after dark is one click away: the sun and moon key in the landing nav or the app sidebar (or "Switch to dark mode" in the command palette) sets `data-theme="dark"` on `<html>`. The choice is kept in `localStorage`, and `index.html` applies it before the first paint, so the page never flashes the wrong theme. Daylight is the default.
+**Night session.** The same studio after dark is one click away: the sun and moon key in either top bar (or "Switch to dark mode" in the command palette) sets `data-theme="dark"` on `<html>`. The choice is kept in `localStorage`, and `index.html` applies it before the first paint, so the page never flashes the wrong theme. Daylight is the default.
 
 ## Tokens
 
@@ -40,11 +40,10 @@ Everything reads from [`apps/web/src/styles/tokens.css`](../apps/web/src/styles/
 | `--on-ink` / `--on-spk` | `#FFFFFF` | text on ink and on a speaker colour |
 | `--tint` / `--shade` / `--paper` | RGB channels | translucent fills (`rgb(var(--tint) / 0.06)`), shadows, and rings in the page colour; they flip with the theme |
 | `--glass` / `--pool` | frosted white / soft white | frosted bars (landing nav, transport, zoom keys); the light behind the hero deck |
-| `--side-bg` | `#ECEBE5` | the desk the app sidebar and the page panel sit on (`#040506` at night) |
 
 Dark mode overrides the same names under `:root[data-theme="dark"]`: near-black desk (`#08090B` page, `#101216` panels), `#ECEFF3` ink, light primary buttons, and the speaker hues brightened for the dark desk (cobalt `#5B8CFF`, teal `#2CC4A8`, mustard `#F2B53A`, plum `#E066B3`, …). Canvas and WebGL art re-read the tokens when the theme switches, so the graph, the unspool and the record's grooves always match it.
 
-**Speaker palette.** Eight tape-label hues, deepened for paper. Each meeting assigns them to its speakers (`color_idx`), and a renamed or merged speaker keeps theirs, so quotes, lanes and the graph look the colour up in the meeting rather than from the track number: cobalt `#3366E6`, teal `#0C8A7C`, mustard `#C58A0A`, plum `#C03B8C`, moss `#5B8A14`, rust `#D0521B`, violet `#7450E0`, slate `#5C7085`. Each is at least 3:1 on white. Text on a speaker colour is `--on-spk`; a speaker's name set *in* their colour uses `--spk-text`, the hue mixed 20% toward black so it reads at AA. The canvas and WebGL art read these values from the CSS at runtime, so the record, the unspool and the lanes always match the tokens.
+**Speaker palette.** Eight tape-label hues, deepened for paper and assigned by speaker index: cobalt `#3366E6`, teal `#0C8A7C`, mustard `#C58A0A`, plum `#C03B8C`, moss `#5B8A14`, rust `#D0521B`, violet `#7450E0`, slate `#5C7085`. Each is at least 3:1 on white. Text on a speaker colour is `--on-spk`; a speaker's name set *in* their colour uses `--spk-text`, the hue mixed 20% toward black so it reads at AA. The canvas and WebGL art read these values from the CSS at runtime, so the record, the unspool and the lanes always match the tokens.
 
 **Type.**
 - **Inter** (variable, optical sizes) carries the interface.
@@ -102,13 +101,6 @@ Everything 3D is built from scripts, so it can be rebuilt or restyled:
 
 ## App shell
 
-A sidebar on the desk at the left, and the page on its own inset panel beside it.
-- **Top:** the record mark and name (with a "Demo" chip on bundled data) and search (⌘K opens the command palette).
-- **Sections:** the five sections, each with a live count (open commitments on an ink badge, a red "Live" tag while a meeting records). The current one sits on a white key that slides between rows.
-- **Recent meetings:** each drawn as a small record whose grooves are its speakers' colours, sized by talk time. It turns on hover, and keeps turning while live.
-- **Open commitments:** the newest three, each ruled in its owner's colour.
-- **Foot:** **Ask**, the only dark control, then the system status, the light/dark key and the fold key.
-
-The sidebar folds to a 64 px icon rail (the fold key or `[`, remembered across visits), with name tags beside each icon; icons sit on the same axis in both widths, so folding only clips labels. Below 1100 px it is always the rail. On phones it is a drawer behind a slim top bar (menu, mark, status, Ask), closing on Escape, the scrim or any link. The meeting room puts the title and its facts on the left and the audio transport, one pill holding play, position and download, on the right; the lanes, transcript and Gemma's extractions sit below.
+On desktop, the app uses a quiet left rail that starts as an icon dock. Tooltips keep the compact state legible; opening the record mark or search expands an overlaid workspace with the brand, counts, recent meetings, open commitments, search, the system status, the light/dark key, and **Ask**, the only dark control. The drawer closes with Escape, its close key, or the scrim. On phones the brand stays in a compact top bar and the sections move to a tab bar at the bottom. The meeting room puts the title and its facts on the left and the audio transport, one pill holding play, position and download, on the right; the lanes, transcript and Gemma's extractions sit below.
 
 The graph has a small stack of zoom keys in its corner (in, out, fit, with the current zoom between them); the wheel, a pinch and the `+`, `−` and `0` keys do the same. Choosing a node, in the graph or from "Go to a node", brings it to the middle and close enough to read its neighbours.

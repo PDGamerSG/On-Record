@@ -2,7 +2,7 @@
 .evq {
   margin: 0;
   padding: var(--s-1) 0 var(--s-1) var(--s-3);
-  border-left: 3px solid var(--spk);
+  border-left: 1px solid var(--spk);
   min-width: 0;
 }
 

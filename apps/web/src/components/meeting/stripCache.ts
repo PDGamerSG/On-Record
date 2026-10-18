@@ -116,9 +116,9 @@ export function appendToStrip(u: Utterance): void {
 }
 
 /**
- * A speaker's palette index in a meeting. Colours are assigned per meeting (a renamed or merged speaker keeps theirs),
- * so the track number alone can be wrong; this reads the meeting's own assignment, fetched once and shared with the
- * tape strips, and uses the track's default only until that arrives.
+ * A speaker's palette index in a meeting. Colours are assigned per meeting
+ * (a renamed or merged speaker keeps theirs), so the track number alone can
+ * be wrong; use the track default until the strip data arrives.
  */
 export function useSpeakerColour(meetingId: string | null | undefined, track: string | null | undefined): number {
   const id = meetingId ?? "";

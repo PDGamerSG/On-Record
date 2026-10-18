@@ -286,7 +286,7 @@
   align-items: flex-start;
   gap: var(--s-2);
   padding: var(--s-2) var(--s-3);
-  border-left: 3px solid var(--warn);
+  border: 1px solid var(--warn);
   border-radius: var(--r-chip);
   background: var(--warn-soft);
 }
@@ -588,13 +588,13 @@
 }
 .ask-note {
   padding: var(--s-2) var(--s-3);
-  border-left: 3px solid var(--ink-2);
+  border: 1px solid var(--line-strong);
   border-radius: var(--r-chip);
   background: var(--surface);
   font-size: var(--fs-sm);
 }
 .ask-note--err {
-  border-left-color: var(--warn);
+  border-color: var(--warn);
   background: var(--warn-soft);
 }
 .ask-type {

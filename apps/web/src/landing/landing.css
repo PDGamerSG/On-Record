@@ -1140,7 +1140,7 @@
     inset 0 1px 0 rgb(255 255 255 / 0.12),
     0 2px 4px rgb(var(--shade) / 0.2),
     0 18px 34px -14px rgb(var(--shade) / 0.6);
-  transition: transform 200ms var(--ease-spring);
+  transition: transform 200ms var(--ease-out);
 }
 .talk-btn:hover {
   transform: scale(1.03);

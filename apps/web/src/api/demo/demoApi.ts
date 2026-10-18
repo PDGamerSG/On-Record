@@ -20,11 +20,8 @@ import type {
 } from "../types";
 import type { Api } from "../client";
 import { ApiError } from "../base";
-import { hub } from "../events";
 import { brand } from "../../lib/brand";
 import raw from "./fixtures.json";
-
-let eventId = 0;
 
 interface Entity {
   id: string;
@@ -418,11 +415,7 @@ export const demoApi: Api = {
     if (!a) return Promise.reject(new ApiError(404, "Action item not found"));
     a.status = status;
     a.done_at = status === "done" ? Date.now() : null;
-    // the server announces the change to every open view; so does the demo (the sidebar counts listen for it)
-    return wait<ActionItem>(a, 90).then((item) => {
-      hub.emit({ id: ++eventId, type: "action.updated", meeting_id: item.meeting_id, ts: Date.now() / 1000, data: { ...item } });
-      return item;
-    });
+    return wait<ActionItem>(a, 90);
   },
   decisions: (meetingId) => wait<Decision[]>(allDecisions().filter((d) => !meetingId || d.meeting_id === meetingId)),
   people: () => wait<Person[]>(db.people),

@@ -100,10 +100,7 @@
   --shadow-float: 0 0 0 1px rgb(21 23 28 / 0.06), 0 24px 56px -16px rgb(21 23 28 / 0.22), 0 4px 12px rgb(21 23 28 / 0.06);
   --glow: 0 0 0 2px color-mix(in srgb, var(--spk, var(--ink)) 30%, transparent),
     0 6px 16px -6px color-mix(in srgb, var(--spk, var(--ink)) 55%, transparent);
-  --nav-h: 16px; /* app chrome above and below the page panel (its inset from the window) */
-  --side-w: 252px; /* app sidebar, open */
-  --rail-w: 64px; /* app sidebar, folded to icons */
-  --side-bg: #ecebe5; /* the desk the sidebar and the page panel sit on */
+  --nav-h: 60px;
   --drawer-w: 460px;
 
   /* textures: the dot grid behind wells */
@@ -115,7 +112,6 @@
   --t-slow: 520ms;
   --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1); /* expo out */
-  --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
 }
 
 :root[data-theme="dark"] {
@@ -148,7 +144,6 @@
   --glass: rgb(16 18 22 / 0.78);
   --pool: rgb(120 140 180 / 0.08);
   --knob: #a3acb8;
-  --side-bg: #040506;
 
   /* speakers: the same tape labels, brightened for the dark desk */
   --spk-0: #5b8cff;
