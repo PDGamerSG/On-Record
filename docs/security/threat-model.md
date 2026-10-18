@@ -4,6 +4,17 @@ This page applies STRIDE (spoofing, tampering, repudiation, information disclosu
 
 The main assumption is a single developer on their own machine. No route checks who is calling, so every protection below depends on the services staying bound to `127.0.0.1`.
 
+## Key findings
+
+A summary of the tables below, most important first:
+
+1. **No authentication.** Any caller that can reach an API port acts as the operator; protection relies on Uvicorn binding to `127.0.0.1` (apps/api/wsw_brain/cli.py:24). The access settings in `.env.example:56-61` are ignored.
+2. **The documents app allows every origin by default.** `WSW_CORS_ORIGINS` defaults to `*` (apps/api/wsw_brain/config.py:81; apps/api/wsw_brain/documents/app.py:22-24); the main app adds no CORS headers.
+3. **Content leaves the machine when a hosted provider is configured.** `auto` prefers Gemini, then Sarvam, before Ollama (apps/api/wsw_brain/brain/llm.py:861-868), and every document upload goes to Sarvam Document AI. A fully local setup is described under [Privacy](#privacy-what-leaves-the-machine).
+4. **`GemmaClient` sends the Gemini key in the URL** (apps/api/wsw_brain/brain/gemma.py:239). Only the benchmark script uses it today.
+5. **Prompt-injection defences are advisory.** `UNTRUSTED_NOTE` (apps/api/wsw_brain/brain/llm.py:36-39) asks the model to ignore instructions in evidence, and citation filtering (apps/api/wsw_brain/brain/agent.py:148-163) drops citations to lines that were not retrieved; neither stops a model from following injected text.
+6. **No Cypher injection found.** Values travel as query parameters (apps/api/wsw_brain/graph/cypher.py:1-2).
+
 ## Data flow and trust boundaries
 
 *Data-flow diagram with trust boundaries (flowchart): what crosses from the developer machine to Sarvam and Google, and what stays local.*
