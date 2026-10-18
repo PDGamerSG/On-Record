@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import pytest
+
 from wsw_brain.__main__ import main
 
 
@@ -37,3 +39,11 @@ def test_main_accepts_server_options(monkeypatch):
             {"host": "0.0.0.0", "port": 9100, "reload": True},
         )
     ]
+
+
+@pytest.mark.parametrize("port", ["0", "65536"])
+def test_main_rejects_ports_outside_tcp_range(monkeypatch, port: str) -> None:
+    monkeypatch.setattr("wsw_brain.__main__.uvicorn.run", lambda *args, **kwargs: None)
+
+    with pytest.raises(SystemExit):
+        main(["--port", port])
