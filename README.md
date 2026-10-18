@@ -81,8 +81,10 @@ How to use each part of `wsw_brain`. The settings they read are listed in [CONFI
 Start the dependency-free API shell locally with:
 
 ```bash
-uv run --project apps/api uvicorn wsw_brain.app:app --reload
+uv run --project apps/api python -m wsw_brain
 ```
+
+The module launcher binds to `127.0.0.1:8000`; use Uvicorn directly when you need `--reload` or other server options.
 
 `GET /healthz` returns `{"status":"ok"}` for process health checks. `GET /api/status` returns the product identity without connecting to FalkorDB or loading a model. Feature routes can be mounted on the same app as they are added.
 
