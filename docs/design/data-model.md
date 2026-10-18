@@ -212,6 +212,34 @@ The vector dimension is the embedder's `dim`, passed to `ensure_schema`: `GraphS
 | Epoch milliseconds (int) | `Meeting.started_at`, `Meeting.ended_at`, `Decision.created_at`, `ActionItem.created_at`, `ActionItem.done_at`, `Turn.at`, `Document.created_at` | apps/api/wsw_brain/contracts.py:11; apps/api/wsw_brain/graph/store.py:1172-1173; apps/api/wsw_brain/documents/store.py:213 |
 | Epoch seconds (float) | event `ts` only, not stored in the graph | apps/api/wsw_brain/contracts.py:11 |
 
+## Inspecting the graph
+
+With FalkorDB running, its browser is at <http://localhost:3000> (port published in `docker-compose.yml:5`). Select the graph named by `WSW_GRAPH`, `wsw_demo` by default (`apps/api/wsw_brain/config.py:24`). To count what it holds, run the statement that `GraphStore.stats()` sends (`apps/api/wsw_brain/graph/cypher.py:43-46`, `apps/api/wsw_brain/graph/store.py:784-787`), shown here as the code builds it:
+
+```cypher
+MATCH (n:Meeting) RETURN 'Meeting' AS label, count(n) AS n
+UNION ALL
+MATCH (n:Speaker) RETURN 'Speaker' AS label, count(n) AS n
+UNION ALL
+MATCH (n:Person) RETURN 'Person' AS label, count(n) AS n
+UNION ALL
+MATCH (n:Utterance) RETURN 'Utterance' AS label, count(n) AS n
+UNION ALL
+MATCH (n:Topic) RETURN 'Topic' AS label, count(n) AS n
+UNION ALL
+MATCH (n:Decision) RETURN 'Decision' AS label, count(n) AS n
+UNION ALL
+MATCH (n:ActionItem) RETURN 'ActionItem' AS label, count(n) AS n
+UNION ALL
+MATCH (n:Entity) RETURN 'Entity' AS label, count(n) AS n
+UNION ALL
+MATCH (n:Turn) RETURN 'Turn' AS label, count(n) AS n
+UNION ALL
+MATCH ()-[r]->() RETURN 'relationships' AS label, count(r) AS n
+```
+
+It covers the meeting labels in `LABELS` (`apps/api/wsw_brain/graph/cypher.py:11`); `Document` and `DocChunk` nodes are not counted, though the relationships total includes `HAS_CHUNK` edges.
+
 ## Data flow
 
 Solid arrows are flows that a route or script reaches at `8943885`. Dashed arrows are flows whose code exists but which nothing in production calls: `IngestPipeline` is constructed only in a test, `MeetingAgent` is never constructed, and the main app does not mount the documents router (see [What is not in the repository yet](../ARCHITECTURE.md#what-is-not-in-the-repository-yet)).
