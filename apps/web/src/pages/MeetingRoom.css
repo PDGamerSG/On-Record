@@ -294,7 +294,7 @@
   font-size: var(--fs-sm);
 }
 
-/* FalkorDB write counters in the lanes header */
+/* graph write counters in the lanes header */
 .writes {
   display: flex;
   flex-wrap: wrap;

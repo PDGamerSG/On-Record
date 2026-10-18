@@ -100,7 +100,7 @@ function CypherBlock({ statements }: { statements: string[] }) {
   return (
     <section>
       <div className="ask-why__head">
-        <h4>Cypher that ran on FalkorDB</h4>
+        <h4>Cypher that ran on Neo4j</h4>
         <button type="button" className="btn btn--ghost ask-mini" onClick={() => copy(text)}>
           {state === "copied" ? <CheckIcon aria-hidden="true" /> : <CopyIcon aria-hidden="true" />}
           {state === "copied" ? "Copied" : state === "failed" ? "Copy blocked" : "Copy"}

@@ -27,7 +27,7 @@ const PAGES: { label: string; path: string; icon: ReactNode; words: string }[] =
   { label: "Commitments", path: "/commitments", icon: <CheckSquareIcon aria-hidden="true" />, words: "commitments action items todo tasks" },
   { label: "Decisions", path: "/decisions", icon: <SignpostIcon aria-hidden="true" />, words: "decisions decided history" },
   { label: "People", path: "/people", icon: <UsersThreeIcon aria-hidden="true" />, words: "people speakers who knows" },
-  { label: "Graph", path: "/graph", icon: <GraphIcon aria-hidden="true" />, words: "graph falkordb nodes knowledge" },
+  { label: "Graph", path: "/graph", icon: <GraphIcon aria-hidden="true" />, words: "graph neo4j nodes knowledge" },
 ];
 
 function meetingDetail(startedAt: number, seconds: number): string {
