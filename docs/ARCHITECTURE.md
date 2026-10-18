@@ -83,6 +83,10 @@ The server pushes changes to the browser over **Server-Sent Events (SSE)**, a on
 {"id": 42, "type": "utterance.created", "meeting_id": "m1", "ts": 1760000000.5, "data": {}}
 ```
 
+`GET /api/events` (`wsw_brain/event_stream.py`) sends each event as one SSE frame. The id goes on the `id:` line and the type on the `event:` line, and the `data:` line carries only `data` as JSON; `meeting_id` and `ts` are not sent. When no event has arrived for 15 s, the endpoint sends a `: keep-alive` comment.
+
+The web client (`src/api/events.ts`) currently parses each frame's `data:` line as the whole event object, so the two sides have to be reconciled before live mode can work.
+
 | Type | `data` | Used by |
 | --- | --- | --- |
 | `meeting.started`, `meeting.ended` | `MeetingSummary` | Meeting room, meetings, people, sidebar, graph totals |
