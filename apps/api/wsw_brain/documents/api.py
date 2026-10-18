@@ -12,7 +12,7 @@ import time
 import uuid
 from dataclasses import dataclass, field
 from functools import lru_cache
-from typing import Annotated, Any
+from typing import Annotated, Any, Literal
 
 from fastapi import APIRouter, File, Form, HTTPException, Response, UploadFile
 from pydantic import BaseModel, Field
@@ -194,10 +194,13 @@ async def upload(
 
 
 @router.get("/jobs")
-def list_jobs() -> list[dict[str, Any]]:
+def list_jobs(status: Literal["running", "done", "failed"] | None = None) -> list[dict[str, Any]]:
     """List recent document ingestion jobs for clients that need a job overview."""
     _prune_jobs()
-    return [job.view() for job in sorted(_jobs.values(), key=lambda item: item.started_at, reverse=True)]
+    jobs = sorted(_jobs.values(), key=lambda item: item.started_at, reverse=True)
+    if status is not None:
+        jobs = [job for job in jobs if job.status == status]
+    return [job.view() for job in jobs]
 
 
 @router.get("/jobs/{job_id}")

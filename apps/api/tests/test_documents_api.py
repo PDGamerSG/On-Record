@@ -96,6 +96,24 @@ def test_jobs_endpoint_lists_uploaded_jobs(client):
     assert any(job["id"] == job_id and job["filename"] == "queued.pdf" for job in listing.json())
 
 
+def test_jobs_endpoint_filters_by_status(client):
+    response = client.post("/api/documents", files={"file": ("filtered.pdf", make_pdf(1), "application/pdf")})
+    assert response.status_code == 200
+    job_id = response.json()["job"]["id"]
+    for _ in range(50):
+        state = client.get(f"/api/documents/jobs/{job_id}").json()
+        if state["status"] != "running":
+            break
+    assert state["status"] == "done"
+
+    listing = client.get("/api/documents/jobs", params={"status": "done"})
+
+    assert listing.status_code == 200
+    assert all(job["status"] == "done" for job in listing.json())
+    assert any(job["id"] == job_id for job in listing.json())
+    assert client.get("/api/documents/jobs", params={"status": "waiting"}).status_code == 422
+
+
 def test_ask_translates_when_a_language_is_requested(client):
     plain = client.post("/api/documents/ask", json={"question": "When?"}).json()
     assert "translated_answer" not in plain
