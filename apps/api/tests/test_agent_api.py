@@ -52,9 +52,14 @@ def test_agent_router_rejects_blank_questions():
 def test_main_app_mounts_agent_router_when_an_agent_is_injected():
     agent = StubAgent()
 
-    response = TestClient(create_app(meeting_agent=agent)).post(
-        "/api/agent/ask", json={"question": "When is the launch?"}
-    )
+    client = TestClient(create_app(meeting_agent=agent))
+    response = client.post("/api/agent/ask", json={"question": "When is the launch?"})
 
     assert response.status_code == 200
     assert agent.calls == [("When is the launch?", "default", None, 8)]
+    assert client.get("/api/capabilities").json()["features"] == [
+        "status",
+        "documents",
+        "events",
+        "agent",
+    ]

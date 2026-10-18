@@ -29,10 +29,13 @@ def create_app(event_bus: EventBus | None = None, meeting_agent: MeetingAgent | 
 
     @app.get("/api/capabilities")
     def capabilities() -> dict[str, object]:
+        features = ["status", "documents", "events"]
+        if meeting_agent is not None:
+            features.append("agent")
         return {
             "product": product_name(),
             "api_version": "v1",
-            "features": ["status", "documents", "events"],
+            "features": features,
         }
 
     return app
