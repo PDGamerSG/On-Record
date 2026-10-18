@@ -665,6 +665,8 @@ def _heuristic_topics(utterances: list[dict[str, Any]]) -> tuple[list[str], dict
 
 class Extractor:
     def __init__(self, llm: LLM | None = None, *, max_tokens: int = 1800) -> None:
+        if isinstance(max_tokens, bool) or not isinstance(max_tokens, int) or max_tokens <= 0:
+            raise ValueError("max_tokens must be positive")
         self.llm = llm or get_llm()
         self.max_tokens = max_tokens
 
