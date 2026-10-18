@@ -237,6 +237,12 @@ uv run --project apps/api pytest apps/api/tests/test_documents_split.py apps/api
   apps/api/tests/test_sarvam_asr.py -q
 ```
 
+### Meeting-note extraction
+
+`Extractor` (`wsw_brain.brain`) reads a window of speaker-attributed utterances and asks the configured model (`get_llm()`) for decisions, action items, topics, entities and mentions as JSON. Each item must cite utterance ids from the window; items with invented or missing evidence are dropped. Decisions can name the earlier decision they supersede, matched against the decisions passed in as `existing_decisions`. Action items keep their owner as a speaker track (`S1`) when the person is in the speaker list, and their deadline as spoken ("Friday"). Speaker tracks inside the item text are replaced by names, so "S2 will own the billing page" becomes "Rahul will own the billing page", while a product such as "AWS S3" stays as written.
+
+When the model call fails, the reply is not JSON, or the model is `FakeLLM`, `heuristic_extract()` finds decisions and owned action items from cue phrases such as "we decided" and "I'll". `extract_with_meta()` also returns the provider, model, latency and the reason for any fallback. Extraction calls take priority over queued questions on a shared model. The system prompt ends with `UNTRUSTED_NOTE` (`brain/llm.py`), which tells the model that transcript lines are material to extract from, not instructions.
+
 ### Speaker attribution
 
 `OnlineClusterer` groups voice embeddings into meeting-scoped speaker tracks named `S1`, `S2`, and so on. A segment joins the closest track when its cosine similarity reaches the threshold; otherwise it opens a new track, up to `max_speakers`. Short or borderline segments that match nothing stay with the previous speaker, because brief interjections give noisy embeddings. `merge_close()` folds tracks whose centroids converge into the older track, and track numbers are never reused. `state()` and `restore()` carry tracks over to a later session of the same meeting.
