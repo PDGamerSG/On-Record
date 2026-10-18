@@ -144,7 +144,7 @@ def native_terms(query: str) -> list[str]:
 def vector_chunks(by_doc: bool) -> str:
     return (
         "CALL db.idx.vector.queryNodes('DocChunk', 'embedding', $knn, vecf32($vector)) YIELD node, score\n"
-        "WITH node AS c, 1.0 - score AS score\n"
+        "WITH node AS c, 1.0 - score AS score\n"  # cosine distance -> similarity (higher = better)
         f"{_scope(by_doc)}"
         "WITH c, score ORDER BY score DESC LIMIT $k" + _HIT_TAIL
     )

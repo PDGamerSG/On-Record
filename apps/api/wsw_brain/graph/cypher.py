@@ -108,7 +108,9 @@ SET o.status = 'active'
 
 
 def delete_orphans(label: str) -> str:
-    """Remove global nodes (Topic, Entity, Person) nothing points at any more."""
+    """Remove global nodes (Topic, Entity, Person) nothing points at any more. Only incoming edges are
+    counted, because these labels never have outgoing ones: ABOUT and MENTIONS point at topics and entities,
+    and IS points at people."""
     return f"""
 MATCH (n:{label})
 WITH n
@@ -355,6 +357,7 @@ def vector_hits(by_meeting: bool) -> str:
     where = "WHERE u.meeting_id = $meeting_id\n" if by_meeting else ""
     return (
         "CALL db.idx.vector.queryNodes('Utterance', 'embedding', $knn, vecf32($vector)) YIELD node, score\n"
+        # The index returns cosine distance (lower = closer); Hit scores are similarities (higher = better).
         "WITH node AS u, 1.0 - score AS score\n"
         f"{where}"
         "WITH u, score ORDER BY score DESC LIMIT $k" + _HIT_TAIL
