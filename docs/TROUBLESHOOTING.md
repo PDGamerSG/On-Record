@@ -137,6 +137,8 @@ To start the API itself on the default port, run this from the repository root:
 uv run --project apps/api python -m wsw_brain.cli
 ```
 
+Add `--port 9000` (or any free port) to run it elsewhere, and set `WSW_API_URL` to match.
+
 It serves `/api/status`, `/api/capabilities` and `/api/events`, but not the meeting routes yet, so the
 meeting pages still fail with `?demo=0`. Leave demo mode on for them until the meeting API arrives.
 
