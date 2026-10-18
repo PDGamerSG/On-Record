@@ -43,6 +43,15 @@ function groupByOwner(items: ActionItem[]): Group[] {
   return unassigned ? [...named, { owner: null, items: unassigned.sort(order) }] : named;
 }
 
+/** The owner's chip counts what the filter shows: "2 open", "1 done", or both under All. */
+function groupCount(items: ActionItem[], filter: Filter): string {
+  const open = items.filter((i) => i.status === "open").length;
+  const done = items.length - open;
+  if (filter === "open") return `${open} open`;
+  if (filter === "done") return `${done} done`;
+  return done ? `${open} open, ${done} done` : `${open} open`;
+}
+
 export default function CommitmentsPage() {
   usePageTitle("Commitments");
   const [params, setParams] = useSearchParams();
@@ -230,13 +239,13 @@ export default function CommitmentsPage() {
       ) : null}
 
       <div className="cm-groups">
-        {groups.map((g) => (
-          <section key={g.owner ?? "unassigned"} className="panel cm-group" aria-labelledby={`cm-${g.owner ?? "none"}`}>
-            <h2 className="cm-owner" id={`cm-${g.owner ?? "none"}`}>
+        {groups.map((g, i) => (
+          // ids by position: an owner's name can hold spaces ("Priya Sharma"), which split aria-labelledby into two
+          // missing ids, and an owner literally named "none" would collide with Unassigned
+          <section key={g.owner ?? "unassigned"} className="panel cm-group" aria-labelledby={`cm-owner-${i}`}>
+            <h2 className="cm-owner" id={`cm-owner-${i}`}>
               {g.owner ?? "Unassigned"}
-              <span className="cm-owner__count">
-                {g.items.filter((i) => i.status === "open").length} open
-              </span>
+              <span className="cm-owner__count">{groupCount(g.items, filter)}</span>
             </h2>
             <ul className="cm-list">
               {g.items.map((it) => (
