@@ -55,7 +55,7 @@ function propLabel(key: string): string {
 export default function GraphPage() {
   usePageTitle("Graph");
   const [params, setParams] = useSearchParams();
-  const { meetings, error: meetingsError } = useMeetings();
+  const { meetings, error: meetingsError, reload: reloadMeetings } = useMeetings();
   const titles = useMemo(() => titleMap(meetings), [meetings]);
   const requested = params.get("meeting");
   const meetingKey = requested ?? (meetings ? (meetings[0]?.id ?? ALL) : null);
@@ -92,6 +92,11 @@ export default function GraphPage() {
   }, [meetingKey]);
 
   const refetch = useCallback(() => setNonce((n) => n + 1), []);
+  // Without the meeting list there is no meeting to draw, so the graph fetch never runs; retry the list as well.
+  const retry = () => {
+    if (meetingsError) reloadMeetings();
+    refetch();
+  };
   useLiveRefresh(refetch, {
     events: (e) => LIVE_EVENTS.has(e.type) && (meetingKey === ALL || e.meeting_id === meetingKey),
     refresh: ["meeting", "decisions", "action_items"],
@@ -149,7 +154,7 @@ export default function GraphPage() {
       {meetingsError || error ? (
         <div className="mp-alert" role="alert">
           <p>The graph didn't load. {error ?? meetingsError}</p>
-          <button type="button" className="btn mp-mini" onClick={refetch}>
+          <button type="button" className="btn mp-mini" onClick={retry}>
             Try again
           </button>
         </div>
