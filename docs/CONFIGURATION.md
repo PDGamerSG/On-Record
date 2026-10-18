@@ -96,7 +96,7 @@ Each model endpoint gets a `ModelGate` that limits concurrent generations, so a 
 | Variable | Default | What it controls | Read by |
 | --- | --- | --- | --- |
 | `WSW_CORS_ORIGINS` | `*` (`.env.example`: empty) | Comma-separated origins allowed to call the API from another site. Empty adds no CORS headers, so only same-origin requests work; `*` allows any origin | `documents/app.py` |
-| `WSW_EXTRACT_EVERY` | `6` | How many new utterances of a meeting trigger the next extraction of decisions and action items | `pipeline.py` |
+| `WSW_EXTRACT_EVERY` | `6` | How many new utterances of a meeting trigger the next extraction of decisions and action items | `ingest/pipeline.py` |
 | `WSW_SEED_DEMO` | `true` (`.env.example`: `false`) | Load the demo meetings automatically | *Not read yet*; `scripts/seed_demo_meetings.py` loads them by hand |
 
 `.env.example` also lists `WSW_ADMIN_TOKEN`, `WSW_CREATE_LIMIT` and `WSW_ALLOWED_HOSTS` for the access controls of the upcoming meeting API. `Settings` doesn't define them yet, so they are ignored.

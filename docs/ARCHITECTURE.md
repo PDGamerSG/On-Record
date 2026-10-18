@@ -56,7 +56,7 @@ The repository is being assembled in feature-sized PRs, so several things the we
 - `wsw_brain.app:app`, started with `python -m wsw_brain.cli`, serves `GET /healthz`, `GET /api/status`, `GET /api/capabilities` and the `GET /api/events` stream.
 - `wsw_brain.documents.app:app` serves only `/api/documents/*`. The web app on `main` has no Documents page yet.
 - No server provides the meeting routes listed in `apps/web/src/api/client.ts` (`/api/health`, `/api/meetings`, `/api/ask`, …) or the audio WebSocket.
-- The listener (`listen/session.py`) runs as a library: `listen/pipeline.py` feeds it an audio file as if it were streamed, and `IngestPipeline` (`wsw_brain/pipeline.py`) writes its utterances to the graph, extracts insights and summarises ended meetings. No route connects them to the browser yet.
+- The listener (`listen/session.py`) runs as a library: `listen/file_pipeline.py` feeds it an audio file as if it were streamed, and `IngestPipeline` (`wsw_brain/ingest/pipeline.py`) writes its utterances to the graph, extracts insights and summarises ended meetings. No route connects them to the browser yet.
 - The assistant (`brain/agent.py`) answers at `POST /api/agent/ask`, but only when `create_app()` is given a `MeetingAgent`; the default `app` has no agent. The web app calls `POST /api/ask` and `/api/ask/voice`, which no server provides.
 
 The web app decides its mode with `/api/health`, which no server answers yet, so its meeting views always run on the bundled demo data today. The live sections below describe what the client expects from the server.

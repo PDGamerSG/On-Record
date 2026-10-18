@@ -13,7 +13,7 @@ from wsw_brain.brain.embed import HashEmbedder
 from wsw_brain.brain.extract import Extractor
 from wsw_brain.brain.llm import FakeLLM
 from wsw_brain.contracts import ActionItemDraft, DecisionDraft, Insights, Utterance
-from wsw_brain.pipeline import IngestPipeline, _MeetingRecords, _same_owner
+from wsw_brain.ingest.pipeline import IngestPipeline, _MeetingRecords, _same_owner
 
 LINES = [
     ("S1", "Let's start with the pricing review for the Pro plan."),

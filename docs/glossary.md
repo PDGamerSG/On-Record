@@ -29,7 +29,7 @@ Terms used across the On Record code and documentation, with the file that defin
 | Heuristic extraction | Cue-phrase fallback used when no model is usable | `apps/api/wsw_brain/brain/extract.py:599-605` |
 | Hit / Citation | A retrieval result dict (utterance, meeting, speaker, times, text, score, `via`) | `apps/api/wsw_brain/contracts.py:132-133` |
 | Hybrid retrieval | Full-text, vector, speaker and recency sources fused by reciprocal-rank fusion | `apps/api/wsw_brain/brain/retrieve.py:1-2`; `apps/api/wsw_brain/brain/retrieve.py:74-77` |
-| IngestPipeline | Live ingest that writes listener utterances to the graph in batches, publishes events, extracts insights every N utterances and summarises ended meetings | `apps/api/wsw_brain/pipeline.py:1-10`; `apps/api/wsw_brain/pipeline.py:55` |
+| IngestPipeline | Live ingest that writes listener utterances to the graph in batches, publishes events, extracts insights every N utterances and summarises ended meetings | `apps/api/wsw_brain/ingest/pipeline.py:1-10`; `apps/api/wsw_brain/ingest/pipeline.py:55` |
 | Insights | Everything one extraction pass found: decisions, action items, topics, entities, mentions | `apps/api/wsw_brain/contracts.py:221-246` |
 | ListenerOverloaded | Error raised when more than `max_queued_s` of audio waits for the worker | `apps/api/wsw_brain/listen/session.py:56-57` |
 | LiveSession | Listener that turns an audio stream into speaker-attributed utterances on a worker thread | `apps/api/wsw_brain/listen/session.py:1-21`; `apps/api/wsw_brain/listen/session.py:101` |

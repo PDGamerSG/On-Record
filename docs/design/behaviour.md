@@ -65,9 +65,9 @@ sequenceDiagram
     IP-)Bus: speaker.merged
 ```
 
-Sources: apps/web/src/api/client.ts:112-118; apps/api/wsw_brain/listen/session.py:196-222, apps/api/wsw_brain/listen/session.py:386-396, apps/api/wsw_brain/listen/session.py:526-547, apps/api/wsw_brain/listen/session.py:562-593; apps/api/wsw_brain/pipeline.py:118-149, apps/api/wsw_brain/pipeline.py:251-318, apps/api/wsw_brain/pipeline.py:328-361, apps/api/wsw_brain/pipeline.py:373-447; apps/api/wsw_brain/brain/extract.py:683-722. `IngestPipeline` is only constructed in apps/api/tests/test_pipeline.py:142; README.md:346 says no HTTP route starts it.
+Sources: apps/web/src/api/client.ts:112-118; apps/api/wsw_brain/listen/session.py:196-222, apps/api/wsw_brain/listen/session.py:386-396, apps/api/wsw_brain/listen/session.py:526-547, apps/api/wsw_brain/listen/session.py:562-593; apps/api/wsw_brain/ingest/pipeline.py:118-149, apps/api/wsw_brain/ingest/pipeline.py:251-318, apps/api/wsw_brain/ingest/pipeline.py:328-361, apps/api/wsw_brain/ingest/pipeline.py:373-447; apps/api/wsw_brain/brain/extract.py:683-722. `IngestPipeline` is only constructed in apps/api/tests/test_pipeline.py:142; README.md:346 says no HTTP route starts it.
 
-Ending a meeting (`IngestPipeline.end_meeting`) flushes the queue, sets the meeting to `ended`, publishes `meeting.ended`, then runs the final extraction and the summary in the background and publishes a second `meeting.ended` with the summary (apps/api/wsw_brain/pipeline.py:186-240). It has the same status: no route calls it.
+Ending a meeting (`IngestPipeline.end_meeting`) flushes the queue, sets the meeting to `ended`, publishes `meeting.ended`, then runs the final extraction and the summary in the background and publishes a second `meeting.ended` with the summary (apps/api/wsw_brain/ingest/pipeline.py:186-240). It has the same status: no route calls it.
 
 ### Spoken question
 
@@ -222,7 +222,7 @@ flowchart TD
     S -- no --> Z
 ```
 
-Sources: apps/api/wsw_brain/pipeline.py:373-447, apps/api/wsw_brain/pipeline.py:478-547; apps/api/wsw_brain/brain/extract.py:260, apps/api/wsw_brain/brain/extract.py:348, apps/api/wsw_brain/brain/extract.py:683-757.
+Sources: apps/api/wsw_brain/ingest/pipeline.py:373-447, apps/api/wsw_brain/ingest/pipeline.py:478-547; apps/api/wsw_brain/brain/extract.py:260, apps/api/wsw_brain/brain/extract.py:348, apps/api/wsw_brain/brain/extract.py:683-757.
 
 ### Document ingestion
 
@@ -318,7 +318,7 @@ stateDiagram-v2
     end note
 ```
 
-Sources: apps/api/wsw_brain/graph/cypher.py:50-61; apps/api/wsw_brain/graph/store.py:267-335; apps/api/wsw_brain/pipeline.py:186-240.
+Sources: apps/api/wsw_brain/graph/cypher.py:50-61; apps/api/wsw_brain/graph/store.py:267-335; apps/api/wsw_brain/ingest/pipeline.py:186-240.
 
 ### Action item
 

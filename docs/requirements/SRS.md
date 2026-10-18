@@ -45,7 +45,7 @@ Four facts limit what is reachable today. Rows below refer to them by these labe
 
 - **G1.** The main app mounts only the SSE stream, three status routes and, when injected, the agent. It has no meeting routes, no voice routes and no WebSocket (`apps/api/wsw_brain/app.py:14-41`).
 - **G2/G3.** The web app probes `/api/health`, which no server serves, so it runs on demo data unless forced (`apps/web/src/api/mode.ts:25-27`). It posts questions to `/api/ask` (`apps/web/src/api/client.ts:94`), while the agent is mounted at `/api/agent/ask` only when injected (`apps/api/wsw_brain/app.py:19-20`, `apps/api/wsw_brain/app.py:44`).
-- **G4.** `IngestPipeline` (`apps/api/wsw_brain/pipeline.py:55`, PR #75) is the only production caller of the graph insight writer, the extractor and the summariser, and the only production publisher of bus events. No entrypoint constructs it: not `apps/api/wsw_brain/app.py`, not `apps/api/wsw_brain/cli.py`, not any script ("No HTTP route starts the pipeline yet", `README.md:346`).
+- **G4.** `IngestPipeline` (`apps/api/wsw_brain/ingest/pipeline.py:55`, PR #75) is the only production caller of the graph insight writer, the extractor and the summariser, and the only production publisher of bus events. No entrypoint constructs it: not `apps/api/wsw_brain/app.py`, not `apps/api/wsw_brain/cli.py`, not any script ("No HTTP route starts the pipeline yet", `README.md:346`).
 - **G7.** The PR #76 `GemmaClient` (`apps/api/wsw_brain/brain/gemma.py:81`) is used only by `scripts/bench_gemma.py:17` and tests. The server selects models through `get_llm()` (`apps/api/wsw_brain/brain/llm.py:891`).
 
 Two more apply to single features: SSE frames carry only the payload, while the client expects a whole event (G5, `apps/api/wsw_brain/event_stream.py:22-23`, `apps/web/src/api/events.ts:94`), and documents are served only by `apps/api/wsw_brain/documents/app.py:21-25` (G6).
@@ -82,10 +82,10 @@ Requirement text is abridged; the cited code holds the full behaviour and limits
 | FR-001 | Segment a 16 kHz mono stream with Silero VAD on a worker thread; refuse audio beyond 300 s of backlog (`ListenerOverloaded`). | Partial: library only (G1, G4) | `apps/api/wsw_brain/listen/session.py:196-221` | Test |
 | FR-002 | Capture browser microphone audio as 100 ms PCM16 frames and stream them to `/ws/meetings/{id}/audio`. | Planned: no server WebSocket | `apps/web/src/audio/mic.ts:34-36`, `apps/web/src/api/client.ts:112-118` | Inspection |
 | FR-003 | Record a growing 16-bit WAV and serve it at `/api/meetings/{id}/audio`. | Partial: no audio route | `apps/api/wsw_brain/listen/audio.py:215-282` | Test |
-| FR-004 | Process an audio file as a stream (`fast` or `realtime`), at most 2 h and 2 files at once, cancellable. | Partial: `process_file` has no caller | `apps/api/wsw_brain/listen/pipeline.py:27-113` | Test |
+| FR-004 | Process an audio file as a stream (`fast` or `realtime`), at most 2 h and 2 files at once, cancellable. | Partial: `process_file` has no caller | `apps/api/wsw_brain/listen/file_pipeline.py:27-113` | Test |
 | FR-005 | Upload a recording from the Meetings page. | Planned: `/api/meetings/upload` not served | `apps/web/src/components/meeting/UploadRecording.tsx:42` | Inspection |
 | FR-006 | Create, end, list, read and delete meetings in the graph. | Partial: no `/api/meetings` routes (G1) | `apps/api/wsw_brain/graph/store.py:267-342` | Test |
-| FR-007 | Report listener state and lag at most every 2 s and survive ASR or callback failures. | Partial: `listener.status` published only by the unwired pipeline (G4) | `apps/api/wsw_brain/listen/session.py:641-662`, `apps/api/wsw_brain/pipeline.py:151-157` | Test |
+| FR-007 | Report listener state and lag at most every 2 s and survive ASR or callback failures. | Partial: `listener.status` published only by the unwired pipeline (G4) | `apps/api/wsw_brain/listen/session.py:641-662`, `apps/api/wsw_brain/ingest/pipeline.py:151-157` | Test |
 
 ### 3.2 Speaker attribution
 
@@ -108,13 +108,13 @@ Requirement text is abridged; the cited code holds the full behaviour and limits
 
 | ID | Requirement | Status | Evidence | Verification |
 |---|---|---|---|---|
-| FR-015 | Extract decisions, action items, topics, entities and mentions from a window, keeping only evidence ids in the window. | Partial: called only by the unwired pipeline (G4) | `apps/api/wsw_brain/brain/extract.py:199-344`, `apps/api/wsw_brain/pipeline.py:419` | Test |
+| FR-015 | Extract decisions, action items, topics, entities and mentions from a window, keeping only evidence ids in the window. | Partial: called only by the unwired pipeline (G4) | `apps/api/wsw_brain/brain/extract.py:199-344`, `apps/api/wsw_brain/ingest/pipeline.py:419` | Test |
 | FR-016 | Fall back to cue-phrase extraction and report the reason. | Partial: as FR-015 | `apps/api/wsw_brain/brain/extract.py:698-715` | Test |
 | FR-017 | Mark a decision superseded by a later one from any meeting; a restatement does not supersede. | Partial: reached only through the pipeline (G4) | `apps/api/wsw_brain/graph/store.py:555-578` | Test |
 | FR-018 | Store insights in one locked, deduplicated write and return only new items. | Partial: called by the unwired pipeline (G4) | `apps/api/wsw_brain/graph/store.py:461-665` | Test |
 | FR-019 | Summarise a meeting in at most 80 words, with a heuristic fallback. | Partial: pipeline unwired; only the seed script stores summaries | `apps/api/wsw_brain/brain/summary.py:15-123`, `scripts/seed_demo_meetings.py:44-45` | Test |
-| FR-060 | Run live extraction every `WSW_EXTRACT_EVERY` (6) utterances over windows of up to 14, without repeating restated items, publishing `insight.created`. | Partial: pipeline unwired (G4) | `apps/api/wsw_brain/pipeline.py:373-447` | Test |
-| FR-061 | On meeting end, flush, mark ended, run a final extraction and summary, publish `meeting.ended`; idempotent. | Partial: unwired; end route not served | `apps/api/wsw_brain/pipeline.py:186-240` | Test |
+| FR-060 | Run live extraction every `WSW_EXTRACT_EVERY` (6) utterances over windows of up to 14, without repeating restated items, publishing `insight.created`. | Partial: pipeline unwired (G4) | `apps/api/wsw_brain/ingest/pipeline.py:373-447` | Test |
+| FR-061 | On meeting end, flush, mark ended, run a final extraction and summary, publish `meeting.ended`; idempotent. | Partial: unwired; end route not served | `apps/api/wsw_brain/ingest/pipeline.py:186-240` | Test |
 
 ### 3.5 Graph memory
 
@@ -124,7 +124,7 @@ Requirement text is abridged; the cited code holds the full behaviour and limits
 | FR-021 | Create indexes idempotently and refuse an embedder of a different dimension. | Implemented | `apps/api/wsw_brain/graph/store.py:213-247` | Test |
 | FR-022 | Provide read models for action items, decisions, people, "who knows", subgraphs and counts. | Partial: no routes served | `apps/api/wsw_brain/graph/store.py:676-789` | Test |
 | FR-023 | Persist conversation turns per session. | Partial: unused; route not served | `apps/api/wsw_brain/graph/store.py:889-907` | Test |
-| FR-062 | Write listener utterances as they arrive in micro-batches (8 or 1 s), keep text when embedding fails, retry FalkorDB 3 times, publish `utterance.created` and `graph.write`. | Partial: no entrypoint constructs the pipeline or feeds it from a `LiveSession` (G4) | `apps/api/wsw_brain/pipeline.py:251-361` | Test |
+| FR-062 | Write listener utterances as they arrive in micro-batches (8 or 1 s), keep text when embedding fails, retry FalkorDB 3 times, publish `utterance.created` and `graph.write`. | Partial: no entrypoint constructs the pipeline or feeds it from a `LiveSession` (G4) | `apps/api/wsw_brain/ingest/pipeline.py:251-361` | Test |
 
 ### 3.6 Retrieval and Ask
 
@@ -215,7 +215,7 @@ All rows are served only by `wsw_brain.documents.app` (G6).
 | NFR-010 | Reliability | Graph timeouts (3 s connect, 60 s reply), one retry, 503 from the documents API. | Implemented | `apps/api/wsw_brain/graph/store.py:139-191` | Test |
 | NFR-011 | Reliability | Explicit timeouts and bounded retries for hosted calls. | Implemented | `apps/api/wsw_brain/documents/sarvam.py:118-151`, `apps/api/wsw_brain/brain/llm.py:40` | Test |
 | NFR-012 | Reliability | Survive reconnects with replay and client backoff. | Partial: client cannot read frames (G5) | `apps/api/wsw_brain/events.py:101-109` | Test |
-| NFR-026 | Reliability | Keep utterances through transient failures in live ingest. | Partial: pipeline unwired (G4) | `apps/api/wsw_brain/pipeline.py:320-347` | Test |
+| NFR-026 | Reliability | Keep utterances through transient failures in live ingest. | Partial: pipeline unwired (G4) | `apps/api/wsw_brain/ingest/pipeline.py:320-347` | Test |
 | NFR-013 | Security | Mark outside material as untrusted in every prompt (`UNTRUSTED_NOTE`). | Implemented | `apps/api/wsw_brain/brain/llm.py:35-39` | Test |
 | NFR-014 | Integrity | Cite only retrieved or in-window evidence. | Partial: Implemented for documents; agent and extractor unwired | `apps/api/wsw_brain/documents/answer.py:155-157`, `apps/api/wsw_brain/brain/agent.py:148-163` | Test |
 | NFR-015 | Security | Parameterise all Cypher values; redact connection URLs. | Implemented | `apps/api/wsw_brain/graph/cypher.py:1-2`, `apps/api/wsw_brain/graph/store.py:1180-1181` | Inspection |
@@ -286,12 +286,12 @@ flowchart LR
   uc6 --> falkor
 ```
 
-Sources: `apps/web/src/components/meeting/StartMeeting.tsx:28`, `apps/web/src/components/meeting/UploadRecording.tsx:42`, `apps/web/src/components/ask/AskDrawer.tsx:296`, `apps/web/src/components/ask/useVoiceQuestion.ts:1-4`, `apps/api/wsw_brain/documents/api.py:159`, `apps/web/src/App.tsx:43-46`, `apps/api/wsw_brain/brain/llm.py:856-895`, `apps/api/wsw_brain/app.py:14-41`, `apps/api/wsw_brain/pipeline.py:55`.
+Sources: `apps/web/src/components/meeting/StartMeeting.tsx:28`, `apps/web/src/components/meeting/UploadRecording.tsx:42`, `apps/web/src/components/ask/AskDrawer.tsx:296`, `apps/web/src/components/ask/useVoiceQuestion.ts:1-4`, `apps/api/wsw_brain/documents/api.py:159`, `apps/web/src/App.tsx:43-46`, `apps/api/wsw_brain/brain/llm.py:856-895`, `apps/api/wsw_brain/app.py:14-41`, `apps/api/wsw_brain/ingest/pipeline.py:55`.
 
 | UC | Actor and trigger | Main flow | Key alternate flows | Related FRs | Status |
 |---|---|---|---|---|---|
 | UC-1 Capture a live meeting | Participant starts a meeting and capture (`apps/web/src/pages/MeetingRoom.tsx:93`) | Create meeting; stream PCM16 over WebSocket; listener segments, attributes and transcribes; `IngestPipeline` writes utterances and extracts every N; SSE updates the room; ending stores a final extraction and summary | Microphone denied (`apps/web/src/audio/mic.ts:38-53`); backlog over 300 s; reconnect keeps tracks; demo mode 503 | FR-001-FR-012, FR-015-FR-020, FR-043-FR-045, FR-048, FR-049, FR-060-FR-062 | Planned end to end: no meeting or socket routes (G1); pipeline exists but is not constructed (G4) |
-| UC-2 Upload a recording | Participant picks a file (`apps/web/src/components/meeting/UploadRecording.tsx:25`) | Post file; decode in blocks through a `LiveSession`; store as in UC-1 | Over 2 h refused; cancel; more than 2 wait; demo mode 503 | FR-004-FR-006, FR-012, FR-015-FR-020, FR-048, FR-060-FR-062 | Planned end to end: no upload route; `process_file` and `IngestPipeline.callbacks()` (`apps/api/wsw_brain/pipeline.py:118-143`) are not joined |
+| UC-2 Upload a recording | Participant picks a file (`apps/web/src/components/meeting/UploadRecording.tsx:25`) | Post file; decode in blocks through a `LiveSession`; store as in UC-1 | Over 2 h refused; cancel; more than 2 wait; demo mode 503 | FR-004-FR-006, FR-012, FR-015-FR-020, FR-048, FR-060-FR-062 | Planned end to end: no upload route; `process_file` and `IngestPipeline.callbacks()` (`apps/api/wsw_brain/ingest/pipeline.py:118-143`) are not joined |
 | UC-3 Ask a typed question | Any user presses `/` or uses the palette | Post question; hybrid retrieval with RRF; cited answer; show trace and Cypher | No evidence: fixed fallback (`apps/api/wsw_brain/brain/agent.py:61-70`); model busy; stale request aborted; demo matching | FR-024-FR-029, FR-031, FR-054 | Partial: client calls unserved `/api/ask` (G3); demo mode works |
 | UC-4 Ask a spoken question | Any user holds talkback or speaks hands-free | Record ≤30 s WAV; post to `/api/ask/voice`; transcribe; answer as UC-3; speak it; barge-in | Insecure page or microphone error (`apps/web/src/audio/question.ts:19-26`); empty transcript; demo 503 | FR-014, FR-024-FR-028, FR-030, FR-031, FR-063 | Planned on the server: no voice route; `GemmaClient.transcribe` unwired (G7). Browser capture and speech Implemented |
 | UC-5 Upload and query a document | Client posts to `POST /api/documents` | Validate and split; background digitise, describe, chunk, embed, store, summarise; poll; ask with optional meetings and language; read aloud | No Sarvam key 503; too large 413; too many pages 400; job failed; translation error; graph 503 | FR-024, FR-032-FR-042 | Implemented (API only, G6); no web UI (FR-040 Planned) |

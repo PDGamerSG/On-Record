@@ -213,7 +213,7 @@ flowchart LR
 
 *C4 level 3, components of `listen` and `IngestPipeline`. The dashed edge is the connection no code makes yet.*
 
-Sources: apps/api/wsw_brain/listen/pipeline.py:27, apps/api/wsw_brain/listen/pipeline.py:81; apps/api/wsw_brain/listen/session.py:101, apps/api/wsw_brain/listen/session.py:665-680; apps/api/wsw_brain/listen/asr.py:14; apps/api/wsw_brain/listen/sarvam_asr.py:41; apps/api/wsw_brain/listen/speakers.py:19, apps/api/wsw_brain/listen/speakers.py:71; apps/api/wsw_brain/contracts.py:79; apps/api/wsw_brain/pipeline.py:55, apps/api/wsw_brain/pipeline.py:118-143.
+Sources: apps/api/wsw_brain/listen/file_pipeline.py:27, apps/api/wsw_brain/listen/file_pipeline.py:81; apps/api/wsw_brain/listen/session.py:101, apps/api/wsw_brain/listen/session.py:665-680; apps/api/wsw_brain/listen/asr.py:14; apps/api/wsw_brain/listen/sarvam_asr.py:41; apps/api/wsw_brain/listen/speakers.py:19, apps/api/wsw_brain/listen/speakers.py:71; apps/api/wsw_brain/contracts.py:79; apps/api/wsw_brain/ingest/pipeline.py:55, apps/api/wsw_brain/ingest/pipeline.py:118-143.
 
 ## 6. Runtime view
 
@@ -239,7 +239,7 @@ sequenceDiagram
 
 *UML sequence diagram: one batch of live utterances through `IngestPipeline`.*
 
-Sources: apps/api/wsw_brain/pipeline.py:1-10, apps/api/wsw_brain/pipeline.py:39-40, apps/api/wsw_brain/pipeline.py:64-65, apps/api/wsw_brain/pipeline.py:118-143, apps/api/wsw_brain/pipeline.py:251-276, apps/api/wsw_brain/pipeline.py:304-339, apps/api/wsw_brain/pipeline.py:419-447; apps/api/wsw_brain/config.py:79.
+Sources: apps/api/wsw_brain/ingest/pipeline.py:1-10, apps/api/wsw_brain/ingest/pipeline.py:39-40, apps/api/wsw_brain/ingest/pipeline.py:64-65, apps/api/wsw_brain/ingest/pipeline.py:118-143, apps/api/wsw_brain/ingest/pipeline.py:251-276, apps/api/wsw_brain/ingest/pipeline.py:304-339, apps/api/wsw_brain/ingest/pipeline.py:419-447; apps/api/wsw_brain/config.py:79.
 
 ## 7. Deployment view
 
@@ -260,10 +260,10 @@ Only local development is described in the repository. Hosting of https://onreco
 | Configuration | One `Settings` class reads `WSW_*` variables and `.env`; `settings()` is cached and creates the data directories. Every setting is listed in [CONFIGURATION.md](../CONFIGURATION.md) | apps/api/wsw_brain/config.py:15-20, apps/api/wsw_brain/config.py:88-93 |
 | Events and SSE | `EventBus` keeps 500 events for replay and a queue of 2000 per subscriber, dropping new events when a queue is full. `/api/events` sends `id`, `event` and the payload as `data`, with a keep-alive every 15 s | apps/api/wsw_brain/events.py:53-64, apps/api/wsw_brain/events.py:108-109, apps/api/wsw_brain/event_stream.py:16-23 |
 | ModelGate | One gate per model endpoint: `WSW_MODEL_SLOTS` (2) calls at once, at most `WSW_MODEL_MAX_WAITING` (6) ordinary waiters, a `WSW_MODEL_QUEUE_WAIT_S` (90 s) wait; `llm_priority` lets important work jump the queue | apps/api/wsw_brain/brain/llm.py:58-157, apps/api/wsw_brain/config.py:51-53 |
-| Error handling | Typed errors (`LLMError`, `GraphUnavailable`, `GraphQueryError`, `SarvamError`, `DocumentError`); the documents API maps graph errors to 503 and Sarvam speech errors to 502; ingest failures are published as `listener.status` "error" | apps/api/wsw_brain/brain/llm.py:53, apps/api/wsw_brain/graph/store.py:76-84, apps/api/wsw_brain/documents/api.py:107-111, apps/api/wsw_brain/documents/api.py:272-273, apps/api/wsw_brain/pipeline.py:363-370 |
+| Error handling | Typed errors (`LLMError`, `GraphUnavailable`, `GraphQueryError`, `SarvamError`, `DocumentError`); the documents API maps graph errors to 503 and Sarvam speech errors to 502; ingest failures are published as `listener.status` "error" | apps/api/wsw_brain/brain/llm.py:53, apps/api/wsw_brain/graph/store.py:76-84, apps/api/wsw_brain/documents/api.py:107-111, apps/api/wsw_brain/documents/api.py:272-273, apps/api/wsw_brain/ingest/pipeline.py:363-370 |
 | Untrusted content | `UNTRUSTED_NOTE` is appended to every prompt that carries evidence, passages, transcripts or images; citations not retrieved are removed; remote image URLs are refused | apps/api/wsw_brain/brain/llm.py:36-39, apps/api/wsw_brain/brain/agent.py:148-163, apps/api/wsw_brain/brain/llm.py:487-512 |
 | Demo and live mode | The web client decides once per page load; `api` is a `Proxy` over `demoApi` and `realApi`. See [Demo mode and live mode](../ARCHITECTURE.md#demo-mode-and-live-mode) | apps/web/src/api/mode.ts:12-31, apps/web/src/api/client.ts:107-110 |
-| Fallbacks | Heuristic extraction and summaries, hashing embeddings, text-only utterance writes | apps/api/wsw_brain/brain/extract.py:599, apps/api/wsw_brain/brain/summary.py:45, apps/api/wsw_brain/brain/embed.py:182-186, apps/api/wsw_brain/pipeline.py:320-339 |
+| Fallbacks | Heuristic extraction and summaries, hashing embeddings, text-only utterance writes | apps/api/wsw_brain/brain/extract.py:599, apps/api/wsw_brain/brain/summary.py:45, apps/api/wsw_brain/brain/embed.py:182-186, apps/api/wsw_brain/ingest/pipeline.py:320-339 |
 
 ## 9. Architecture decisions
 
@@ -300,8 +300,8 @@ Each item was re-checked at `8943885` with `git show` and `git grep`.
 
 | ID | Risk or debt | Evidence | Effect |
 |---|---|---|---|
-| TD-1 | `IngestPipeline` is constructed by no entrypoint, and nothing joins it to a `LiveSession` | apps/api/wsw_brain/pipeline.py:55; no import in apps/api/wsw_brain/app.py:1-44; apps/api/wsw_brain/pipeline.py:118-143 | Live meeting capture does not reach the graph |
-| TD-2 | No HTTP or WebSocket route feeds the listener; `process_file` has no production caller | apps/api/wsw_brain/listen/pipeline.py:27 | The upload and microphone features of the web client have no server |
+| TD-1 | `IngestPipeline` is constructed by no entrypoint, and nothing joins it to a `LiveSession` | apps/api/wsw_brain/ingest/pipeline.py:55; no import in apps/api/wsw_brain/app.py:1-44; apps/api/wsw_brain/ingest/pipeline.py:118-143 | Live meeting capture does not reach the graph |
+| TD-2 | No HTTP or WebSocket route feeds the listener; `process_file` has no production caller | apps/api/wsw_brain/listen/file_pipeline.py:27 | The upload and microphone features of the web client have no server |
 | TD-3 | The default app has no `MeetingAgent`, and the client posts to `/api/ask`, not `/api/agent/ask` | apps/api/wsw_brain/app.py:44; apps/web/src/api/client.ts:94; apps/api/wsw_brain/brain/agent_api.py:38-40 | Ask works only in demo mode |
 | TD-4 | The meeting routes the client calls (`/api/health`, `/api/meetings`, …) are served by no module | apps/web/src/api/client.ts:57-103 | The client always falls back to demo mode |
 | TD-5 | The documents router is not mounted in the main app, although `/api/capabilities` lists `"documents"`; the web client has no Documents page | apps/api/wsw_brain/app.py:32; apps/api/wsw_brain/documents/app.py:1-7 | Two processes are needed, and the capability list is misleading |

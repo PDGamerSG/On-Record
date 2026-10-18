@@ -9,7 +9,7 @@ There are two separate FastAPI applications. Neither mounts the other's routes.
 | Main API | `wsw_brain.app:app` | `/healthz`, `/api/status`, `/api/capabilities`, `/api/events`; `/api/agent/ask` only when built with an agent | `apps/api/wsw_brain/app.py:14-44` |
 | Documents app | `wsw_brain.documents.app:app` | `/api/documents/*` only, with optional CORS (cross-origin resource sharing) | `apps/api/wsw_brain/documents/app.py:21-25` |
 
-No other module defines routes. `apps/api/wsw_brain/pipeline.py` and `apps/api/wsw_brain/brain/gemma.py` contain no `APIRouter` or `@app` routes.
+No other module defines routes. `apps/api/wsw_brain/ingest/pipeline.py` and `apps/api/wsw_brain/brain/gemma.py` contain no `APIRouter` or `@app` routes.
 
 ## OpenAPI schema
 
@@ -103,7 +103,7 @@ Ingestion jobs live in an in-process dict (`apps/api/wsw_brain/documents/api.py:
 
 ## Server-Sent Events
 
-`GET /api/events` on the main API streams events from the in-process `EventBus`. Status: Partial. The endpoint and bus work and are tested, but the only production publisher, `IngestPipeline` in `apps/api/wsw_brain/pipeline.py`, is not constructed by any entrypoint, so a running server publishes no events.
+`GET /api/events` on the main API streams events from the in-process `EventBus`. Status: Partial. The endpoint and bus work and are tested, but the only production publisher, `IngestPipeline` in `apps/api/wsw_brain/ingest/pipeline.py`, is not constructed by any entrypoint, so a running server publishes no events.
 
 ### Query parameters
 
