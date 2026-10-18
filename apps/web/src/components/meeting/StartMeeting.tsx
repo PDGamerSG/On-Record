@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { CircleNotchIcon, MicrophoneIcon } from "@phosphor-icons/react";
 import { api } from "../../api/client";
@@ -12,6 +12,20 @@ export default function StartMeeting() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fallback, setFallback] = useState("");
+  const startButton = useRef<HTMLButtonElement>(null);
+  // Cancel or Escape removes the form; focus goes back to the button that opened it, not to the page body
+  const refocus = useRef(false);
+
+  useEffect(() => {
+    if (open || !refocus.current) return;
+    refocus.current = false;
+    startButton.current?.focus();
+  }, [open]);
+
+  const closeForm = () => {
+    refocus.current = true;
+    setOpen(false);
+  };
 
   const openForm = () => {
     setFallback(`Meeting, ${when(Date.now())}`);
@@ -35,7 +49,7 @@ export default function StartMeeting() {
 
   if (!open) {
     return (
-      <button type="button" className="btn btn--primary" onClick={openForm}>
+      <button ref={startButton} type="button" className="btn btn--primary" onClick={openForm}>
         <MicrophoneIcon aria-hidden="true" />
         Start a live meeting
       </button>
@@ -47,7 +61,7 @@ export default function StartMeeting() {
       className="start"
       onSubmit={submit}
       onKeyDown={(e) => {
-        if (e.key === "Escape" && !busy) setOpen(false);
+        if (e.key === "Escape" && !busy) closeForm();
       }}
     >
       <label htmlFor="start-title" className="start-label">
@@ -68,7 +82,7 @@ export default function StartMeeting() {
           {busy ? <CircleNotchIcon className="spin" aria-hidden="true" /> : <MicrophoneIcon aria-hidden="true" />}
           {busy ? "Starting" : "Start meeting"}
         </button>
-        <button type="button" className="btn btn--ghost" onClick={() => setOpen(false)} disabled={busy}>
+        <button type="button" className="btn btn--ghost" onClick={closeForm} disabled={busy}>
           Cancel
         </button>
       </div>
