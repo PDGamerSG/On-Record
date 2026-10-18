@@ -17,7 +17,6 @@ import { api } from "../../api/client";
 import type { ActionItem, Decision, MeetingSummary, Person } from "../../api/types";
 import { brand } from "../../lib/brand";
 import { duration, speakerIndex } from "../../lib/format";
-import { isDemo } from "../../api/mode";
 import ProductMark from "./ProductMark";
 import { SystemStatus } from "./SystemStatus";
 import ThemeToggle from "./ThemeToggle";
@@ -159,11 +158,6 @@ export default function AppShell({ children }: { children: ReactNode }) {
               <XIcon aria-hidden="true" />
             </button>
           </div>
-          {isDemo() && (
-            <span className="shell-demo" title="You're looking at bundled demo data. Start the API to use your own meetings.">
-              Demo
-            </span>
-          )}
 
           <button type="button" className="shell-search" onClick={handleSearch} aria-label={railOpen ? "Search and commands" : "Open navigation"} aria-keyshortcuts="Meta+K Control+K">
             <MagnifyingGlassIcon aria-hidden="true" />

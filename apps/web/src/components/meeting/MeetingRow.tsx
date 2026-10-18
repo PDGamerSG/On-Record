@@ -14,9 +14,10 @@ function peopleText(data: StripData | undefined, count: number): string {
   return rest > 0 ? `${shown} and ${rest} more` : shown;
 }
 
-function sourceText(m: MeetingSummary): string {
+/** How the meeting got here. Bundled sample meetings get no label: they should read like any other meeting. */
+function sourceText(m: MeetingSummary): string | null {
   if (m.source === "upload") return "Uploaded";
-  if (m.source === "demo") return "Demo";
+  if (m.source === "demo") return null;
   return "Recorded live";
 }
 
@@ -54,6 +55,7 @@ function MeetingRow({ m, now }: { m: MeetingSummary; now: number }) {
   const elapsed = live && startedAt ? (now - startedAt) / 1000 : 0;
   const lastEnd = entry.data?.lastEnd ?? 0;
   const length = Math.max(Number(m.duration_s) || 0, live && m.source !== "upload" ? elapsed : 0, lastEnd);
+  const source = sourceText(m);
 
   return (
     <li ref={ref} className={`mrow${live ? " is-live" : ""}`}>
@@ -68,7 +70,7 @@ function MeetingRow({ m, now }: { m: MeetingSummary; now: number }) {
           <Link to={`/m/${encodeURIComponent(m.id)}`} className="mrow-title">
             {m.title || "Untitled meeting"}
           </Link>
-          <span className="mrow-source">{sourceText(m)}</span>
+          {source && <span className="mrow-source">{source}</span>}
         </div>
         <div className="mrow-meta">
           {startedAt > 0 && <span className="mrow-num">{when(startedAt)}</span>}

@@ -256,7 +256,7 @@ function RoomReady({ id, room, meeting }: { id: string; room: MeetingRoomApi; me
               <span className="room-fact">
                 {state.speakers.length} {state.speakers.length === 1 ? "speaker" : "speakers"}
               </span>
-              <span className="room-fact">{meeting.source === "upload" ? "Uploaded recording" : meeting.source === "demo" ? "Demo meeting" : "Recorded live"}</span>
+              {meeting.source !== "demo" && <span className="room-fact">{meeting.source === "upload" ? "Uploaded recording" : "Recorded live"}</span>}
             </div>
           </div>
           <div className="room-side">
