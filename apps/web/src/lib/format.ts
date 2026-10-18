@@ -29,7 +29,8 @@ export function speakerName(s: { name?: string | null; speaker_name?: string | n
   return s.name || s.speaker_name || s.label || (s.track || s.speaker ? `Speaker ${(s.track || s.speaker || "").replace(/^S/, "")}` : "Unknown");
 }
 
-/** "S3" -> 2 (palette index), stable per meeting. */
+/** "S3" -> 2: the default palette index for a track. Prefer the speaker's color_idx when known, since a
+ * renamed or merged speaker keeps their colour (see useSpeakerColour in stripCache.ts). */
 export function speakerIndex(track: string | null | undefined): number {
   const n = parseInt(String(track ?? "").replace(/\D/g, ""), 10);
   return Number.isFinite(n) && n > 0 ? (n - 1) % 8 : 7;

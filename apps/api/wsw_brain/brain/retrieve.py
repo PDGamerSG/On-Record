@@ -1,4 +1,4 @@
-"""Hybrid retrieval over the graph: full-text + EmbeddingGemma KNN + speaker and recency Cypher templates,
+"""Hybrid retrieval over the graph: full-text + vector KNN (any Embedder) + speaker and recency Cypher templates,
 fused with reciprocal-rank fusion."""
 
 from __future__ import annotations

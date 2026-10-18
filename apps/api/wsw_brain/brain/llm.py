@@ -1,7 +1,9 @@
-"""Local text model calls behind contracts.LLM.
+"""Text model adapters behind contracts.LLM: Ollama, Gemini, OpenAI-compatible endpoints, Sarvam and a
+deterministic fake. get_llm() picks one from the settings, and ModelGate limits concurrent generations per
+endpoint.
 
 Assistant tool messages use {id, name, arguments} entries; tool responses keep
-the matching tool_call_id. Helpers let later adapters share the same exchange.
+the matching tool_call_id. Helpers let every adapter share the same exchange.
 """
 
 from __future__ import annotations

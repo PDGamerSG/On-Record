@@ -1,5 +1,5 @@
 // Tiny app-wide channel so the Ask drawer (or anything) can ask the meeting room to seek/highlight.
-// The meeting room listens with onSeek(); producers call requestSeek().
+// The meeting room listens with useSeekRequests(); producers call requestSeek().
 import { useEffect, useRef } from "react";
 
 export interface SeekRequest {

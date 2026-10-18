@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     models_dir: Path = Field(REPO_ROOT / "models", alias="WSW_MODELS_DIR")
 
     # Text model routing. "auto" prefers Gemini with a key, then Sarvam with a key, then the configured local
-    # model, then fake.
+    # model, then fake. With only OpenAI-compatible settings, auto raises; choose openai explicitly.
     llm_provider: Literal["auto", "ollama", "gemini", "openai", "sarvam", "fake"] = Field(
         "auto", alias="WSW_LLM_PROVIDER"
     )
