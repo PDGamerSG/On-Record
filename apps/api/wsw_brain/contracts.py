@@ -5,7 +5,7 @@ Layers:
   graph/      GraphStore: FalkorDB writes + reads
   brain/      text model adapters, embeddings, retrieval           [LLM, Embedder]
   documents/  uploaded documents: digitise, chunk, search, answer
-  app.py      FastAPI entrypoint; the REST, SSE and WebSocket routes arrive in later PRs
+  app.py      FastAPI entrypoint; REST, SSE and WebSocket adapters for the web app
 
 Times inside a meeting (Utterance.t_start/t_end, Decision.made_at, duration_s) are SECONDS from meeting
 start. Wall-clock times are epoch milliseconds, except event `ts` in events.py, which is epoch seconds.

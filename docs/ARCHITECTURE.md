@@ -49,17 +49,11 @@ flowchart LR
 
 In development, Vite serves the web app on port 5173 and proxies `/api` and `/ws` to `WSW_API_URL` (default `http://127.0.0.1:8000`). For an API hosted elsewhere, build the web app with `VITE_API_BASE` set to its origin.
 
-### What is not in the repository yet
+### Runtime integration
 
-The repository is being assembled in feature-sized PRs, so several things the web app calls have no server yet:
+`wsw_brain.app:app`, started with `python -m wsw_brain.cli`, now exposes the REST, SSE and WebSocket contracts used by the web app. The meeting router covers meeting lifecycle, incremental transcript reads, speaker naming, uploads, recordings, decisions, action items, people, graph/search views, session history and spoken questions. The audio WebSocket feeds `LiveSession` into `IngestPipeline`; the default runtime builds the graph, embedder, language model, retriever and extractor lazily on the first live request so health checks remain usable without external services.
 
-- `wsw_brain.app:app`, started with `python -m wsw_brain.cli`, serves `GET /healthz`, `GET /api/status`, `GET /api/capabilities` and the `GET /api/events` stream.
-- `wsw_brain.documents.app:app` serves only `/api/documents/*`. The web app on `main` has no Documents page yet.
-- No server provides the meeting routes listed in `apps/web/src/api/client.ts` (`/api/health`, `/api/meetings`, `/api/ask`, …) or the audio WebSocket.
-- The listener (`listen/session.py`) runs as a library: `listen/pipeline.py` feeds it an audio file as if it were streamed, and `IngestPipeline` (`wsw_brain/pipeline.py`) writes its utterances to the graph, extracts insights and summarises ended meetings. No route connects them to the browser yet.
-- The assistant (`brain/agent.py`) answers at `POST /api/agent/ask`, but only when `create_app()` is given a `MeetingAgent`; the default `app` has no agent. The web app calls `POST /api/ask` and `/api/ask/voice`, which no server provides.
-
-The web app decides its mode with `/api/health`, which no server answers yet, so its meeting views always run on the bundled demo data today. The live sections below describe what the client expects from the server.
+`create_app()` accepts injected graph, pipeline and agent instances for tests and alternate deployments. A live deployment still needs FalkorDB and the configured speech/model assets; when those are unavailable, live routes return a clear `503` while the bundled demo mode remains available.
 
 ## Demo mode and live mode
 
@@ -194,7 +188,7 @@ sequenceDiagram
   Drawer->>User: Shows the answer and its quotes, reads it aloud if enabled
 ```
 
-The request's `k` (1 to 20, default 8) is how many fused hits the agent retrieves as evidence; `question` can be up to 2000 characters. The agent keeps the last six question-and-answer pairs of each session in memory; it does not write `Turn` nodes. Its `actions` list is always empty, and its `timings` keys are `retrieval_ms`, `model_ms` and `total_ms`. Before the drawer can use the agent, two gaps need closing: the drawer posts to `/api/ask` rather than `/api/agent/ask`, and spoken questions have no server route.
+The request's `k` (1 to 20, default 8) is how many fused hits the agent retrieves as evidence; `question` can be up to 2000 characters. The agent keeps the last six question-and-answer pairs of each session in memory; it does not write `Turn` nodes. Its `actions` list is always empty, and its `timings` keys are `retrieval_ms`, `model_ms` and `total_ms`. Both `/api/ask` (the browser contract) and `/api/agent/ask` are available, and `/api/ask/voice` transcribes a WAV upload before asking the same grounded agent.
 
 Both answer paths run the answer checks in `brain/grounding.py` before they return. Every number in a sentence must appear in the evidence that sentence cites, compared without thousands separators and with Indian-script digits read as ASCII. An uncited sentence is kept only if it is not a factual claim or shares at least three content words with the evidence. On an unsupported number the model is asked once more at temperature 0; sentences that still fail are dropped, and an answer left empty becomes the usual "not found" reply. `MeetingAgent` adds a `check_answer` entry to `tool_trace`, and `answer_question()` returns `checks`. `WSW_ANSWER_CHECKS=report` keeps answers unchanged and only records what would be removed.
 
