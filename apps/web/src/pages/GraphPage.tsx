@@ -6,6 +6,7 @@ import { ArrowLeftIcon, ArrowRightIcon, CircleNotchIcon, PlayIcon } from "@phosp
 import { api } from "../api/client";
 import type { GraphNode, Subgraph } from "../api/types";
 import { timecode, when } from "../lib/format";
+import { usePageTitle } from "../lib/pageTitle";
 import { errorText, titleMap, useMeetings } from "../components/ask/meetingData";
 import { meetingPath, useJump } from "../components/ask/useJump";
 import { useLiveRefresh } from "../components/ask/useLiveRefresh";
@@ -52,6 +53,7 @@ function propLabel(key: string): string {
 }
 
 export default function GraphPage() {
+  usePageTitle("Graph");
   const [params, setParams] = useSearchParams();
   const { meetings, error: meetingsError } = useMeetings();
   const titles = useMemo(() => titleMap(meetings), [meetings]);
