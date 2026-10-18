@@ -690,6 +690,51 @@ class OpenAICompatLLM:
         return {"role": role, "content": message.get("content") or ""}
 
 
+class SarvamLLM(OpenAICompatLLM):
+    """Gemma 4 31B (model "gemma4") or another Sarvam-served model through Sarvam's v2 chat completions.
+
+    The v2 endpoint is OpenAI-compatible, so only the URL and the `api-subscription-key` header differ.
+    Sarvam documents that gemma4 returns blank output when `response_format` is combined with a JSON
+    instruction in the prompt, so JSON mode only sends `response_format` when no message asks for JSON.
+    """
+
+    provider = "sarvam"
+
+    def __init__(
+        self,
+        api_key: str,
+        model: str = "gemma4",
+        *,
+        base_url: str = "https://api.sarvam.ai",
+        transport: httpx.AsyncBaseTransport | None = None,
+    ) -> None:
+        if not isinstance(api_key, str) or not api_key.strip():
+            raise ValueError("a Sarvam API key is required (set SARVAM_API_KEY)")
+        super().__init__(base_url, None, model, transport=transport)
+        self.url = f"{base_url.rstrip('/')}/v2/chat/completions"
+        self._headers = {"api-subscription-key": api_key.strip()}
+
+    async def chat(
+        self,
+        messages: list[dict[str, Any]],
+        *,
+        tools: list[dict[str, Any]] | None = None,
+        json_mode: bool = False,
+        temperature: float = 0.2,
+        max_tokens: int = 800,
+    ) -> LLMResult:
+        prompt_asks_for_json = any(
+            isinstance(m.get("content"), str) and "json" in m["content"].lower() for m in messages
+        )
+        return await super().chat(
+            messages,
+            tools=tools,
+            json_mode=json_mode and not prompt_asks_for_json,
+            temperature=temperature,
+            max_tokens=max_tokens,
+        )
+
+
 class FakeLLM:
     """Deterministic, offline text model for local development and tests."""
 
@@ -759,6 +804,10 @@ def select_llm(s: Settings, probe: Any = probe_ollama_model) -> LLM:
         if not s.gemini_api_key:
             raise LLMError("configured Gemini provider needs GEMINI_API_KEY")
         return GeminiLLM(s.gemini_api_key, s.gemini_model)
+    if provider == "sarvam" or (provider == "auto" and s.sarvam_api_key):
+        if not s.sarvam_api_key:
+            raise LLMError("configured Sarvam provider needs SARVAM_API_KEY")
+        return SarvamLLM(s.sarvam_api_key, s.sarvam_model, base_url=s.sarvam_base_url)
     if provider == "openai":
         if not s.openai_base_url:
             raise LLMError("configured OpenAI-compatible provider needs WSW_OPENAI_BASE_URL")
