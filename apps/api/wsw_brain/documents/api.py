@@ -211,6 +211,17 @@ def job_status(job_id: str) -> dict[str, Any]:
     return job.view()
 
 
+@router.delete("/jobs/{job_id}")
+def delete_job(job_id: str) -> dict[str, bool]:
+    job = _jobs.get(job_id)
+    if job is None:
+        raise HTTPException(404, "no such document job")
+    if job.status == "running":
+        raise HTTPException(409, "document job is still running")
+    _jobs.pop(job_id)
+    return {"deleted": True}
+
+
 @router.get("")
 def list_documents() -> list[dict[str, Any]]:
     return _graph_call(_docs().list_documents)
