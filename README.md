@@ -237,6 +237,16 @@ uv run --project apps/api pytest apps/api/tests/test_documents_split.py apps/api
   apps/api/tests/test_sarvam_asr.py -q
 ```
 
+### Speaker attribution
+
+`OnlineClusterer` groups voice embeddings into meeting-scoped speaker tracks named `S1`, `S2`, and so on. A segment joins the closest track when its cosine similarity reaches the threshold; otherwise it opens a new track, up to `max_speakers`. Short or borderline segments that match nothing stay with the previous speaker, because brief interjections give noisy embeddings. `merge_close()` folds tracks whose centroids converge into the older track, and track numbers are never reused. `state()` and `restore()` carry tracks over to a later session of the same meeting.
+
+`SherpaSpeakerEmbedder` computes normalised voice embeddings with a sherpa-onnx speaker model such as NeMo TitaNet-small (`speaker_embedding_en.onnx`). `speaker_change_points()` finds where the voice changes inside one speech segment, for replies that follow each other with too little silence to split.
+
+`get_speaker_embedder()` loads the model named by `WSW_SPEAKER_MODEL` from `WSW_MODELS_DIR` once and shares it; an absolute `WSW_SPEAKER_MODEL` path is used as given. It raises `FileNotFoundError` while the file is missing, and a later call retries. `speaker_clusterer()` returns a fresh `OnlineClusterer` for one meeting, matching voices at `WSW_SPEAKER_THRESHOLD`.
+
+The model-backed tests in `apps/api/tests/test_speakers.py` skip when a speaker model is missing from `WSW_MODELS_DIR`. The clustering tests use synthetic vectors and always run.
+
 ### Graph schema
 
 The schema definitions in `apps/api/wsw_brain/graph/cypher.py` cover range, full-text, and vector indexes. To verify them against the running database:
