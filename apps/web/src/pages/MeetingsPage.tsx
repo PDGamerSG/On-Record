@@ -3,6 +3,7 @@ import { api } from "../api/client";
 import { useBusEvents } from "../api/events";
 import type { MeetingSummary, Utterance } from "../api/types";
 import { brand } from "../lib/brand";
+import { usePageTitle } from "../lib/pageTitle";
 import GraphTotals from "../components/meeting/GraphTotals";
 import MeetingRow from "../components/meeting/MeetingRow";
 import StartMeeting from "../components/meeting/StartMeeting";
@@ -23,6 +24,7 @@ function upsert(list: MeetingSummary[], m: MeetingSummary): MeetingSummary[] {
 }
 
 export default function MeetingsPage() {
+  usePageTitle("Meetings");
   const [meetings, setMeetings] = useState<MeetingSummary[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -37,7 +39,6 @@ export default function MeetingsPage() {
   }, []);
 
   useEffect(() => {
-    document.title = brand.name;
     load();
   }, [load]);
 

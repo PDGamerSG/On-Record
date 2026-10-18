@@ -6,8 +6,8 @@ import { ArrowLeftIcon, CircleNotchIcon, DatabaseIcon, MicrophoneIcon, StopIcon,
 import { api } from "../api/client";
 import { isDemo } from "../api/mode";
 import type { ActionItem, MeetingSummary, Utterance } from "../api/types";
-import { brand } from "../lib/brand";
 import { duration, speakerName, timecode, when } from "../lib/format";
+import { usePageTitle } from "../lib/pageTitle";
 import { takePendingSeek, useSeekRequests } from "../lib/player";
 import AudioTransport from "../components/meeting/AudioTransport";
 import InsightsRail from "../components/meeting/InsightsRail";
@@ -96,9 +96,7 @@ function RoomReady({ id, room, meeting }: { id: string; room: MeetingRoomApi; me
   const hasPlayer = !live && meeting.has_audio === true;
   const canPlay = hasPlayer && !audio.error;
 
-  useEffect(() => {
-    document.title = `${meeting.title || "Untitled meeting"} - ${brand.short}`;
-  }, [meeting.title]);
+  usePageTitle(meeting.title || "Untitled meeting");
 
   const now = useNow(1000, live);
   const startedAt = Number(meeting.started_at) || 0;
