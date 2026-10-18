@@ -22,6 +22,17 @@ from .meeting_api import create_router as create_meeting_router
 from .pipeline import IngestPipeline
 
 
+class _LazyAgent:
+    """Proxy that keeps the assistant routes mounted without loading models at import time."""
+
+    def __init__(self, app: FastAPI) -> None:
+        self.app = app
+
+    async def ask(self, *args: object, **kwargs: object) -> object:
+        _ensure_runtime(self.app, auto_configure=True)
+        return await self.app.state.meeting_agent.ask(*args, **kwargs)
+
+
 def create_app(
     event_bus: EventBus | None = None,
     meeting_agent: MeetingAgent | None = None,
@@ -53,8 +64,8 @@ def create_app(
     app.state.ensure_runtime = ensure_runtime
     app.include_router(event_stream_router)
     app.include_router(create_meeting_router())
-    if meeting_agent is not None:
-        app.include_router(create_agent_router(meeting_agent))
+    if meeting_agent is not None or auto_configure:
+        app.include_router(create_agent_router(meeting_agent or _LazyAgent(app)))
 
     @app.on_event("shutdown")
     async def shutdown_runtime() -> None:
@@ -81,7 +92,7 @@ def create_app(
     @app.get("/api/capabilities")
     def capabilities() -> dict[str, object]:
         features = ["status", "documents", "events", "meetings", "search", "live"]
-        if meeting_agent is not None:
+        if meeting_agent is not None or auto_configure:
             features.append("agent")
         return {
             "product": product_name(),
