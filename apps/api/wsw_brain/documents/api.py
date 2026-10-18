@@ -20,7 +20,7 @@ from pydantic import BaseModel, Field
 from ..brain import Retriever, get_embedder, get_llm
 from ..config import settings
 from ..graph import GraphError, GraphStore
-from ..sarvam import SarvamSpeech, SarvamSpeechError
+from ..sarvam import SarvamSpeech, SarvamSpeechError, translator_name
 from .answer import DocumentRetriever, answer_question
 from .ingest import DocumentIngestor, new_document_id
 from .sarvam import SarvamDocAI, SarvamError
@@ -53,6 +53,7 @@ _tasks: set[asyncio.Task[None]] = set()
 
 
 LANGUAGE_PATTERN = r"^[a-z]{2,3}-IN$"
+TRANSLATE_TIMEOUT_S = 20.0  # a slow translation must not hold back the English answer
 
 
 class AskBody(BaseModel):
@@ -248,12 +249,15 @@ async def ask(body: AskBody) -> dict[str, Any]:
     if body.language and body.language != "en-IN":
         started = time.perf_counter()
         try:
-            result["translated_answer"] = await _speech().translate(result["answer"], body.language)
+            result["translated_answer"] = await asyncio.wait_for(
+                _speech().translate(result["answer"], body.language), TRANSLATE_TIMEOUT_S
+            )
             result["answer_language"] = body.language
-            result["translated_by"] = "Sarvam Mayura"
-        except SarvamSpeechError as exc:
-            log.warning("translating the answer to %s failed: %s", body.language, exc)
-            result["translation_error"] = str(exc)
+            result["translated_by"] = translator_name(body.language)
+        except (SarvamSpeechError, TimeoutError) as exc:
+            detail = str(exc) or f"translation took longer than {TRANSLATE_TIMEOUT_S:g} s"
+            log.warning("translating the answer to %s failed: %s", body.language, detail)
+            result["translation_error"] = detail
         result["timings"]["translate_ms"] = round((time.perf_counter() - started) * 1000, 1)
     return result
 
