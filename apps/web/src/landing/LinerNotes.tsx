@@ -7,7 +7,7 @@ const PERSONNEL: [string, string][] = [
   ["Silero VAD", "finds the speech"],
   ["TitaNet-small", "tells voices apart"],
   ["faster-whisper", "writes the words down"],
-  ["FalkorDB", "stores every line as a graph"],
+  ["Neo4j", "stores every line as a graph"],
   ["Kokoro-82M", "voices the demo meetings"],
 ];
 

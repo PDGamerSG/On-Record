@@ -128,7 +128,7 @@ export default function LiveRoom({ deck }: { deck: Deck }) {
           meta={
             <span className="room-frame-writes">
               <DatabaseIcon aria-hidden="true" />
-              Written to FalkorDB <b className="tc">{count}</b> utterances
+              Written to Neo4j <b className="tc">{count}</b> utterances
             </span>
           }
           emptyText="Nothing said yet. Each line appears a moment after the speaker finishes."
