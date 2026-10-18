@@ -18,6 +18,7 @@ import type { ActionItem, Decision, MeetingSummary, Person } from "../../api/typ
 import { brand } from "../../lib/brand";
 import { duration } from "../../lib/format";
 import { useSpeakerColour } from "../meeting/stripCache";
+import { useLiveRefresh } from "../ask/useLiveRefresh";
 import ProductMark from "./ProductMark";
 import { SystemStatus } from "./SystemStatus";
 import ThemeToggle from "./ThemeToggle";
@@ -123,7 +124,13 @@ function useDockTip(railOpen: boolean) {
   };
 }
 
-/** The rail's counts and lists. refresh() refetches them; only the newest request's answer is kept. */
+// The server events that change what the rail lists (see api/events.ts).
+const RAIL_EVENTS = new Set(["meeting.started", "meeting.ended", "speaker.merged", "speaker.named", "insight.created", "action.updated"]);
+
+/**
+ * The rail's counts and lists. refresh() refetches them; only the newest request's answer is kept. They also refetch
+ * when the server reports a change or Ask asks for a refresh ("mark it done"), so an open rail stays current.
+ */
 function useRailData(): RailData & { refresh: () => void } {
   const [data, setData] = useState<RailData>(EMPTY_RAIL);
   const latest = useRef(0);
@@ -145,6 +152,8 @@ function useRailData(): RailData & { refresh: () => void } {
   useEffect(() => {
     refresh();
   }, [refresh]);
+
+  useLiveRefresh(refresh, { events: (e) => RAIL_EVENTS.has(e.type), refresh: ["action_items", "decisions", "meeting"], delayMs: 1000 });
 
   return { ...data, refresh };
 }
