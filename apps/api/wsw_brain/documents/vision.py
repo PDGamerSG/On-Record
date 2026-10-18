@@ -1,8 +1,9 @@
 """Gemma 4 image understanding for uploaded pictures: whiteboards, slides, charts and diagrams.
 
-Sarvam Vision reads the text on an image; Gemma 4 31B (via Sarvam) describes what the text alone misses,
-such as arrows between boxes, chart trends or which item a note points at. The description is stored
-with the page so it can be searched and cited like any other passage.
+Sarvam Vision reads the text on an image; Gemma 4 describes what the text alone misses, such as arrows
+between boxes, chart trends or which item a note points at. Any text model with `supports_images` can do
+this: Gemma 4 31B through Sarvam, and Gemma 4 on the Gemini API. The description is stored with the page
+so it can be searched and cited like any other passage.
 """
 
 from __future__ import annotations
