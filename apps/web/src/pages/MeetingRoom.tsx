@@ -31,10 +31,13 @@ export default function MeetingRoom() {
 function Room({ id }: { id: string }) {
   const room = useMeetingRoom(id);
   const { phase, error, meeting } = room.state;
+  const notFound = error?.status === 404;
+  const failed = phase === "error" || (phase !== "loading" && !meeting);
+  // RoomReady names the tab after the meeting; a failed load names it here instead of keeping the last page's title
+  usePageTitle(failed ? (notFound ? "Meeting not found" : "Couldn't load meeting") : null);
 
   if (phase === "loading") return <RoomLoading />;
   if (phase === "error" || !meeting) {
-    const notFound = error?.status === 404;
     return (
       <div className="room room--message">
         <Link to="/meetings" className="room-back">
