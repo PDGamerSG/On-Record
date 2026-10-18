@@ -123,7 +123,7 @@ CI does not check the web app yet; run `npm run lint` and `npm run build` in `ap
 | --- | --- |
 | `apps/web/` | The web app: landing page and the app (React, Vite, TypeScript). See [its README](apps/web/README.md) |
 | `apps/web/scripts/` | Builds the demo data and, with Blender, the 3D landing assets |
-| `apps/api/wsw_brain/` | The Python package: `contracts`, `config`, `events`, `graph`, `listen`, `brain`, `documents`, and the HTTP `app`, `event_stream` and `cli` launcher |
+| `apps/api/wsw_brain/` | The Python package: `contracts`, `config`, `events`, `graph`, `listen`, `ingest`, `brain`, `documents`, `routes` (the HTTP routers), and the `app` and `cli` launcher |
 | `apps/api/tests/` | The pytest suite; `fixtures/` holds small synthetic ONNX models |
 | `apps/api/scripts/`, `apps/api/benchmarks/` | Load the demo meetings into the graph, generate a demo PDF, start local Gemma and run its smoke benchmark |
 | `docs/` | The documentation listed below |
