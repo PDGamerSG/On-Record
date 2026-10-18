@@ -23,6 +23,11 @@ def create_app(event_bus: EventBus | None = None, meeting_agent: MeetingAgent | 
     def health() -> dict[str, str]:
         return {"status": "ok"}
 
+    @app.get("/api/health")
+    def api_health() -> dict[str, bool]:
+        """Return the boolean probe used by the web app to select live mode."""
+        return {"ok": True}
+
     @app.get("/api/status")
     def status() -> dict[str, str]:
         return {"status": "ok", "product": product_name()}
