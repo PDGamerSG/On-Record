@@ -104,17 +104,6 @@
   letter-spacing: -0.015em;
   white-space: nowrap;
 }
-.shell-demo {
-  flex: none;
-  padding: 2px 8px;
-  border: 1px solid var(--line-strong);
-  border-radius: var(--r-round);
-  background: var(--surface);
-  color: var(--ink-2);
-  font-size: 11.5px;
-  font-weight: 560;
-  cursor: default;
-}
 
 /* sections: quiet labels; the current one sits on a white key */
 .shell-nav {
@@ -559,9 +548,6 @@
   .shell-link-label {
     font-size: 10px;
   }
-  .shell-demo {
-    display: none;
-  }
 }
 
 /* desktop dock and expanded workspace: the rail is compact until the user asks for the full context */
@@ -603,8 +589,7 @@
     height: 42px;
   }
   .shell-brand,
-  .shell-close,
-  .shell-demo {
+  .shell-close {
     display: none;
   }
 
@@ -787,12 +772,6 @@
   }
   .shell.is-rail-open .shell-close {
     display: grid;
-  }
-  .shell.is-rail-open .shell-demo {
-    display: inline-block;
-    align-self: flex-start;
-    margin-top: -2px;
-    font-size: 16px;
   }
   .shell.is-rail-open .shell-search {
     flex-shrink: 0;

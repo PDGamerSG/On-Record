@@ -14,7 +14,6 @@ import {
   type Icon,
 } from "@phosphor-icons/react";
 import type { ActionItem, MeetingSummary } from "../../api/types";
-import { isDemo } from "../../api/mode";
 import { brand } from "../../lib/brand";
 import { duration } from "../../lib/format";
 import { requestStrip, useSpeakerColour, useStrip, type StripData } from "../meeting/stripCache";
@@ -186,11 +185,6 @@ export default function Sidebar({ id, rail, canToggle, onToggle, onClose, onNavi
           <ProductMark size={28} />
           <span className="side-brand-name side-fade">{brand.short}</span>
         </Link>
-        {isDemo() && (
-          <span className="side-demo side-fade" title="You're looking at bundled demo data. Start the API to use your own meetings.">
-            Demo
-          </span>
-        )}
         {onClose && (
           <button type="button" className="side-icon side-close" onClick={onClose} aria-label="Close menu">
             <XIcon aria-hidden="true" />
