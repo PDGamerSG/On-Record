@@ -1,4 +1,4 @@
-/* App frame: one top bar (brand, sections, search, status, Ask) over the page; a tab bar on phones. */
+/* App frame: a left rail (brand, sections, search, status, Ask) on desktop; a top bar and tab bar on phones. */
 .shell {
   min-height: 100dvh;
   background: var(--bg);
@@ -55,6 +55,41 @@
   border-radius: var(--r-ctl);
   color: var(--ink);
   text-decoration: none;
+}
+.shell-brand-row {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 10px;
+}
+.shell-brand .mark {
+  width: 28px;
+  height: 28px;
+}
+.shell-dock-brand,
+.shell-close {
+  display: none;
+  place-items: center;
+  flex: none;
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-round);
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+}
+.shell-dock-brand:hover,
+.shell-close:hover {
+  background: var(--surface-2);
+}
+.shell-close {
+  width: 42px;
+  height: 42px;
+  color: var(--ink-2);
+}
+.shell-close svg {
+  width: 26px;
+  height: 26px;
 }
 .shell-brand .mark {
   display: block;
@@ -136,6 +171,10 @@
   gap: var(--s-2);
   margin-left: auto;
 }
+.shell-recent,
+.shell-commitments {
+  display: none;
+}
 
 .shell-search {
   display: inline-flex;
@@ -211,6 +250,9 @@
     background var(--t-fast) var(--ease),
     transform var(--t-fast) var(--ease);
 }
+.shell-ask-expanded-label {
+  display: none;
+}
 .shell-ask:hover {
   background: color-mix(in srgb, var(--ink) 84%, white);
 }
@@ -235,6 +277,9 @@
 }
 .shell-content:focus {
   outline: none;
+}
+.shell-backdrop {
+  display: none;
 }
 
 /* ---- system status chip and popover ----------------------------------------------------------- */
@@ -516,5 +561,471 @@
   }
   .shell-demo {
     display: none;
+  }
+}
+
+/* desktop dock and expanded workspace: the rail is compact until the user asks for the full context */
+@media (min-width: 768px) {
+  .shell {
+    --shell-dock-w: 64px;
+    --shell-drawer-w: min(608px, calc(100vw - 24px));
+  }
+
+  .shell-bar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 80;
+    width: var(--shell-dock-w);
+    border-right: 1px solid var(--line);
+    border-bottom: 0;
+    background: color-mix(in srgb, var(--bg) 92%, transparent);
+  }
+  .shell-bar-inner {
+    align-items: center;
+    flex-direction: column;
+    gap: var(--s-3);
+    height: 100%;
+    min-height: 100dvh;
+    padding: var(--s-4) var(--s-2);
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+  .shell-bar-inner::-webkit-scrollbar {
+    display: none;
+  }
+  .shell-brand-row {
+    justify-content: center;
+    width: 100%;
+  }
+  .shell-dock-brand {
+    display: grid;
+    width: 42px;
+    height: 42px;
+  }
+  .shell-brand,
+  .shell-close,
+  .shell-demo {
+    display: none;
+  }
+
+  .shell-search {
+    justify-content: center;
+    width: 48px;
+    height: 42px;
+    padding: 0;
+  }
+  .shell-search-label,
+  .shell-search kbd {
+    display: none !important;
+  }
+  .shell-nav {
+    width: 100%;
+    margin: var(--s-4) 0 0;
+  }
+  .shell-nav ul {
+    align-items: center;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .shell-nav li {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+  }
+  .shell-link {
+    justify-content: center;
+    width: 48px;
+    height: 42px;
+    padding: 0;
+  }
+  .shell-link-label,
+  .shell-count {
+    position: absolute !important;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+  .shell-link::after {
+    content: attr(data-label);
+    position: absolute;
+    top: 50%;
+    left: calc(100% + var(--s-2));
+    z-index: 90;
+    padding: 6px 10px;
+    border-radius: var(--r-chip);
+    background: var(--ink);
+    box-shadow: var(--shadow-float);
+    color: var(--on-ink);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1;
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-4px, -50%);
+    transition: opacity var(--t-fast) var(--ease-out), transform var(--t-fast) var(--ease-out);
+  }
+  .shell-link:hover::after,
+  .shell-link:focus-visible::after {
+    opacity: 1;
+    transform: translate(0, -50%);
+  }
+
+  .shell-recent {
+    display: block;
+    width: 100%;
+    margin-top: var(--s-4);
+    padding-top: var(--s-4);
+    border-top: 1px solid var(--line);
+  }
+  .shell-recent h2,
+  .shell-recent-copy {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+  .shell-recent ul {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--s-3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .shell-recent a {
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    border-radius: var(--r-round);
+  }
+  .shell-recent a:hover,
+  .shell-recent a:focus-visible {
+    background: var(--surface-2);
+  }
+  .shell-recent .mark {
+    width: 32px;
+    height: 32px;
+  }
+
+  .shell-tools {
+    align-items: center;
+    flex-direction: column;
+    width: 100%;
+    margin: auto 0 0;
+    gap: 8px;
+  }
+  .status-pop-wrap {
+    display: none;
+  }
+  .shell-icon {
+    align-self: center;
+    width: 48px;
+    height: 42px;
+  }
+  .shell-ask {
+    justify-content: center;
+    width: 48px;
+    height: 42px;
+    padding: 0;
+  }
+  .shell-ask-label,
+  .shell-ask kbd {
+    display: none;
+  }
+  .shell-content {
+    min-height: 100dvh;
+    margin-left: var(--shell-dock-w);
+  }
+
+  .shell-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 70;
+    display: none;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    background: rgb(var(--shade) / 0.22);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    cursor: default;
+  }
+  .shell.is-rail-open .shell-backdrop {
+    display: block;
+  }
+  .shell.is-rail-open .shell-bar {
+    width: var(--shell-drawer-w);
+    border-right-color: var(--line);
+    background: color-mix(in srgb, var(--bg) 96%, transparent);
+    box-shadow: 12px 0 40px -24px rgb(var(--shade) / 0.35);
+  }
+  .shell.is-rail-open .shell-bar-inner {
+    align-items: stretch;
+    padding: var(--s-5) var(--s-6);
+  }
+  .shell.is-rail-open .shell-brand-row {
+    justify-content: space-between;
+  }
+  .shell.is-rail-open .shell-dock-brand {
+    display: none;
+  }
+  .shell.is-rail-open .shell-brand {
+    display: inline-flex;
+  }
+  .shell.is-rail-open .shell-brand .mark {
+    width: 44px;
+    height: 44px;
+  }
+  .shell.is-rail-open .shell-brand-name {
+    font-size: 22px;
+  }
+  .shell.is-rail-open .shell-close {
+    display: grid;
+  }
+  .shell.is-rail-open .shell-demo {
+    display: inline-block;
+    align-self: flex-start;
+    margin-top: -2px;
+    font-size: 16px;
+  }
+  .shell.is-rail-open .shell-search {
+    flex-shrink: 0;
+    justify-content: flex-start;
+    width: 100%;
+    height: 72px;
+    margin-top: var(--s-4);
+    padding: 0 18px;
+    border-radius: var(--r-panel);
+    font-size: 20px;
+  }
+  .shell.is-rail-open .shell-search svg {
+    width: 28px;
+    height: 28px;
+  }
+  .shell.is-rail-open .shell-search-label {
+    display: block !important;
+    color: var(--ink-2);
+    font-size: 20px;
+  }
+  .shell.is-rail-open .shell-nav {
+    flex-shrink: 0;
+    margin-top: var(--s-4);
+  }
+  .shell.is-rail-open .shell-nav ul {
+    align-items: stretch;
+    gap: 4px;
+  }
+  .shell.is-rail-open .shell-nav li {
+    display: block;
+    width: auto;
+  }
+  .shell.is-rail-open .shell-link {
+    justify-content: flex-start;
+    width: 100%;
+    height: 58px;
+    padding: 0 20px;
+    border-radius: var(--r-panel);
+    font-size: 20px;
+  }
+  .shell.is-rail-open .shell-link svg {
+    width: 27px;
+    height: 27px;
+  }
+  .shell.is-rail-open .shell-link-label {
+    position: static !important;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip: auto;
+  }
+  .shell.is-rail-open .shell-count {
+    position: static !important;
+    display: inline-grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    margin-left: auto;
+    border-radius: var(--r-round);
+    background: var(--surface-2);
+    color: var(--ink-3);
+    font-size: 17px;
+    font-variant-numeric: tabular-nums;
+  }
+  .shell.is-rail-open .shell-link.is-active .shell-count {
+    background: var(--surface-3);
+  }
+  .shell.is-rail-open .shell-link::after {
+    display: none;
+  }
+  .shell.is-rail-open .shell-recent {
+    flex-shrink: 0;
+    margin-top: var(--s-5);
+    padding-top: var(--s-4);
+    border-top: 0;
+  }
+  .shell.is-rail-open .shell-recent h2,
+  .shell.is-rail-open .shell-commitments h2 {
+    position: static;
+    width: auto;
+    height: auto;
+    margin: 0 0 var(--s-3);
+    overflow: visible;
+    clip: auto;
+    color: var(--ink-3);
+    font-size: 17px;
+    font-weight: 620;
+    line-height: 1.3;
+  }
+  .shell.is-rail-open .shell-recent ul {
+    align-items: stretch;
+    gap: var(--s-2);
+  }
+  .shell.is-rail-open .shell-recent a {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: var(--s-3);
+    width: 100%;
+    height: auto;
+    padding: var(--s-2) 0;
+    border-radius: var(--r-ctl);
+    text-decoration: none;
+  }
+  .shell.is-rail-open .shell-recent .mark {
+    width: 42px;
+    height: 42px;
+  }
+  .shell.is-rail-open .shell-recent-copy {
+    position: static;
+    display: flex;
+    flex-direction: column;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
+  }
+  .shell.is-rail-open .shell-recent-copy strong {
+    color: var(--ink);
+    font-size: 17px;
+    font-weight: 650;
+    line-height: 1.35;
+  }
+  .shell.is-rail-open .shell-recent-copy span {
+    margin-top: 2px;
+    color: var(--ink-3);
+    font-size: 14px;
+  }
+  .shell.is-rail-open .shell-commitments {
+    flex-shrink: 0;
+    display: block;
+    margin-top: var(--s-6);
+  }
+  .shell.is-rail-open .shell-commitments ul {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-4);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .shell.is-rail-open .shell-commitments li {
+    padding-left: var(--s-3);
+    border-left: 3px solid var(--spk);
+  }
+  .shell.is-rail-open .shell-commitments a {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .shell.is-rail-open .shell-commitments a:hover span {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .shell.is-rail-open .shell-commitments span {
+    font-size: 17px;
+    line-height: 1.4;
+  }
+  .shell.is-rail-open .shell-commitments small {
+    color: var(--spk);
+    font-size: 15px;
+    font-weight: 650;
+  }
+  .shell.is-rail-open .shell-tools {
+    flex-shrink: 0;
+    align-items: stretch;
+    margin-top: var(--s-6);
+    gap: var(--s-3);
+  }
+  .shell.is-rail-open .status-pop-wrap {
+    display: block;
+    width: 100%;
+  }
+  .shell.is-rail-open .status-toggle {
+    justify-content: flex-start;
+    width: 100%;
+  }
+  .shell.is-rail-open .status-toggle-label {
+    display: inline;
+  }
+  .shell.is-rail-open .status-pop {
+    top: auto;
+    right: auto;
+    bottom: calc(100% + var(--s-2));
+    left: 0;
+  }
+  .shell.is-rail-open .shell-icon {
+    align-self: flex-start;
+  }
+  .shell.is-rail-open .shell-ask {
+    justify-content: flex-start;
+    width: 100%;
+    height: 66px;
+    padding: 0 18px;
+    border-radius: var(--r-panel);
+  }
+  .shell.is-rail-open .shell-ask-label {
+    display: none;
+  }
+  .shell.is-rail-open .shell-ask-expanded-label {
+    display: inline;
+    font-size: 18px;
+  }
+  .shell.is-rail-open .shell-ask kbd {
+    display: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .shell-brand-row {
+    flex: 1;
+  }
+  .shell-brand .mark {
+    width: 28px;
+    height: 28px;
+  }
+  .shell-backdrop,
+  .shell-dock-brand,
+  .shell-close,
+  .shell-recent,
+  .shell-commitments {
+    display: none !important;
+  }
+  .shell-ask-label {
+    display: inline;
+  }
+  .shell-ask-expanded-label {
+    display: none !important;
+  }
+  .shell-count {
+    display: none !important;
   }
 }

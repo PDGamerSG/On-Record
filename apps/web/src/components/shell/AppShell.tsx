@@ -8,31 +8,49 @@ import {
   SignpostIcon,
   UsersThreeIcon,
   WaveformIcon,
+  XIcon,
   type Icon,
 } from "@phosphor-icons/react";
+import { api } from "../../api/client";
+import type { ActionItem, Decision, MeetingSummary, Person } from "../../api/types";
 import { brand } from "../../lib/brand";
+import { duration, speakerIndex } from "../../lib/format";
 import { isDemo } from "../../api/mode";
 import ProductMark from "./ProductMark";
 import { SystemStatus } from "./SystemStatus";
 import ThemeToggle from "./ThemeToggle";
 import "./AppShell.css";
 
+type RailCountKey = "meetings" | "commitments" | "decisions" | "people";
+
 interface NavItem {
   to: string;
   label: string;
   icon: Icon;
   match: (path: string) => boolean;
+  countKey?: RailCountKey;
 }
 
 const NAV: NavItem[] = [
-  { to: "/meetings", label: "Meetings", icon: WaveformIcon, match: (p) => p === "/meetings" || p.startsWith("/m/") },
-  { to: "/commitments", label: "Commitments", icon: CheckSquareIcon, match: (p) => p.startsWith("/commitments") },
-  { to: "/decisions", label: "Decisions", icon: SignpostIcon, match: (p) => p.startsWith("/decisions") },
-  { to: "/people", label: "People", icon: UsersThreeIcon, match: (p) => p.startsWith("/people") },
+  { to: "/meetings", label: "Meetings", icon: WaveformIcon, match: (p) => p === "/meetings" || p.startsWith("/m/"), countKey: "meetings" },
+  { to: "/commitments", label: "Commitments", icon: CheckSquareIcon, match: (p) => p.startsWith("/commitments"), countKey: "commitments" },
+  { to: "/decisions", label: "Decisions", icon: SignpostIcon, match: (p) => p.startsWith("/decisions"), countKey: "decisions" },
+  { to: "/people", label: "People", icon: UsersThreeIcon, match: (p) => p.startsWith("/people"), countKey: "people" },
   { to: "/graph", label: "Graph", icon: GraphIcon, match: (p) => p.startsWith("/graph") },
 ];
 
 const isMac = typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform);
+const recentDate = new Intl.DateTimeFormat(undefined, { day: "numeric", month: "short" });
+
+interface RailData {
+  meetings: MeetingSummary[];
+  commitments: ActionItem[];
+  decisions: Decision[];
+  people: Person[];
+  loaded: boolean;
+}
+
+const EMPTY_RAIL: RailData = { meetings: [], commitments: [], decisions: [], people: [], loaded: false };
 
 function openAsk() {
   window.dispatchEvent(new CustomEvent("wsw:ask-open"));
@@ -62,36 +80,113 @@ function useScrolled(): boolean {
   return scrolled;
 }
 
+function useRailData(): RailData {
+  const [data, setData] = useState<RailData>(EMPTY_RAIL);
+
+  useEffect(() => {
+    let alive = true;
+    Promise.allSettled([api.meetings(), api.actionItems({ status: "open" }), api.decisions(), api.people()]).then(([meetings, commitments, decisions, people]) => {
+      if (!alive) return;
+      setData({
+        meetings: meetings.status === "fulfilled" ? meetings.value : [],
+        commitments: commitments.status === "fulfilled" ? commitments.value : [],
+        decisions: decisions.status === "fulfilled" ? decisions.value : [],
+        people: people.status === "fulfilled" ? people.value : [],
+        loaded: true,
+      });
+    });
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  return data;
+}
+
+function meetingMeta(meeting: MeetingSummary): string {
+  return `${recentDate.format(new Date(meeting.started_at))} · ${duration(meeting.duration_s)}`;
+}
+
 export default function AppShell({ children }: { children: ReactNode }) {
   const { pathname } = useLocation();
   const scrolled = useScrolled();
+  const railData = useRailData();
+  const [railOpen, setRailOpen] = useState(false);
+
+  useEffect(() => {
+    if (!railOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setRailOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [railOpen]);
+
+  const counts: Record<RailCountKey, number> = {
+    meetings: railData.meetings.length,
+    commitments: railData.commitments.length,
+    decisions: railData.decisions.length,
+    people: railData.people.length,
+  };
+
+  const handleSearch = () => {
+    if (!railOpen) {
+      setRailOpen(true);
+      return;
+    }
+    openPalette();
+  };
 
   return (
-    <div className="shell">
+    <div className={`shell${railOpen ? " is-rail-open" : ""}`}>
       <a href="#main" className="shell-skip" onClick={skipToMain}>
         Skip to main content
       </a>
+      {railOpen && <button type="button" className="shell-backdrop" aria-label="Close navigation" onClick={() => setRailOpen(false)} />}
       <header className={`shell-bar${scrolled ? " is-scrolled" : ""}`}>
         <div className="shell-bar-inner">
-          <Link to="/" className="shell-brand" aria-label={`${brand.name} home`}>
-            <ProductMark size={28} />
-            <span className="shell-brand-name">{brand.short}</span>
-          </Link>
+          <div className="shell-brand-row">
+            <button type="button" className="shell-dock-brand" onClick={() => setRailOpen(true)} aria-label="Open navigation">
+              <ProductMark size={30} />
+            </button>
+            <Link to="/" className="shell-brand" aria-label={`${brand.name} home`}>
+              <ProductMark size={38} />
+              <span className="shell-brand-name">{brand.short}</span>
+            </Link>
+            <button type="button" className="shell-close" onClick={() => setRailOpen(false)} aria-label="Close navigation">
+              <XIcon aria-hidden="true" />
+            </button>
+          </div>
           {isDemo() && (
             <span className="shell-demo" title="You're looking at bundled demo data. Start the API to use your own meetings.">
               Demo
             </span>
           )}
 
+          <button type="button" className="shell-search" onClick={handleSearch} aria-label={railOpen ? "Search and commands" : "Open navigation"} aria-keyshortcuts="Meta+K Control+K">
+            <MagnifyingGlassIcon aria-hidden="true" />
+            <span className="shell-search-label">Search or ask</span>
+            <kbd>{isMac ? "⌘K" : "Ctrl K"}</kbd>
+          </button>
+
           <nav className="shell-nav" aria-label="Main">
             <ul>
-              {NAV.map(({ to, label, icon: NavIcon, match }) => {
+              {NAV.map(({ to, label, icon: NavIcon, match, countKey }) => {
                 const active = match(pathname);
                 return (
                   <li key={to}>
-                    <Link to={to} className={`shell-link${active ? " is-active" : ""}`} aria-current={active ? "page" : undefined}>
+                    <Link
+                      to={to}
+                      className={`shell-link${active ? " is-active" : ""}`}
+                      aria-current={active ? "page" : undefined}
+                      data-label={label}
+                      onClick={() => setRailOpen(false)}
+                    >
                       <NavIcon aria-hidden="true" weight={active ? "fill" : "regular"} />
                       <span className="shell-link-label">{label}</span>
+                      {railData.loaded && countKey ? (
+                        <span className="shell-count">{counts[countKey]}</span>
+                      ) : null}
                     </Link>
                   </li>
                 );
@@ -99,17 +194,47 @@ export default function AppShell({ children }: { children: ReactNode }) {
             </ul>
           </nav>
 
+          <section className="shell-recent" aria-labelledby="shell-recent-title">
+            <h2 id="shell-recent-title">Recent meetings</h2>
+            <ul>
+              {railData.meetings.slice(0, 2).map((meeting) => (
+                <li key={meeting.id}>
+                  <Link to={`/m/${encodeURIComponent(meeting.id)}`} onClick={() => setRailOpen(false)}>
+                    <ProductMark size={34} />
+                    <span className="shell-recent-copy">
+                      <strong>{meeting.title}</strong>
+                      <span>{meetingMeta(meeting)}</span>
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+
+          <section className="shell-commitments" aria-labelledby="shell-commitments-title">
+            <h2 id="shell-commitments-title">Open commitments</h2>
+            <ul>
+              {railData.commitments.slice(0, 3).map((item) => (
+                <li key={item.id} className={`spk spk-${speakerIndex(item.owner_track)}`}>
+                  <Link to={`/commitments?owner=${encodeURIComponent(item.owner ?? "")}`} onClick={() => setRailOpen(false)}>
+                    <span>{item.text}</span>
+                    <small>
+                      {item.owner ?? "Unassigned"}
+                      {item.due ? ` · Due ${item.due}` : ""}
+                    </small>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+
           <div className="shell-tools">
-            <button type="button" className="shell-search" onClick={openPalette} aria-label="Search and commands" aria-keyshortcuts="Meta+K Control+K">
-              <MagnifyingGlassIcon aria-hidden="true" />
-              <span className="shell-search-label">Search</span>
-              <kbd>{isMac ? "⌘K" : "Ctrl K"}</kbd>
-            </button>
             <SystemStatus />
             <ThemeToggle className="shell-icon" />
             <button type="button" className="shell-ask" onClick={openAsk} aria-keyshortcuts="/">
               <MicrophoneIcon aria-hidden="true" weight="fill" />
-              <span>Ask</span>
+              <span className="shell-ask-label">Ask</span>
+              <span className="shell-ask-expanded-label">Ask out loud</span>
               <kbd aria-hidden="true">/</kbd>
             </button>
           </div>
