@@ -78,7 +78,7 @@ Each model endpoint gets a `ModelGate` that limits concurrent generations, so a 
 | `WSW_ASR_LANGUAGE` | `en` | Language passed to faster-whisper | *Not read yet* |
 | `WSW_SPEAKER_MODEL` | `speaker_embedding_en.onnx` | Speaker embedding model for telling voices apart | `listen/factory.py` |
 | `WSW_SPEAKER_THRESHOLD` | `0.55` | Voice similarity threshold (0 to 1) for matching a known speaker | `listen/factory.py` |
-| `WSW_MAX_UTTERANCE_S` | `12` | Longest utterance the listener should produce, in seconds | *Not read yet* |
+| `WSW_MAX_UTTERANCE_S` | `12` | Longest utterance the listener should produce, in seconds | *Not read yet*; `LiveSession` takes it as `max_utterance_s` |
 
 ## Documents
 

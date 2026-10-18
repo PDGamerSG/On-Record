@@ -247,6 +247,21 @@ uv run --project apps/api pytest apps/api/tests/test_documents_split.py apps/api
 
 The model-backed tests in `apps/api/tests/test_speakers.py` skip when a speaker model is missing from `WSW_MODELS_DIR`. The clustering tests use synthetic vectors and always run.
 
+### Live listening
+
+`LiveSession` turns a live audio stream into speaker-attributed, timestamped `Utterance` objects. `feed()` and `feed_pcm16()` only queue 16 kHz mono audio; one worker thread per session does the rest:
+
+1. Silero VAD cuts the stream into speech segments.
+2. `speaker_change_points()` splits a segment where the voice changes without a pause.
+3. Each part is embedded and assigned a speaker track by `OnlineClusterer`. A short part that matches nobody well waits for its neighbours and joins the closer one.
+4. Consecutive parts of one speaker share one ASR call, and the result goes to `ListenerCallbacks.on_utterance`.
+
+Callbacks run on the worker thread. Errors reach `on_status("error", ...)` and the worker keeps going. `feed()` raises `ListenerOverloaded` once `max_queued_s` of audio is waiting; a producer that runs faster than real time calls `wait_queued()` first. `close()` flushes the stream and stops the worker, and `abort()` drops whatever is still queued. With `recording_path`, the session also writes the audio to a WAV file. With `speaker_state_path`, it saves the speaker tracks so a reconnecting microphone keeps the same speaker numbers.
+
+`process_file()` runs an audio file through a `LiveSession` in 100 ms chunks and returns every utterance, with speaker merges applied. `pace="fast"` feeds as quickly as the session keeps up, never more than 30 seconds ahead of it; `pace="realtime"` feeds at wall-clock speed for a live demo from a file. At most two files run at once, and a later call waits for a free slot. Setting `cancel` drops the audio that is not transcribed yet and returns what was produced so far. A missing, undecodable or too long file (over two hours by default) fails before the session starts recording.
+
+The VAD model is `silero_vad.onnx` in `WSW_MODELS_DIR` unless `vad_model_path` is given. The tests in `apps/api/tests/test_session.py` that need the VAD or a speaker model skip when either file is missing.
+
 ### Graph schema
 
 The schema definitions in `apps/api/wsw_brain/graph/cypher.py` cover range, full-text, and vector indexes. To verify them against the running database:
