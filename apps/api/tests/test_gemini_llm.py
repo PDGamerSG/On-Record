@@ -226,3 +226,41 @@ async def test_gemini_does_not_offer_audio():
     with pytest.raises(NotImplementedError, match="audio"):
         await llm.transcribe(b"wav")
 
+
+
+PNG = b"\x89PNG\r\n\x1a\n" + b"\x00" * 16
+
+
+def _image_message(url: str, text: str = "Describe the whiteboard.") -> dict[str, Any]:
+    return {"role": "user", "content": [{"type": "text", "text": text}, {"type": "image_url", "image_url": {"url": url}}]}
+
+
+@pytest.mark.parametrize("mime", ["image/png", "image/jpeg"])
+def test_gemini_user_images_become_inline_data_parts(mime: str):
+    import base64
+
+    uri = f"data:{mime};base64,{base64.b64encode(PNG).decode('ascii')}"
+    system, contents = to_gemini_contents([{"role": "system", "content": "Be brief."}, _image_message(uri)])
+
+    assert system == "Be brief."
+    assert [content.role for content in contents] == ["user"]
+    text, image = contents[0].parts
+    assert text.text == "Describe the whiteboard."
+    assert image.inline_data.mime_type == mime and image.inline_data.data == PNG
+
+
+@pytest.mark.parametrize(
+    ("message", "error"),
+    [
+        (_image_message("https://example.com/board.png"), "data URIs"),
+        (_image_message("data:image/gif;base64,R0lGODlh"), "data URIs"),
+        ({"role": "user", "content": [{"type": "input_audio", "input_audio": {}}]}, "input_audio"),
+    ],
+)
+def test_gemini_rejects_remote_images_and_unknown_parts(message: dict[str, Any], error: str):
+    with pytest.raises(ValueError, match=error):
+        to_gemini_contents([message])
+
+
+def test_gemini_reports_image_support():
+    assert _llm().supports_images is True
