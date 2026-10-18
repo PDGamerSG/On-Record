@@ -134,3 +134,37 @@ def test_insights_rejects_invalid_collection_types() -> None:
 def test_insights_rejects_blank_topics() -> None:
     with pytest.raises(ValueError, match="topics"):
         Insights(topics=[" "])
+
+
+@pytest.mark.parametrize(
+    "entities",
+    [None, ["Acme"], [{"name": " "}], [{"name": "Acme", "kind": " "}], [{"name": "Acme", "kind": 3}]],
+)
+def test_insights_rejects_malformed_entities(entities: object) -> None:
+    with pytest.raises(ValueError, match="entities"):
+        Insights(entities=entities)  # type: ignore[arg-type]
+
+
+@pytest.mark.parametrize(
+    "mentions",
+    [None, []],
+)
+def test_insights_rejects_non_mapping_mentions(mentions: object) -> None:
+    with pytest.raises(TypeError, match="mentions"):
+        Insights(mentions=mentions)  # type: ignore[arg-type]
+
+
+@pytest.mark.parametrize("mentions", [{"": ["Acme"]}, {"m1:u00001": "Acme"}, {"m1:u00001": [" "]}])
+def test_insights_rejects_malformed_mentions(mentions: object) -> None:
+    with pytest.raises(ValueError, match="mentions"):
+        Insights(mentions=mentions)  # type: ignore[arg-type]
+
+
+def test_insights_accepts_valid_entities_and_mentions() -> None:
+    insights = Insights(
+        entities=[{"name": "Acme", "kind": "vendor"}, {"name": "Launch"}],
+        mentions={"m1:u00001": ["Acme", "Launch"], "m1:u00002": []},
+    )
+
+    assert insights.entities[0]["name"] == "Acme"
+    assert insights.mentions["m1:u00001"] == ["Acme", "Launch"]

@@ -169,6 +169,24 @@ def _require_evidence(value: object, field: str) -> None:
         raise ValueError(f"{field} must be a list of non-empty strings")
 
 
+def _require_entities(value: object) -> None:
+    if not isinstance(value, list) or any(not isinstance(entity, dict) for entity in value):
+        raise ValueError("Insights.entities must be a list of dictionaries")
+    for entity in value:
+        _require_text(entity.get("name"), "Insights.entities.name")
+        if "kind" in entity:
+            _require_text(entity["kind"], "Insights.entities.kind")
+
+
+def _require_mentions(value: object) -> None:
+    if not isinstance(value, dict):
+        raise TypeError("Insights.mentions must be a dictionary")
+    for utterance_id, names in value.items():
+        _require_text(utterance_id, "Insights.mentions.utterance_id")
+        if not isinstance(names, list) or any(not isinstance(name, str) or not name.strip() for name in names):
+            raise ValueError("Insights.mentions values must be lists of non-empty strings")
+
+
 @dataclass
 class Insights:
     decisions: list[DecisionDraft] = field(default_factory=list)
@@ -186,6 +204,8 @@ class Insights:
             raise ValueError("Insights.action_items must be a list of ActionItemDraft values")
         if not isinstance(self.topics, list) or any(not isinstance(topic, str) or not topic.strip() for topic in self.topics):
             raise ValueError("Insights.topics must be a list of non-empty strings")
+        _require_entities(self.entities)
+        _require_mentions(self.mentions)
 
     def is_empty(self) -> bool:
         return not (self.decisions or self.action_items or self.topics or self.entities)
