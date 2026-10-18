@@ -28,6 +28,8 @@ function kindsIn(graph: Subgraph | null): { kind: string; count: number }[] {
 function propValue(key: string, value: unknown): string {
   if (value === null || value === undefined || value === "") return "None";
   if (typeof value === "number") {
+    // Tell the units apart by size: meeting offsets are seconds (under 1e7, about 115 days), and epoch times
+    // are milliseconds (over 1e11, after 1973).
     if ((key === "t_start" || key === "t_end" || key === "made_at") && value < 1e7) return timecode(value);
     if (key.endsWith("_at") && value > 1e11) return when(value);
     if (key.endsWith("_s")) return `${Math.round(value)} s`;
@@ -89,7 +91,7 @@ export default function GraphPage() {
   useLiveRefresh(refetch, {
     events: (e) => LIVE_EVENTS.has(e.type) && (meetingKey === ALL || e.meeting_id === meetingKey),
     refresh: ["meeting", "decisions", "action_items"],
-    delayMs: 1500,
+    delayMs: 1500, // longer than the 700 ms default, so a burst of live events causes one graph refetch
   });
 
   const kinds = useMemo(() => kindsIn(graph), [graph]);

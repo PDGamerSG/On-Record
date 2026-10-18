@@ -1,3 +1,8 @@
+// Every server call the web app makes, as one typed object. realApi talks to the HTTP API, and demoApi
+// (demo/demoApi.ts) serves the bundled meetings with the same shape. `api` is a Proxy because the mode is only
+// known once resolveMode() has run in main.tsx, after this module is imported, so each call checks isDemo().
+// Failures are ApiError (status 0 when the server can't be reached); an AbortError from a cancelled request
+// is re-thrown unchanged, so callers can tell "stopped" from "failed".
 import type {
   ActionItem,
   AskResult,

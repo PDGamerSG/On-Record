@@ -260,6 +260,8 @@ export default function AskDrawer() {
     onQuestion: (wav, seconds) => askVoice(wav, seconds),
     onBargeIn: (source) => {
       setNotice(null);
+      // A press always interrupts: it stops the spoken answer and cancels the request in flight. Voice in
+      // hands-free mode only interrupts while an answer is being spoken.
       if (source === "press" || speakingRef.current) {
         stopSpeech();
         abortInflight();
@@ -363,6 +365,7 @@ export default function AskDrawer() {
       }
       return;
     }
+    // Space is push-to-talk anywhere in the drawer, except on controls Space already activates and in text fields.
     if (e.key === " " && !e.repeat && !isActivatable(e.target) && !isTypingTarget(e.target)) {
       e.preventDefault();
       spaceHeld.current = true;

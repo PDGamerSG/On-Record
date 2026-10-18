@@ -1,3 +1,14 @@
+// The server's live update stream (SSE /api/events). Event types and the views that react to them:
+//   meeting.started, meeting.ended  meeting room, meetings, people, sidebar, graph totals
+//   utterance.created               meeting room, meetings, graph
+//   speaker.merged                  meeting room, graph, sidebar
+//   speaker.named                   meeting room, people, graph, sidebar
+//   insight.created                 meeting room, decisions, commitments, graph, sidebar
+//   action.updated                  meeting room, commitments, people, sidebar
+//   graph.write                     meeting room, graph, graph totals
+//   listener.status                 meeting room
+// The meeting room reduces events in components/meeting/useMeetingRoom.ts; other views refetch through
+// components/ask/useLiveRefresh.ts.
 import { useEffect, useRef } from "react";
 import { API_BASE } from "./base";
 import { isDemo } from "./mode";
