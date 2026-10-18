@@ -49,12 +49,19 @@ class MeetingAgent:
         started = time.perf_counter()
         hits, cypher = self.retriever.retrieve(question, meeting_id=meeting_id, k=k)
         retrieval_ms = round((time.perf_counter() - started) * 1000, 1)
+        tool_trace = [{
+            "tool": "search_meetings",
+            "args": {"meeting_id": meeting_id, "query": question, "k": k},
+            "result_count": len(hits),
+            "ms": retrieval_ms,
+        }]
         if not hits:
             return self._result(
                 _FALLBACK,
                 [],
                 cypher,
                 session_id,
+                tool_trace=tool_trace,
                 retrieval_ms=retrieval_ms,
                 total_ms=round((time.perf_counter() - started) * 1000, 1),
             )
@@ -75,6 +82,7 @@ class MeetingAgent:
             citations,
             cypher,
             session_id,
+            tool_trace=tool_trace,
             retrieval_ms=retrieval_ms,
             model_ms=model_ms,
             total_ms=round((time.perf_counter() - started) * 1000, 1),
@@ -98,6 +106,7 @@ class MeetingAgent:
         cypher: list[str],
         session_id: str,
         *,
+        tool_trace: list[dict[str, Any]],
         retrieval_ms: float,
         total_ms: float,
         model_ms: float | None = None,
@@ -111,7 +120,7 @@ class MeetingAgent:
             answer=answer,
             citations=citations,
             actions=[],
-            tool_trace=[],
+            tool_trace=tool_trace,
             cypher=cypher,
             model=model or self.llm.model,
             provider=provider or self.llm.provider,

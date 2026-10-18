@@ -52,6 +52,10 @@ async def test_agent_retrieves_context_and_keeps_only_grounded_citations():
     assert result.answer == "The launch is Friday [u:meeting-1:u00001]"
     assert result.citations == hits
     assert result.cypher == ["MATCH (u:Utterance) RETURN u"]
+    assert result.tool_trace[0]["tool"] == "search_meetings"
+    assert result.tool_trace[0]["args"] == {"meeting_id": "meeting-1", "query": "When is the launch?", "k": 4}
+    assert result.tool_trace[0]["result_count"] == 1
+    assert "ms" in result.tool_trace[0]
     assert retriever.calls == [("When is the launch?", "meeting-1", 4)]
     assert "[u:meeting-1:u00001]" in llm.calls[0][-1]["content"]
     assert "When is the launch?" in llm.calls[0][-1]["content"]
@@ -81,6 +85,7 @@ async def test_agent_returns_grounded_fallback_without_calling_model():
 
     assert result.answer == "I couldn't find supporting evidence in the meeting record."
     assert result.citations == []
+    assert result.tool_trace[0]["result_count"] == 0
     assert llm.calls == []
 
 
