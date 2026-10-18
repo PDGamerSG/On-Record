@@ -15,3 +15,12 @@ For the system overview see [ARCHITECTURE.md](../ARCHITECTURE.md). New records c
 | 0007 | Demo mode in the web app | Accepted (retroactive) | [0007-web-demo-mode.md](0007-web-demo-mode.md) |
 | 0008 | Limit concurrent model calls with ModelGate | Accepted (retroactive) | [0008-model-gate-concurrency.md](0008-model-gate-concurrency.md) |
 | 0009 | Server-Sent Events for live updates | Accepted (retroactive) | [0009-server-sent-events.md](0009-server-sent-events.md) |
+
+## Status values
+
+| Status | Meaning |
+| --- | --- |
+| Proposed | Under discussion; not yet reflected in the code |
+| Accepted | Agreed and reflected in the code |
+| Accepted (retroactive) | Already in the code before it was recorded; every record above has this status |
+| Superseded by NNNN | Replaced by a later record; keep the old record and link the new one |
