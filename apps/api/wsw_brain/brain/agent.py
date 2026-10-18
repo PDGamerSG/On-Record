@@ -12,13 +12,16 @@ import time
 from typing import Any
 
 from ..contracts import LLM, AskResult
+from .llm import UNTRUSTED_NOTE
 from .retrieve import Retriever
 
 _CITATION = re.compile(r"\[u:([^\]\s]+)\]")
 _FALLBACK = "I couldn't find supporting evidence in the meeting record."
 _SYSTEM_PROMPT = """You answer questions about meeting transcripts using only the evidence provided.
 Keep answers concise and cite each factual statement with the exact [u:<utterance_id>] marker.
-If the evidence does not answer the question, say so plainly and do not guess."""
+If the evidence does not answer the question, say so plainly and do not guess.
+"""
+_SYSTEM_PROMPT += UNTRUSTED_NOTE
 
 
 class MeetingAgent:

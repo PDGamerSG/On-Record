@@ -12,6 +12,7 @@ import re
 import time
 from typing import Any
 
+from ..brain.llm import UNTRUSTED_NOTE
 from ..brain.retrieve import rrf_fuse
 from ..contracts import LLM, Embedder
 from .split import Chunk
@@ -32,7 +33,9 @@ Rules:
   for example [d:doc-handbook-1a2b3c4d:c0003].
 - If the passages do not answer the question, say that the documents do not cover it. Do not guess.
 - Keep the answer short: two to five sentences or a short list.
-- Reply in the language of the question."""
+- Reply in the language of the question.
+"""
+ANSWER_SYSTEM += UNTRUSTED_NOTE
 
 ANSWER_WITH_MEETINGS_SYSTEM = """You answer questions using document passages ([d:...]) and meeting transcript lines ([u:...]).
 Rules:
@@ -42,12 +45,16 @@ Rules:
   if the dates show it.
 - If neither source answers the question, say so. Do not guess.
 - Keep the answer short: two to six sentences or a short list.
-- Reply in the language of the question."""
+- Reply in the language of the question.
+"""
+ANSWER_WITH_MEETINGS_SYSTEM += UNTRUSTED_NOTE
 
 SUMMARY_SYSTEM = """You summarise a document for a team that will discuss it in meetings.
 Write a title-free summary in plain text: one sentence on what the document is, then up to five short
 bullet points ("- ") covering decisions, deadlines, owners, amounts and obligations it states.
-Only use facts that appear in the text."""
+Only use facts that appear in the text.
+"""
+SUMMARY_SYSTEM += UNTRUSTED_NOTE
 
 
 class DocumentRetriever:
