@@ -10,8 +10,8 @@ export interface MeetingSummary {
   status: MeetingStatus;
   source: MeetingSource;
   started_at: number; // epoch ms
-  ended_at: number | null;
-  duration_s: number;
+  ended_at: number | null; // epoch ms
+  duration_s: number; // seconds
   utterance_count: number;
   speaker_count: number;
   has_audio: boolean;
@@ -23,7 +23,7 @@ export interface Speaker {
   label: string; // "Speaker 1"
   name: string | null;
   person_id: string | null;
-  color_idx: number;
+  color_idx: number; // 0..7 palette slot, set when the speaker first appears; renames keep it
   utterance_count: number;
   talk_time_s: number;
 }
@@ -31,13 +31,13 @@ export interface Speaker {
 export interface Utterance {
   id: string;
   meeting_id: string;
-  seq: number;
+  seq: number; // 0-based order in the meeting; the cursor for api.utterancesAfter()
   speaker: string; // track
   speaker_name: string | null;
   t_start: number; // seconds from meeting start
-  t_end: number;
+  t_end: number; // seconds from meeting start
   text: string;
-  confidence: number;
+  confidence: number; // 0..1: how sure the listener is about who spoke, not transcription confidence
 }
 
 export interface Decision {
@@ -45,8 +45,8 @@ export interface Decision {
   meeting_id: string;
   text: string;
   status: "active" | "superseded";
-  made_at: number;
-  proposed_by: string | null;
+  made_at: number; // seconds from meeting start (not epoch time): when the earliest cited line was said
+  proposed_by: string | null; // display name or label ("Priya", "Speaker 2"), not a track
   evidence: string[];
   superseded_by: string | null;
   supersedes: string | null;
@@ -57,12 +57,12 @@ export interface ActionItem {
   meeting_id: string;
   meeting_title: string;
   text: string;
-  owner: string | null;
-  owner_track: string | null;
-  due: string | null;
+  owner: string | null; // display name or label, like Decision.proposed_by
+  owner_track: string | null; // "S2", when the owner is one of the meeting's speakers
+  due: string | null; // free text as spoken ("Friday"), not a date
   status: "open" | "done";
-  created_at: number;
-  done_at: number | null;
+  created_at: number; // epoch ms
+  done_at: number | null; // epoch ms
   evidence: string[];
 }
 
@@ -87,10 +87,10 @@ export interface Hit {
   meeting_title: string;
   speaker: string;
   speaker_name: string | null;
-  t_start: number;
-  t_end: number;
+  t_start: number; // seconds from meeting start
+  t_end: number; // seconds from meeting start
   text: string;
-  score: number;
+  score: number; // higher = better; a ranking score, not a probability
   via: "fulltext" | "vector" | "graph" | "recent";
 }
 
@@ -111,7 +111,7 @@ export interface Subgraph {
 }
 
 export type ClientAction =
-  | { type: "seek"; meeting_id: string; t: number }
+  | { type: "seek"; meeting_id: string; t: number } // t: seconds from meeting start
   | { type: "open_meeting"; meeting_id: string }
   | { type: "refresh"; what: "action_items" | "decisions" | "meeting" }
   | { type: "draft"; title: string; body: string };
@@ -125,7 +125,7 @@ export interface AskResult {
   model: string;
   provider: string;
   session_id: string;
-  timings: Record<string, number>;
+  timings: Record<string, number>; // ms: retrieve, llm, total
   transcript: string | null;
   transcript_provider: string | null;
 }
@@ -169,7 +169,7 @@ export interface WhoKnows {
 export type Stats = Record<string, number>;
 
 export interface BusEvent<T = unknown> {
-  id: number;
+  id: number; // increases with every event; the since_id cursor for reconnecting
   type:
     | "meeting.started"
     | "meeting.ended"
@@ -181,13 +181,13 @@ export interface BusEvent<T = unknown> {
     | "graph.write"
     | "listener.status";
   meeting_id: string | null;
-  ts: number;
+  ts: number; // epoch SECONDS (float), unlike the epoch-ms fields elsewhere
   data: T;
 }
 
 export interface Turn {
   role: "user" | "assistant";
   text: string;
-  at: number;
+  at: number; // epoch ms
   citations: string[];
 }
