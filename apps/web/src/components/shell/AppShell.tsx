@@ -22,6 +22,7 @@ import { useLiveRefresh } from "../ask/useLiveRefresh";
 import ProductMark from "./ProductMark";
 import { SystemStatus } from "./SystemStatus";
 import ThemeToggle from "./ThemeToggle";
+import { useRailFocus } from "./useRailFocus";
 import "./AppShell.css";
 
 type RailCountKey = "meetings" | "commitments" | "decisions" | "people";
@@ -190,15 +191,16 @@ export default function AppShell({ children }: { children: ReactNode }) {
   };
   const [railOpen, setRailOpen] = useState(false);
   const dockTip = useDockTip(railOpen);
+  const { bar: railBar, close: closeRail } = useRailFocus(railOpen, setRailOpen);
 
   useEffect(() => {
     if (!railOpen) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setRailOpen(false);
+      if (e.key === "Escape") closeRail();
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [railOpen]);
+  }, [railOpen, closeRail]);
 
   // Ask and the palette open over the page, but the open rail and its backdrop sit above both, so the rail steps
   // aside first. Listening for the open events also covers the "/" and Cmd+K shortcuts.
@@ -233,8 +235,8 @@ export default function AppShell({ children }: { children: ReactNode }) {
       <a href="#main" className="shell-skip" onClick={skipToMain}>
         Skip to main content
       </a>
-      {railOpen && <button type="button" className="shell-backdrop" aria-label="Close navigation" onClick={() => setRailOpen(false)} />}
-      <header className={`shell-bar${scrolled ? " is-scrolled" : ""}`} {...dockTip.handlers}>
+      {railOpen && <button type="button" className="shell-backdrop" aria-label="Close navigation" onClick={closeRail} />}
+      <header ref={railBar} className={`shell-bar${scrolled ? " is-scrolled" : ""}`} {...dockTip.handlers}>
         <div className="shell-bar-inner" onScroll={dockTip.hide}>
           <div className="shell-brand-row">
             <button type="button" className="shell-dock-brand" onClick={openRail} aria-label="Open navigation">
@@ -244,7 +246,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
               <ProductMark size={38} />
               <span className="shell-brand-name">{brand.short}</span>
             </Link>
-            <button type="button" className="shell-close" onClick={() => setRailOpen(false)} aria-label="Close navigation">
+            <button type="button" className="shell-close" onClick={closeRail} aria-label="Close navigation">
               <XIcon aria-hidden="true" />
             </button>
           </div>
