@@ -38,6 +38,32 @@ uv run --project apps/api python -c "import json; from wsw_brain.documents.app i
 
 Both default to port 8000, so run them on different ports if you need both at once. The main API has no CORS middleware (`apps/api/wsw_brain/app.py:14-41`). The documents app adds CORS only when `WSW_CORS_ORIGINS` is non-empty (`apps/api/wsw_brain/documents/app.py:22-24`; see [../CONFIGURATION.md](../CONFIGURATION.md)). Neither app has authentication.
 
+## Try it
+
+With the main app running (`uv run --project apps/api python -m wsw_brain.cli`, port 8000), these are the responses recorded from commit `8943885`:
+
+```bash
+curl -s http://127.0.0.1:8000/healthz
+# {"status":"ok"}
+
+curl -s http://127.0.0.1:8000/api/status
+# {"status":"ok","product":"On Record"}
+
+curl -s http://127.0.0.1:8000/api/capabilities
+# {"product":"On Record","api_version":"v1","features":["status","documents","events"]}
+
+curl -sN -D - "http://127.0.0.1:8000/api/events?since_id=0"
+# HTTP/1.1 200 OK, content-type: text/event-stream; charset=utf-8,
+# cache-control: no-cache, x-accel-buffering: no. No frames arrive while nothing publishes events;
+# after 15 s without events the stream sends ": keep-alive".
+
+curl -s -o /dev/null -w "%{http_code}\n" -X POST -H "content-type: application/json" \
+  -d '{"question":"What did Priya commit to?"}' http://127.0.0.1:8000/api/agent/ask
+# 404: the default app has no MeetingAgent, so the agent route is not mounted
+```
+
+`/api/capabilities` lists `documents` although this app does not serve `/api/documents/*`; those routes are on the documents app below.
+
 ## Main API routes
 
 Status: Implemented, except `/api/agent/ask`, which is Partial (the route works when an agent is injected, as the tests do, but no entrypoint injects one).
