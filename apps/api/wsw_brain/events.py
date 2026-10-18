@@ -48,9 +48,12 @@ class EventSubscription:
 
 
 class EventBus:
-    def __init__(self, replay: int = 500) -> None:
+    def __init__(self, replay: int = 500, queue_size: int = 2000) -> None:
         if replay <= 0:
             raise ValueError("replay must be positive")
+        if queue_size <= 0:
+            raise ValueError("queue_size must be positive")
+        self.queue_size = queue_size
         self._subs: dict[asyncio.Queue[dict[str, Any]], str | None] = {}
         self._ids = itertools.count(1)
         self._replay: deque[dict[str, Any]] = deque(maxlen=replay)
@@ -96,7 +99,7 @@ class EventBus:
             raise ValueError("since_id must be a non-negative int")
         if meeting_id is not None:
             _require_non_empty_text(meeting_id, "meeting_id")
-        q: asyncio.Queue[dict[str, Any]] = asyncio.Queue(maxsize=2000)
+        q: asyncio.Queue[dict[str, Any]] = asyncio.Queue(maxsize=self.queue_size)
         for e in self._replay:
             if e["id"] > since_id and (meeting_id is None or e.get("meeting_id") == meeting_id):
                 q.put_nowait(e)
