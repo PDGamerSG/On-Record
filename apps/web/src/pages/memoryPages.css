@@ -32,7 +32,9 @@
   color: var(--ink-2);
   font-size: var(--fs-md);
 }
+/* the count line is held open while the page loads, so the content below doesn't drop when it arrives */
 .mp-count {
+  min-height: 1lh;
   margin-top: var(--s-3);
   font-size: var(--fs-sm);
   color: var(--ink-2);

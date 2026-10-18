@@ -159,7 +159,7 @@ export default function CommitmentsPage() {
         <div>
           <h1>Commitments</h1>
           <p className="mp-sub">Action items Gemma 4 found in your meetings, by owner.</p>
-          {items ? <p className="mp-count">{countText}</p> : null}
+          <p className="mp-count">{items ? countText : null}</p>
         </div>
         <fieldset className="mp-seg">
           <legend className="visually-hidden">Show</legend>
