@@ -131,6 +131,17 @@ With `?demo=0` and no API running, requests to `/api` and `/ws` are proxied to
 WSW_API_URL=http://127.0.0.1:9000 npm run dev
 ```
 
+To start the API itself on the default port, run this from the repository root:
+
+```
+uv run --project apps/api python -m wsw_brain.cli
+```
+
+Add `--port 9000` (or any free port) to run it elsewhere, and set `WSW_API_URL` to match.
+
+It serves `/api/status`, `/api/capabilities` and `/api/events`, but not the meeting routes yet, so the
+meeting pages still fail with `?demo=0`. Leave demo mode on for them until the meeting API arrives.
+
 ### Build or lint errors
 
 `npm run build` type-checks with TypeScript before bundling, so a type error stops the
