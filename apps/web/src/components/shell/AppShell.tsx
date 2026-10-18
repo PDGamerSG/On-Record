@@ -1,41 +1,45 @@
 import { useEffect, useState, type MouseEvent, type ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { AudioLines, ListChecks, Mic, Network, Signpost, Users, type LucideIcon } from "lucide-react";
+import {
+  CheckSquareIcon,
+  GraphIcon,
+  MagnifyingGlassIcon,
+  MicrophoneIcon,
+  SignpostIcon,
+  UsersThreeIcon,
+  WaveformIcon,
+  type Icon,
+} from "@phosphor-icons/react";
 import { brand } from "../../lib/brand";
+import { isDemo } from "../../api/mode";
 import ProductMark from "./ProductMark";
-import { StatusDot, StatusLine } from "./SystemStatus";
+import { SystemStatus } from "./SystemStatus";
+import ThemeToggle from "./ThemeToggle";
 import "./AppShell.css";
 
 interface NavItem {
   to: string;
   label: string;
-  icon: LucideIcon;
+  icon: Icon;
   match: (path: string) => boolean;
 }
 
 const NAV: NavItem[] = [
-  { to: "/meetings", label: "Meetings", icon: AudioLines, match: (p) => p === "/meetings" || p.startsWith("/m/") },
-  { to: "/commitments", label: "Commitments", icon: ListChecks, match: (p) => p.startsWith("/commitments") },
-  { to: "/decisions", label: "Decisions", icon: Signpost, match: (p) => p.startsWith("/decisions") },
-  { to: "/people", label: "People", icon: Users, match: (p) => p.startsWith("/people") },
-  { to: "/graph", label: "Graph", icon: Network, match: (p) => p.startsWith("/graph") },
+  { to: "/meetings", label: "Meetings", icon: WaveformIcon, match: (p) => p === "/meetings" || p.startsWith("/m/") },
+  { to: "/commitments", label: "Commitments", icon: CheckSquareIcon, match: (p) => p.startsWith("/commitments") },
+  { to: "/decisions", label: "Decisions", icon: SignpostIcon, match: (p) => p.startsWith("/decisions") },
+  { to: "/people", label: "People", icon: UsersThreeIcon, match: (p) => p.startsWith("/people") },
+  { to: "/graph", label: "Graph", icon: GraphIcon, match: (p) => p.startsWith("/graph") },
 ];
 
-const MOBILE_QUERY = "(max-width: 767px)";
-
-function useIsMobile(): boolean {
-  const [mobile, setMobile] = useState(() => typeof window !== "undefined" && window.matchMedia(MOBILE_QUERY).matches);
-  useEffect(() => {
-    const mq = window.matchMedia(MOBILE_QUERY);
-    const on = () => setMobile(mq.matches);
-    mq.addEventListener("change", on);
-    return () => mq.removeEventListener("change", on);
-  }, []);
-  return mobile;
-}
+const isMac = typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform);
 
 function openAsk() {
   window.dispatchEvent(new CustomEvent("wsw:ask-open"));
+}
+
+function openPalette() {
+  window.dispatchEvent(new CustomEvent("wsw:palette-open"));
 }
 
 function skipToMain(e: MouseEvent<HTMLAnchorElement>) {
@@ -46,48 +50,75 @@ function skipToMain(e: MouseEvent<HTMLAnchorElement>) {
   main.scrollIntoView({ block: "start" });
 }
 
+/** A hairline appears under the bar once the page scrolls beneath it. */
+function useScrolled(): boolean {
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const on = () => setScrolled(window.scrollY > 4);
+    on();
+    window.addEventListener("scroll", on, { passive: true });
+    return () => window.removeEventListener("scroll", on);
+  }, []);
+  return scrolled;
+}
+
 export default function AppShell({ children }: { children: ReactNode }) {
   const { pathname } = useLocation();
-  const mobile = useIsMobile();
+  const scrolled = useScrolled();
 
   return (
     <div className="shell">
       <a href="#main" className="shell-skip" onClick={skipToMain}>
         Skip to main content
       </a>
-      <nav className="shell-rail" aria-label="Main">
-        <Link to="/" className="shell-mark" aria-label={`${brand.short} home`}>
-          <ProductMark />
-          <span className="shell-mark-name" aria-hidden="true">
-            {brand.short}
-          </span>
-        </Link>
-        <ul className="shell-nav">
-          {NAV.map(({ to, label, icon: Icon, match }) => {
-            const active = match(pathname);
-            return (
-              <li key={to}>
-                <Link to={to} className={`shell-link${active ? " is-active" : ""}`} aria-current={active ? "page" : undefined}>
-                  <Icon aria-hidden="true" />
-                  <span className="shell-link-label">{label}</span>
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-        <div className="shell-rail-foot">
-          <button type="button" className="shell-talk" onClick={openAsk} aria-label="Ask (press /)" aria-keyshortcuts="/" data-tip="Ask (press /)">
-            <Mic aria-hidden="true" />
-          </button>
-          {mobile && <StatusDot />}
+      <header className={`shell-bar${scrolled ? " is-scrolled" : ""}`}>
+        <div className="shell-bar-inner">
+          <Link to="/" className="shell-brand" aria-label={`${brand.name} home`}>
+            <ProductMark size={28} />
+            <span className="shell-brand-name">{brand.short}</span>
+          </Link>
+          {isDemo() && (
+            <span className="shell-demo" title="You're looking at bundled demo data. Start the API to use your own meetings.">
+              Demo
+            </span>
+          )}
+
+          <nav className="shell-nav" aria-label="Main">
+            <ul>
+              {NAV.map(({ to, label, icon: NavIcon, match }) => {
+                const active = match(pathname);
+                return (
+                  <li key={to}>
+                    <Link to={to} className={`shell-link${active ? " is-active" : ""}`} aria-current={active ? "page" : undefined}>
+                      <NavIcon aria-hidden="true" weight={active ? "fill" : "regular"} />
+                      <span className="shell-link-label">{label}</span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </nav>
+
+          <div className="shell-tools">
+            <button type="button" className="shell-search" onClick={openPalette} aria-label="Search and commands" aria-keyshortcuts="Meta+K Control+K">
+              <MagnifyingGlassIcon aria-hidden="true" />
+              <span className="shell-search-label">Search</span>
+              <kbd>{isMac ? "⌘K" : "Ctrl K"}</kbd>
+            </button>
+            <SystemStatus />
+            <ThemeToggle className="shell-icon" />
+            <button type="button" className="shell-ask" onClick={openAsk} aria-keyshortcuts="/">
+              <MicrophoneIcon aria-hidden="true" weight="fill" />
+              <span>Ask</span>
+              <kbd aria-hidden="true">/</kbd>
+            </button>
+          </div>
         </div>
-      </nav>
-      <div className="shell-main">
-        <main id="main" className="shell-content" tabIndex={-1}>
-          {children}
-        </main>
-        {!mobile && <StatusLine />}
-      </div>
+      </header>
+
+      <main id="main" className="shell-content" tabIndex={-1}>
+        {children}
+      </main>
     </div>
   );
 }

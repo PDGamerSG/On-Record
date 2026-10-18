@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { timecode } from "../../lib/format";
 import type { Deck } from "../deck";
+import { onThemeChange } from "../../lib/theme";
 import { lineAt, speakerHex, speakingAt } from "../sides";
 import { META } from "./meta";
 import type { TurntableScene } from "./scene";
@@ -93,6 +94,8 @@ export default function Turntable({ deck }: { deck: Deck }) {
         if (reduced) s.snap();
       };
       cleanups.push(deck.subscribe(sync));
+      // the grooves are pressed in the speaker colours of the current theme
+      cleanups.push(onThemeChange(() => s.setSide(deck.current, speakerHex())));
       // wait for the label's faces so the first pressing is typeset correctly
       void document.fonts.ready.then(() => {
         if (cancelled) return;

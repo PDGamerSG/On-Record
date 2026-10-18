@@ -1,7 +1,8 @@
 // Ctrl/Cmd+K: jump to a meeting or page, or ask a question (hands it to the ask drawer).
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
-import { AudioLines, Gavel, ListChecks, MessageSquare, Network, Search, Users } from "lucide-react";
+import { ChatCircleIcon, CheckSquareIcon, GraphIcon, MagnifyingGlassIcon, MicrophoneIcon, MoonIcon, SignpostIcon, SunIcon, UsersThreeIcon, WaveformIcon } from "@phosphor-icons/react";
+import { toggleTheme, useTheme } from "../lib/theme";
 import { duration, when } from "../lib/format";
 import { useMeetings } from "./ask/meetingData";
 import { useFocusTrap } from "./ask/useFocusTrap";
@@ -22,11 +23,11 @@ interface Item {
 }
 
 const PAGES: { label: string; path: string; icon: ReactNode; words: string }[] = [
-  { label: "Meetings", path: "/meetings", icon: <AudioLines aria-hidden="true" />, words: "meetings home recordings" },
-  { label: "Commitments", path: "/commitments", icon: <ListChecks aria-hidden="true" />, words: "commitments action items todo tasks" },
-  { label: "Decisions", path: "/decisions", icon: <Gavel aria-hidden="true" />, words: "decisions decided history" },
-  { label: "People", path: "/people", icon: <Users aria-hidden="true" />, words: "people speakers who knows" },
-  { label: "Graph", path: "/graph", icon: <Network aria-hidden="true" />, words: "graph falkordb nodes knowledge" },
+  { label: "Meetings", path: "/meetings", icon: <WaveformIcon aria-hidden="true" />, words: "meetings home recordings" },
+  { label: "Commitments", path: "/commitments", icon: <CheckSquareIcon aria-hidden="true" />, words: "commitments action items todo tasks" },
+  { label: "Decisions", path: "/decisions", icon: <SignpostIcon aria-hidden="true" />, words: "decisions decided history" },
+  { label: "People", path: "/people", icon: <UsersThreeIcon aria-hidden="true" />, words: "people speakers who knows" },
+  { label: "Graph", path: "/graph", icon: <GraphIcon aria-hidden="true" />, words: "graph falkordb nodes knowledge" },
 ];
 
 function meetingDetail(startedAt: number, seconds: number): string {
@@ -79,6 +80,7 @@ export default function CommandPalette() {
 
   const close = () => setOpen(false);
 
+  const theme = useTheme();
   const items = useMemo<Item[]>(() => {
     const q = query.trim();
     const out: Item[] = [];
@@ -88,7 +90,7 @@ export default function CommandPalette() {
         group: "Ask",
         label: `Ask: ${q}`,
         detail: "Answered from your meetings, with quotes",
-        icon: <MessageSquare aria-hidden="true" />,
+        icon: <ChatCircleIcon aria-hidden="true" />,
         run: () => window.dispatchEvent(new CustomEvent("wsw:ask", { detail: { question: q } })),
       });
     }
@@ -99,7 +101,7 @@ export default function CommandPalette() {
         group: "Meetings",
         label: m.title || "Untitled meeting",
         detail: m.status === "live" ? "Recording now" : meetingDetail(m.started_at, m.duration_s),
-        icon: <AudioLines aria-hidden="true" />,
+        icon: <WaveformIcon aria-hidden="true" />,
         live: m.status === "live",
         run: () => navigate(meetingPath(m.id)),
       });
@@ -114,12 +116,22 @@ export default function CommandPalette() {
         group: "Go to",
         label: "Ask by voice",
         detail: "Opens the ask panel",
-        icon: <MessageSquare aria-hidden="true" />,
+        icon: <MicrophoneIcon aria-hidden="true" />,
         run: () => window.dispatchEvent(new CustomEvent("wsw:ask-open")),
       });
     }
+    const dark = theme === "dark";
+    if (!q || matches("theme dark light mode night day appearance", q)) {
+      out.push({
+        id: "theme",
+        group: "Go to",
+        label: dark ? "Switch to light mode" : "Switch to dark mode",
+        icon: dark ? <SunIcon aria-hidden="true" /> : <MoonIcon aria-hidden="true" />,
+        run: toggleTheme,
+      });
+    }
     return out;
-  }, [query, meetings, navigate]);
+  }, [query, meetings, navigate, theme]);
 
   const safeActive = Math.min(active, Math.max(0, items.length - 1));
   const activeId = items[safeActive] ? `cp-opt-${items[safeActive].id}` : undefined;
@@ -187,7 +199,7 @@ export default function CommandPalette() {
         onKeyDown={onKeyDown}
       >
         <div className="cp-input">
-          <Search aria-hidden="true" />
+          <MagnifyingGlassIcon aria-hidden="true" />
           <input
             ref={inputRef}
             role="combobox"

@@ -1,11 +1,13 @@
 // Force-directed view of a FalkorDB subgraph. react-force-graph-2d is loaded on demand so it stays
 // out of the main bundle.
-import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState, type ReactElement } from "react";
+import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent, type ReactElement } from "react";
+import { FrameCornersIcon, MinusIcon, PlusIcon } from "@phosphor-icons/react";
 import type ForceGraph from "react-force-graph-2d";
 import type { ForceGraphMethods, LinkObject, NodeObject } from "react-force-graph-2d";
 import type { GraphNode, Subgraph } from "../../api/types";
 import { isHollow, kindStyle, nodeSpeakerIndex, readPalette, toneColor, traceShape, truncate } from "./graphStyle";
 import { useReducedMotion } from "./useReducedMotion";
+import { onThemeChange } from "../../lib/theme";
 import "./graph.css";
 
 interface NodeData {
@@ -43,6 +45,11 @@ export interface GraphViewProps {
 const FIT_PADDING = 56;
 const MAX_FIT_ZOOM = 3;
 const EARLY_FIT_TICKS = new Set([1, 20, 50]);
+const MIN_ZOOM = 0.2;
+const MAX_ZOOM = 10;
+const ZOOM_STEP = 1.5;
+/** Picking a node brings it at least this close, so its label and neighbours are readable. */
+const FOCUS_ZOOM = 2.2;
 
 function endId(end: SimLink["source"]): string {
   if (end && typeof end === "object") return String((end as SimNode).id);
@@ -59,7 +66,10 @@ export default function GraphView({ data, label, onSelect, selectedId = null, hi
   const sizeRef = useRef(size);
   sizeRef.current = size;
   const [hoverId, setHoverId] = useState<string | null>(null);
-  const [palette] = useState(readPalette);
+  const [zoomPct, setZoomPct] = useState(100);
+  // canvas colours come from the tokens, so re-read them when the theme switches
+  const [palette, setPalette] = useState(readPalette);
+  useEffect(() => onThemeChange(() => setPalette(readPalette())), []);
   const reduced = useReducedMotion();
 
   useEffect(() => {
@@ -217,6 +227,47 @@ export default function GraphView({ data, label, onSelect, selectedId = null, hi
     [graph],
   );
 
+  const zoomBy = useCallback(
+    (factor: number) => {
+      const fg = fgRef.current;
+      if (!fg) return;
+      fg.zoom(Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, fg.zoom() * factor)), reduced ? 0 : 240);
+    },
+    [reduced],
+  );
+
+  const onZoom = useCallback(({ k }: { k: number }) => {
+    const pct = Math.round(k * 100);
+    setZoomPct((p) => (p === pct ? p : pct));
+  }, [setZoomPct]);
+
+  // Bring a newly selected node into view, closer if the camera is far out. Only a new selection moves the camera:
+  // live additions to the graph, or clearing the selection, leave it where the reader put it.
+  const graphRef = useRef(graph);
+  useLayoutEffect(() => {
+    graphRef.current = graph;
+  }, [graph]);
+  useEffect(() => {
+    const fg = fgRef.current;
+    if (!fg || !selectedId) return;
+    const node = graphRef.current.nodes.find((n) => n.id === selectedId);
+    if (node?.x === undefined || node.y === undefined) return;
+    const ms = reduced ? 0 : 450;
+    fg.centerAt(node.x, node.y, ms);
+    if (fg.zoom() < FOCUS_ZOOM) fg.zoom(FOCUS_ZOOM, ms);
+    // the layout has settled on a picture the reader chose, so the end-of-layout fit must not undo it
+    fitStage.current = 2;
+  }, [selectedId, reduced]);
+
+  const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (e.key === "+" || e.key === "=") zoomBy(ZOOM_STEP);
+    else if (e.key === "-" || e.key === "_") zoomBy(1 / ZOOM_STEP);
+    else if (e.key === "0") fit(reduced ? 0 : 400);
+    else return;
+    e.preventDefault();
+  };
+
   const forcesSet = useRef(false);
   const onEngineTick = useCallback(() => {
     const fg = fgRef.current;
@@ -245,9 +296,11 @@ export default function GraphView({ data, label, onSelect, selectedId = null, hi
   // Never pass undefined to the kapsule: it would replace the library default rather than keep it.
   const timing = reduced ? { warmupTicks: 80, cooldownTicks: 12 } : { warmupTicks: 40, cooldownTime: 4000 };
   const style = height ? { height } : undefined;
+  const ready = !!size && size.w > 0 && size.h > 0;
   return (
-    <div ref={boxRef} className={`gv${height ? "" : " gv--fill"}`} style={style} role="img" aria-label={label}>
-      {size && size.w > 0 && size.h > 0 ? (
+    <div className={`gv${height ? "" : " gv--fill"}${height && height < 300 ? " gv--compact" : ""}`} style={style} onKeyDown={onKeyDown}>
+      <div ref={boxRef} className="gv__canvas" role="img" aria-label={label}>
+      {ready ? (
         <Suspense fallback={<p className="gv__loading">Loading the graph…</p>}>
           <ForceGraph2D
             ref={fgRef}
@@ -265,11 +318,29 @@ export default function GraphView({ data, label, onSelect, selectedId = null, hi
             onBackgroundClick={() => onSelect?.(null)}
             onEngineTick={onEngineTick}
             onEngineStop={onEngineStop}
-            minZoom={0.2}
-            maxZoom={10}
+            onZoom={onZoom}
+            minZoom={MIN_ZOOM}
+            maxZoom={MAX_ZOOM}
             {...timing}
           />
         </Suspense>
+      ) : null}
+      </div>
+      {ready ? (
+        <div className="gv__zoom" role="toolbar" aria-label="Zoom the graph">
+          <button type="button" onClick={() => zoomBy(ZOOM_STEP)} disabled={zoomPct >= MAX_ZOOM * 100} aria-label="Zoom in" title="Zoom in (+)">
+            <PlusIcon aria-hidden="true" />
+          </button>
+          <span className="gv__zoom-pct tc" aria-live="polite" aria-label={`Zoom ${zoomPct} percent`}>
+            {zoomPct}%
+          </span>
+          <button type="button" onClick={() => zoomBy(1 / ZOOM_STEP)} disabled={zoomPct <= MIN_ZOOM * 100} aria-label="Zoom out" title="Zoom out (−)">
+            <MinusIcon aria-hidden="true" />
+          </button>
+          <button type="button" className="gv__zoom-fit" onClick={() => fit(reduced ? 0 : 400)} aria-label="Fit the graph to the view" title="Fit to view (0)">
+            <FrameCornersIcon aria-hidden="true" />
+          </button>
+        </div>
       ) : null}
     </div>
   );

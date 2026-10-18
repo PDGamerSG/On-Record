@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
-import { ArrowDown, ArrowUp, Search } from "lucide-react";
+import { ArrowDownIcon, ArrowUpIcon, MagnifyingGlassIcon } from "@phosphor-icons/react";
 import { api } from "../api/client";
 import type { Person, WhoKnows } from "../api/types";
 import { duration } from "../lib/format";
@@ -68,10 +68,7 @@ export default function PeoplePage() {
       <header className="mp-head">
         <div>
           <h1>People</h1>
-          <p className="mp-sub">
-            Everyone the brain has heard, across meetings. Name a speaker in a meeting to link their voice to a person
-            here.
-          </p>
+          <p className="mp-sub">Everyone heard across your meetings. Rename a speaker in a meeting to link them here.</p>
         </div>
       </header>
 
@@ -121,9 +118,9 @@ export default function PeoplePage() {
                           {c.label}
                           {sort.key === c.key ? (
                             sort.desc ? (
-                              <ArrowDown aria-hidden="true" />
+                              <ArrowDownIcon aria-hidden="true" />
                             ) : (
-                              <ArrowUp aria-hidden="true" />
+                              <ArrowUpIcon aria-hidden="true" />
                             )
                           ) : null}
                         </button>
@@ -211,7 +208,7 @@ function WhoKnowsPanel() {
           autoComplete="off"
         />
         <button type="submit" className="btn btn--primary" disabled={!topic.trim() || loading}>
-          <Search aria-hidden="true" />
+          <MagnifyingGlassIcon aria-hidden="true" />
           Find people
         </button>
       </form>

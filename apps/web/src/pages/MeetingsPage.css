@@ -86,11 +86,11 @@
   overflow: hidden;
 }
 .totals-title {
-  padding: var(--s-3) var(--s-5);
+  padding: 14px var(--s-5);
   border-bottom: 1px solid var(--line);
   color: var(--ink-2);
-  font-size: var(--fs-sm);
-  font-weight: 550;
+  font-size: var(--fs-xs);
+  font-weight: 600;
   letter-spacing: 0;
 }
 .totals-list {
@@ -101,9 +101,9 @@
 .totals-item {
   display: flex;
   flex-direction: column;
-  gap: var(--s-1);
+  gap: 6px;
   min-width: 0;
-  padding: var(--s-4) var(--s-5);
+  padding: var(--s-5);
 }
 .totals-item + .totals-item {
   border-left: 1px solid var(--line);
@@ -116,12 +116,11 @@
 .totals-item dd {
   order: 1;
   margin: 0;
-  font-size: var(--fs-2xl);
-  font-weight: 600;
-  line-height: 1.15;
-  font-variation-settings: var(--ui-mono);
+  font-size: 1.875rem;
+  font-weight: 620;
+  line-height: 1.1;
   font-variant-numeric: tabular-nums;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
 }
 .totals-item dd.skel {
   width: 3ch;
@@ -184,14 +183,14 @@
   grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
   align-items: center;
   gap: var(--s-3) var(--s-8);
-  padding: var(--s-4) var(--s-5);
+  padding: var(--s-5);
   transition: background var(--t-fast) var(--ease-out);
 }
 .mrow + .mrow {
   border-top: 1px solid var(--line);
 }
 .mrow:hover {
-  background: var(--surface-2);
+  background: var(--surface-sunk);
 }
 
 .mrow-main {
@@ -256,12 +255,13 @@
 }
 .mrow-source {
   flex: none;
-  padding: 0 var(--s-2);
-  border: 1px solid var(--line-strong);
-  border-radius: var(--r-chip);
+  padding: 0 8px;
+  border-radius: var(--r-round);
+  background: var(--surface-2);
   color: var(--ink-2);
-  font-size: var(--fs-xs);
-  line-height: 1.6;
+  font-size: 11.5px;
+  font-weight: 560;
+  line-height: 20px;
 }
 
 .mrow-tape {

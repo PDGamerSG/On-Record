@@ -4,7 +4,9 @@
   position: fixed;
   inset: 0;
   z-index: 60;
-  background: color-mix(in srgb, var(--bg) 60%, transparent);
+  background: rgb(var(--shade) / 0.22);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
   animation: ask-fade var(--t-med) var(--ease-out);
 }
 @keyframes ask-fade {
@@ -68,10 +70,10 @@
   max-width: calc(100% - 2 * var(--s-5));
   min-width: 0;
   margin: 0 var(--s-5) var(--s-4);
-  padding: 2px;
-  border: 1px solid var(--line);
+  padding: 3px;
+  border: 0;
   border-radius: var(--r-ctl);
-  background: var(--surface-sunk);
+  background: var(--surface-3);
 }
 .ask-seg {
   position: relative;
@@ -109,9 +111,8 @@
   color: var(--ink);
 }
 .ask-seg input:checked + span {
-  border-color: var(--line-strong);
-  background: var(--surface-3);
-  box-shadow: inset 0 1px 0 var(--hi);
+  background: var(--surface);
+  box-shadow: 0 1px 2px rgb(var(--shade) / 0.08), 0 0 0 1px rgb(var(--shade) / 0.04);
   color: var(--ink);
 }
 .ask-seg input:focus-visible + span {
@@ -285,7 +286,7 @@
   align-items: flex-start;
   gap: var(--s-2);
   padding: var(--s-2) var(--s-3);
-  border-left: 3px solid var(--warn);
+  border: 1px solid var(--warn);
   border-radius: var(--r-chip);
   background: var(--warn-soft);
 }
@@ -437,6 +438,7 @@
 }
 .ask-why__tool,
 .ask-why__code {
+  font-family: var(--font-mono);
   font-variation-settings: var(--ui-mono);
 }
 .ask-why__tool {
@@ -526,7 +528,6 @@
   border: 1px solid var(--line);
   border-radius: var(--r-ctl);
   background: var(--surface);
-  box-shadow: inset 0 1px 0 var(--hi);
   text-align: left;
   font-size: var(--fs-sm);
   cursor: pointer;
@@ -534,7 +535,7 @@
 }
 .ask-sugg__btn:hover {
   border-color: var(--line-strong);
-  background: var(--surface-2);
+  background: var(--surface-sunk);
 }
 .ask-sugg__note {
   margin-top: var(--s-4);
@@ -548,7 +549,7 @@
   gap: var(--s-3);
   padding: var(--s-4) var(--s-5) calc(var(--s-4) + env(safe-area-inset-bottom, 0px));
   border-top: 1px solid var(--line);
-  background: var(--surface-2);
+  background: var(--surface-sunk);
 }
 .ask-dock__main {
   display: flex;
@@ -569,9 +570,8 @@
   display: inline-flex;
   align-items: center;
   gap: var(--s-2);
-  font-size: var(--fs-lg);
-  font-weight: 650;
-  font-variation-settings: var(--display-casual);
+  font-size: var(--fs-md);
+  font-weight: 620;
 }
 .ask-status__timer {
   color: var(--ink-2);
@@ -588,13 +588,13 @@
 }
 .ask-note {
   padding: var(--s-2) var(--s-3);
-  border-left: 3px solid var(--ink-2);
+  border: 1px solid var(--line-strong);
   border-radius: var(--r-chip);
   background: var(--surface);
   font-size: var(--fs-sm);
 }
 .ask-note--err {
-  border-left-color: var(--warn);
+  border-color: var(--warn);
   background: var(--warn-soft);
 }
 .ask-type {
@@ -606,7 +606,7 @@
   min-width: 0;
 }
 
-/* switch: square-shouldered, like a console toggle */
+/* switch: a rounded toggle that fills with ink when on */
 .ask-switch {
   display: inline-flex;
   align-items: center;
@@ -626,21 +626,21 @@
 .ask-switch__track {
   position: relative;
   flex: none;
-  width: 32px;
-  height: 18px;
-  border-radius: var(--r-chip);
-  background: var(--surface-3);
-  box-shadow: inset 0 0 0 1px var(--line-strong);
+  width: 34px;
+  height: 20px;
+  border-radius: var(--r-round);
+  background: var(--line-strong);
   transition: background var(--t-fast) var(--ease-out);
 }
 .ask-switch__thumb {
   position: absolute;
   top: 2px;
   left: 2px;
-  width: 14px;
-  height: 14px;
-  border-radius: 2px;
-  background: var(--ink-2);
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--knob);
+  box-shadow: 0 1px 2px rgb(var(--shade) / 0.25);
   transition:
     transform var(--t-fast) var(--ease-out),
     background var(--t-fast) var(--ease-out);
@@ -657,8 +657,8 @@
 .ask-talk {
   position: relative;
   flex: none;
-  width: 76px;
-  height: 76px;
+  width: 64px;
+  height: 64px;
 }
 .ask-talk__ring {
   position: absolute;
@@ -672,12 +672,13 @@
   position: relative;
   display: grid;
   place-items: center;
-  width: 76px;
-  height: 76px;
+  width: 64px;
+  height: 64px;
   padding: 0;
   border: 0;
   border-radius: var(--r-round);
   background: var(--ink);
+  box-shadow: 0 2px 4px rgb(var(--shade) / 0.18), 0 10px 24px -10px rgb(var(--shade) / 0.55);
   color: var(--on-ink);
   cursor: pointer;
   touch-action: none;
@@ -698,9 +699,8 @@
   outline-offset: 10px;
 }
 .ask-talk__btn svg {
-  width: 30px;
-  height: 30px;
-  stroke-width: 1.75;
+  width: 26px;
+  height: 26px;
 }
 .ask-talk[data-state="recording"] .ask-talk__btn {
   background: var(--rec);

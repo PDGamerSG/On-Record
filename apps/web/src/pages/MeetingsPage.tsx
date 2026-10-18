@@ -75,7 +75,6 @@ export default function MeetingsPage() {
           <h2 id="home-list-title" className="home-list-title">
             All meetings {meetings && meetings.length > 0 && <span className="home-count">{meetings.length}</span>}
           </h2>
-          {meetings && meetings.length > 0 && <p className="home-list-hint">Each strip shows who spoke when. Open a meeting to hear it.</p>}
         </div>
 
         {error ? (

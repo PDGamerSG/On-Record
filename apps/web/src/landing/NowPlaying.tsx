@@ -1,5 +1,5 @@
 import { useEffect, useRef, type KeyboardEvent, type MouseEvent } from "react";
-import { LoaderCircle, Pause, Play, SkipBack, SkipForward, Volume2, VolumeX } from "lucide-react";
+import { CircleNotchIcon, PauseIcon, PlayIcon, SkipBackIcon, SkipForwardIcon, SpeakerHighIcon, SpeakerSlashIcon } from "@phosphor-icons/react";
 import { timecode } from "../lib/format";
 import { useDeckState, useNowPlaying, type Deck } from "./deck";
 import { SIDES, type Side } from "./sides";
@@ -110,17 +110,17 @@ export default function NowPlaying({ deck }: { deck: Deck }) {
         </div>
         <div className="now-buttons">
           <button type="button" className="now-icon" onClick={() => jump(-1)} aria-label="Previous line">
-            <SkipBack aria-hidden="true" />
+            <SkipBackIcon weight="fill" aria-hidden="true" />
           </button>
           <button type="button" className="now-icon now-icon--main" onClick={() => deck.togglePlaying()} aria-label={state.playing ? "Pause" : "Play"}>
-            {state.playing ? <Pause aria-hidden="true" /> : <Play aria-hidden="true" />}
+            {state.playing ? <PauseIcon weight="fill" aria-hidden="true" /> : <PlayIcon weight="fill" aria-hidden="true" />}
           </button>
           <button type="button" className="now-icon" onClick={() => jump(1)} aria-label="Next line">
-            <SkipForward aria-hidden="true" />
+            <SkipForwardIcon weight="fill" aria-hidden="true" />
           </button>
         </div>
         <button type="button" className={`now-sound${state.sound ? " is-on" : ""}`} aria-pressed={state.sound} onClick={() => void deck.setSound(!state.sound)}>
-          {state.sound ? state.loading ? <LoaderCircle className="spin" aria-hidden="true" /> : <Volume2 aria-hidden="true" /> : <VolumeX aria-hidden="true" />}
+          {state.sound ? state.loading ? <CircleNotchIcon className="spin" aria-hidden="true" /> : <SpeakerHighIcon aria-hidden="true" /> : <SpeakerSlashIcon aria-hidden="true" />}
           <span>{state.sound ? "Sound on" : "Listen"}</span>
         </button>
       </div>

@@ -1,9 +1,7 @@
-/* App frame: a narrow rail on the left (bottom bar on phones), the page, and a slim status line. */
+/* App frame: one top bar (brand, sections, search, status, Ask) over the page; a tab bar on phones. */
 .shell {
-  display: grid;
-  grid-template-columns: var(--rail-w) minmax(0, 1fr);
-  height: 100dvh;
-  overflow: hidden;
+  min-height: 100dvh;
+  background: var(--bg);
 }
 
 .shell-skip {
@@ -23,218 +21,314 @@
   transform: none;
 }
 
-/* rail */
-.shell-rail {
+/* ---- top bar ---------------------------------------------------------------------------------- */
+.shell-bar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  border-bottom: 1px solid transparent;
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  transition:
+    border-color var(--t-med) var(--ease),
+    box-shadow var(--t-med) var(--ease);
+}
+.shell-bar.is-scrolled {
+  border-bottom-color: var(--line);
+  box-shadow: 0 1px 12px -6px rgb(var(--shade) / 0.12);
+}
+.shell-bar-inner {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: var(--s-4);
-  min-height: 0;
-  padding: var(--s-4) 0 var(--s-4);
-  border-right: 1px solid var(--line);
-  background: var(--surface);
+  gap: var(--s-3);
+  height: var(--nav-h);
+  padding: 0 clamp(var(--s-4), 3vw, var(--s-8));
 }
 
-.shell-mark {
-  display: flex;
-  flex-direction: column;
+.shell-brand {
+  display: inline-flex;
+  flex: none;
   align-items: center;
-  gap: 6px;
-  width: calc(var(--rail-w) - var(--s-2));
-  padding: var(--s-1) 0;
-  border-radius: var(--r-panel);
+  gap: 10px;
+  padding: 4px 6px 4px 2px;
+  border-radius: var(--r-ctl);
   color: var(--ink);
   text-decoration: none;
 }
-.shell-mark .mark {
+.shell-brand .mark {
   display: block;
-  transition: transform var(--t-med) var(--ease-out);
+  transition: transform var(--t-slow) var(--ease-out);
 }
-.shell-mark:hover .mark {
-  transform: rotate(-24deg);
+.shell-brand:hover .mark {
+  transform: rotate(-40deg);
 }
-.shell-mark-name {
-  font-size: calc(var(--fs-xs) * 0.92);
-  font-weight: 700;
-  line-height: 1.1;
-  text-align: center;
-  font-variation-settings: var(--display-casual);
+.shell-brand-name {
+  font-size: 15px;
+  font-weight: 650;
+  letter-spacing: -0.015em;
+  white-space: nowrap;
+}
+.shell-demo {
+  flex: none;
+  padding: 2px 8px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-round);
+  background: var(--surface);
+  color: var(--ink-2);
+  font-size: 11.5px;
+  font-weight: 560;
+  cursor: default;
 }
 
+/* sections: quiet labels; the current one sits on a white key */
 .shell-nav {
+  min-width: 0;
+  margin-left: var(--s-4);
+}
+.shell-nav ul {
   display: flex;
-  flex-direction: column;
-  gap: var(--s-1);
-  width: 100%;
+  gap: 2px;
   margin: 0;
-  padding: var(--s-2) var(--s-1) 0;
-  border-top: 1px solid var(--line);
+  padding: 0;
   list-style: none;
 }
-
 .shell-link {
   position: relative;
-  display: flex;
-  flex-direction: column;
+  display: inline-flex;
   align-items: center;
-  gap: 3px;
-  padding: var(--s-2) 0;
-  border-radius: var(--r-panel);
+  gap: 7px;
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid transparent;
+  border-radius: var(--r-ctl);
   color: var(--ink-2);
+  font-size: 14px;
+  font-weight: 520;
   text-decoration: none;
+  white-space: nowrap;
   transition:
     background var(--t-fast) var(--ease-out),
-    color var(--t-fast) var(--ease-out);
-}
-.shell-link:focus-visible {
-  outline-offset: -2px;
+    color var(--t-fast) var(--ease-out),
+    border-color var(--t-fast) var(--ease-out);
 }
 .shell-link svg {
-  width: 22px;
-  height: 22px;
-  stroke-width: 1.75;
-}
-.shell-link-label {
-  font-size: calc(var(--fs-xs) * 0.92);
-  font-weight: 550;
-  letter-spacing: -0.01em;
-  line-height: 1.15;
-  white-space: nowrap;
+  flex: none;
+  width: 18px;
+  height: 18px;
 }
 .shell-link:hover {
   background: var(--surface-2);
   color: var(--ink);
 }
 .shell-link.is-active {
-  background: var(--surface-3);
-  box-shadow: inset 0 1px 0 var(--hi);
+  border-color: var(--line);
+  background: var(--surface);
+  box-shadow: 0 1px 2px rgb(var(--shade) / 0.06);
   color: var(--ink);
-}
-.shell-link.is-active .shell-link-label {
-  font-weight: 700;
-}
-.shell-link.is-active::before {
-  content: "";
-  position: absolute;
-  left: calc(-1 * var(--s-1));
-  top: 10px;
-  bottom: 10px;
-  width: 3px;
-  border-radius: 0 var(--r-chip) var(--r-chip) 0;
-  background: var(--ink);
+  font-weight: 600;
 }
 
-.shell-rail-foot {
+.shell-tools {
   display: flex;
-  flex-direction: column;
+  flex: none;
   align-items: center;
-  gap: var(--s-3);
-  margin-top: auto;
+  gap: var(--s-2);
+  margin-left: auto;
 }
 
-/* talkback: the push-to-talk key, the only round control */
-.shell-talk {
-  position: relative;
-  display: grid;
+.shell-search {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: 210px;
+  height: 36px;
+  padding: 0 6px 0 11px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-ctl);
+  background: var(--surface);
+  color: var(--ink-3);
+  font-size: 14px;
+  cursor: pointer;
+  transition:
+    border-color var(--t-fast) var(--ease),
+    color var(--t-fast) var(--ease);
+}
+.shell-search:hover {
+  border-color: color-mix(in srgb, var(--ink-3) 50%, var(--line-strong));
+  color: var(--ink-2);
+}
+.shell-search svg {
+  flex: none;
+  width: 16px;
+  height: 16px;
+}
+.shell-search-label {
+  flex: 1;
+  text-align: left;
+}
+.shell-bar kbd {
+  display: inline-grid;
   place-items: center;
-  width: 48px;
-  height: 48px;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface-2);
+  color: var(--ink-3);
+  font-family: var(--font-ui);
+  font-size: 11.5px;
+  font-weight: 560;
+}
+
+.shell-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--r-round);
+}
+.shell-icon:hover {
+  background: var(--surface);
+  box-shadow: 0 0 0 1px var(--line);
+}
+
+/* Ask: the one dark key in the bar */
+.shell-ask {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 8px 0 13px;
   border: 0;
   border-radius: var(--r-round);
   background: var(--ink);
+  box-shadow: 0 1px 2px rgb(var(--shade) / 0.2), 0 6px 14px -8px rgb(var(--shade) / 0.5);
   color: var(--on-ink);
+  font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
-  transition: background var(--t-fast) var(--ease);
+  transition:
+    background var(--t-fast) var(--ease),
+    transform var(--t-fast) var(--ease);
 }
-.shell-talk:hover {
-  background: color-mix(in srgb, var(--ink) 86%, var(--on-ink));
+.shell-ask:hover {
+  background: color-mix(in srgb, var(--ink) 84%, white);
 }
-.shell-talk:focus-visible {
-  outline-offset: 3px;
+.shell-ask:active {
+  transform: translateY(1px);
 }
-.shell-talk svg {
-  width: 22px;
-  height: 22px;
-  stroke-width: 1.75;
+.shell-ask svg {
+  width: 16px;
+  height: 16px;
 }
-.shell-talk::after {
-  content: attr(data-tip);
-  position: absolute;
-  left: calc(100% + 10px);
-  top: 50%;
-  z-index: 50;
-  padding: var(--s-1) var(--s-2);
-  border: 1px solid var(--line-strong);
-  border-radius: var(--r-chip);
-  background: var(--surface-3);
-  box-shadow: var(--shadow-float);
-  color: var(--ink);
-  font-size: var(--fs-xs);
-  font-weight: 550;
-  white-space: nowrap;
-  opacity: 0;
-  pointer-events: none;
-  transform: translateY(-50%);
-  transition: opacity var(--t-fast) var(--ease);
-}
-.shell-talk:hover::after,
-.shell-talk:focus-visible::after {
-  opacity: 1;
+.shell-bar .shell-ask kbd {
+  border-color: color-mix(in srgb, var(--on-ink) 16%, transparent);
+  background: color-mix(in srgb, var(--on-ink) 10%, transparent);
+  color: color-mix(in srgb, var(--on-ink) 75%, transparent);
+  border-radius: var(--r-round);
 }
 
-/* page column */
-.shell-main {
-  display: grid;
-  grid-template-rows: minmax(0, 1fr) auto;
-  min-width: 0;
-  min-height: 0;
-}
-
+/* ---- page ------------------------------------------------------------------------------------- */
 .shell-content {
-  position: relative; /* contains absolutely positioned helpers so only this column scrolls */
+  position: relative;
   min-width: 0;
-  min-height: 0;
-  overflow: auto;
-  scrollbar-gutter: stable;
 }
 .shell-content:focus {
   outline: none;
 }
 
-/* status line */
-.status-line {
-  padding: 6px var(--s-8);
-  border-top: 1px solid var(--line);
-  background: var(--surface);
+/* ---- system status chip and popover ----------------------------------------------------------- */
+.status-pop-wrap {
+  position: relative;
+}
+.status-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid transparent;
+  border-radius: var(--r-round);
+  background: transparent;
   color: var(--ink-2);
-  font-size: var(--fs-xs);
+  font-size: 13px;
+  font-weight: 520;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background var(--t-fast) var(--ease-out),
+    border-color var(--t-fast) var(--ease-out);
+}
+.status-toggle:hover,
+.status-toggle[aria-expanded="true"] {
+  border-color: var(--line);
+  background: var(--surface);
+}
+.status-toggle.is-warn {
+  color: var(--ink);
+}
+.status-toggle .status-dot {
+  width: 8px;
+  height: 8px;
+}
+.status-toggle.is-ok .status-dot {
+  box-shadow: 0 0 0 3px var(--ok-soft);
+}
+.status-toggle.is-warn .status-dot {
+  box-shadow: 0 0 0 3px var(--warn-soft);
+}
+
+.status-pop {
+  position: absolute;
+  top: calc(100% + var(--s-2));
+  right: 0;
+  z-index: 60;
+  width: max-content;
+  min-width: 260px;
+  max-width: min(360px, calc(100vw - var(--s-8)));
+  padding: var(--s-4);
+  border: 1px solid var(--line);
+  border-radius: var(--r-panel);
+  background: var(--surface);
+  box-shadow: var(--shadow-float);
+  font-size: var(--fs-sm);
+}
+.status-pop[hidden] {
+  display: none;
+}
+.status-pop-title {
+  margin-bottom: var(--s-3);
+  color: var(--ink);
+  font-weight: 600;
 }
 
 .status-items {
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--s-1) var(--s-6);
+  flex-direction: column;
+  gap: var(--s-2);
   margin: 0;
   padding: 0;
   list-style: none;
 }
-
 .status-item {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--s-2);
-  white-space: nowrap;
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-3);
+  color: var(--ink-2);
+  line-height: 1.45;
   font-variant-numeric: tabular-nums;
 }
-/* a problem is marked by its dot and brighter text; the line stays quiet */
+.status-item .status-dot {
+  transform: translateY(-1px);
+}
 .status-item.is-warn {
   color: var(--ink);
 }
 
 .status-dot {
   flex: none;
-  width: 6px;
-  height: 6px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   background: var(--ink-3);
 }
@@ -245,55 +339,8 @@
   background: var(--warn);
 }
 
-/* phone: status as a dot with a popover */
-.status-pop-wrap {
-  position: relative;
-}
-.status-toggle {
-  display: grid;
-  place-items: center;
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  border: 1px solid var(--line);
-  border-radius: var(--r-ctl);
-  background: var(--surface);
-  cursor: pointer;
-  transition: background var(--t-fast) var(--ease-out);
-}
-.status-toggle:hover {
-  background: var(--surface-2);
-}
-.status-toggle .status-dot {
-  width: 10px;
-  height: 10px;
-}
-.status-pop {
-  position: absolute;
-  right: 0;
-  bottom: calc(100% + var(--s-3));
-  z-index: 60;
-  width: max-content;
-  max-width: calc(100vw - var(--s-8));
-  padding: var(--s-3) var(--s-4);
-  border: 1px solid var(--line);
-  border-radius: var(--r-panel);
-  background: var(--surface);
-  box-shadow: var(--shadow-float);
-  font-size: var(--fs-sm);
-}
-.status-pop[hidden] {
-  display: none;
-}
-.status-pop .status-items {
-  flex-direction: column;
-  gap: var(--s-2);
-}
-.status-pop .status-item {
-  white-space: normal;
-}
-
-/* shared spinner for busy buttons */
+/* ---- shared helpers --------------------------------------------------------------------------- */
+/* spinner for busy buttons */
 .spin {
   animation: shell-spin 900ms linear infinite;
 }
@@ -303,7 +350,7 @@
   }
 }
 
-/* shared loading placeholder: a block that breathes, so it reads as loading rather than empty */
+/* loading placeholder: a block that breathes, so it reads as loading rather than empty */
 .skel {
   display: block;
   height: 12px;
@@ -317,7 +364,7 @@
   }
 }
 
-/* shared checkbox: a square key that fills with ink when checked */
+/* checkbox: a square key that fills with ink when checked */
 .check {
   appearance: none;
   flex: none;
@@ -326,9 +373,9 @@
   width: 18px;
   height: 18px;
   margin: 0;
-  border: 1px solid var(--line-strong);
-  border-radius: var(--r-chip);
-  background: var(--surface-sunk);
+  border: 1.5px solid var(--line-strong);
+  border-radius: 5px;
+  background: var(--surface);
   cursor: pointer;
   transition:
     background var(--t-fast) var(--ease-out),
@@ -344,7 +391,7 @@
   transition: transform var(--t-fast) var(--ease-out);
 }
 .check:hover {
-  border-color: color-mix(in srgb, var(--ink-2) 55%, var(--line-strong));
+  border-color: var(--ink-3);
 }
 .check:checked {
   border-color: var(--ink);
@@ -365,61 +412,26 @@
   }
 }
 
-@media (max-width: 767px) {
-  .shell {
-    display: block;
-    height: auto;
-    min-height: 100dvh;
-    overflow: visible;
+/* ---- narrower screens ------------------------------------------------------------------------- */
+@media (max-width: 1180px) {
+  .shell-search {
+    width: auto;
   }
-
-  .shell-rail {
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 40;
-    flex-direction: row;
-    gap: var(--s-1);
-    height: calc(60px + env(safe-area-inset-bottom));
-    padding: 0 var(--s-2) env(safe-area-inset-bottom);
-    border-right: 0;
-    border-top: 1px solid var(--line);
-  }
-
-  .shell-mark {
+  .shell-search-label,
+  .shell-search kbd {
     display: none;
   }
+  .status-toggle-label {
+    display: none;
+  }
+  .status-toggle {
+    padding: 0 12px;
+  }
+}
 
-  .shell-nav {
-    flex: 1;
-    flex-direction: row;
-    gap: 2px;
-    height: 100%;
-    padding: 0;
-    border-top: 0;
-  }
-  .shell-nav li {
-    flex: 1;
-    min-width: 0;
-  }
+@media (max-width: 960px) {
   .shell-link {
-    justify-content: center;
-    height: 100%;
-    padding: 0;
-    border-radius: 0;
-  }
-  .shell-link.is-active {
-    background: var(--surface-2);
-  }
-  .shell-link.is-active::before {
-    left: 20%;
-    right: 20%;
-    top: 0;
-    bottom: auto;
-    width: auto;
-    height: 3px;
-    border-radius: 0 0 var(--r-chip) var(--r-chip);
+    padding: 0 10px;
   }
   .shell-link-label {
     position: absolute !important;
@@ -429,34 +441,80 @@
     clip: rect(0 0 0 0);
     white-space: nowrap;
   }
-
-  .shell-rail-foot {
-    flex-direction: row;
-    gap: var(--s-2);
-    margin: 0;
-  }
-  .shell-talk {
-    width: 44px;
-    height: 44px;
-  }
-  .shell-talk::after {
+  .shell-ask kbd {
     display: none;
-  }
-
-  .shell-content {
-    overflow: visible;
-    padding-bottom: calc(60px + env(safe-area-inset-bottom));
-    scrollbar-gutter: auto;
   }
 }
 
-/* wider phones and small tablets have room for labels in the bottom bar */
-@media (min-width: 520px) and (max-width: 767px) {
+/* phones: sections move to a tab bar at the bottom, the top bar keeps brand, status and Ask */
+@media (max-width: 767px) {
+  /* a backdrop filter would make the bar the containing block for the fixed tab bar inside it */
+  .shell-bar {
+    background: color-mix(in srgb, var(--bg) 96%, transparent);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  .shell-bar-inner {
+    height: 56px;
+  }
+  .shell-nav {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 40;
+    margin: 0;
+    padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--line);
+    background: color-mix(in srgb, var(--surface) 92%, transparent);
+    backdrop-filter: blur(16px) saturate(160%);
+    -webkit-backdrop-filter: blur(16px) saturate(160%);
+  }
+  .shell-nav ul {
+    justify-content: space-around;
+  }
+  .shell-nav li {
+    flex: 1;
+    min-width: 0;
+  }
+  .shell-link {
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+    width: 100%;
+    height: 52px;
+    padding: 0;
+    font-size: 11px;
+  }
+  .shell-link.is-active {
+    border-color: transparent;
+    background: var(--surface-2);
+    box-shadow: none;
+  }
+  .shell-link svg {
+    width: 22px;
+    height: 22px;
+  }
   .shell-link-label {
     position: static !important;
     width: auto;
     height: auto;
     overflow: visible;
     clip: auto;
+  }
+  .shell-search {
+    display: none;
+  }
+  .shell-content {
+    padding-bottom: calc(68px + env(safe-area-inset-bottom));
+  }
+}
+
+@media (max-width: 380px) {
+  .shell-link-label {
+    font-size: 10px;
+  }
+  .shell-demo {
+    display: none;
   }
 }

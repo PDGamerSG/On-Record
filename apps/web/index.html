@@ -5,7 +5,16 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="On Record listens to your meetings, works out who said what, and keeps every line in a FalkorDB graph you can question out loud. Gemma 4 answers with the moment it came from." />
-    <meta name="theme-color" content="#08090b" />
+    <meta name="theme-color" content="#f6f5f2" />
+    <script>
+      // Apply a saved dark-mode choice before the first paint (see src/lib/theme.ts).
+      try {
+        if (localStorage.getItem("onrecord-theme") === "dark") {
+          document.documentElement.dataset.theme = "dark";
+          document.querySelector('meta[name="theme-color"]').setAttribute("content", "#08090b");
+        }
+      } catch (e) {}
+    </script>
     <meta property="og:type" content="website" />
     <meta property="og:title" content="On Record: every meeting, remembered by who said it" />
     <meta property="og:description" content="Speaker-attributed meeting memory. Ask out loud; Gemma 4 answers with who said it, and when." />

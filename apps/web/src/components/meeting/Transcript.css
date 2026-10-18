@@ -10,13 +10,13 @@
   align-items: baseline;
   justify-content: space-between;
   gap: var(--s-4);
-  padding: var(--s-3) var(--s-4);
+  padding: 14px var(--s-5);
   border-bottom: 1px solid var(--line);
 }
 
 .tx-title {
   font-size: var(--fs-md);
-  font-weight: 650;
+  font-weight: 620;
 }
 
 .tx-count {
@@ -52,28 +52,46 @@
 .tx-list {
   list-style: none;
   margin: 0;
-  padding: var(--s-2) 0 var(--s-4);
+  padding: var(--s-3) var(--s-3) var(--s-5);
 }
 
+/* one turn: the speaker's initial, then name, time and what they said */
 .tx-line {
-  max-width: calc(var(--measure) + var(--s-8) + 3px);
-  margin: 0 var(--s-4);
-  padding: var(--s-2) var(--s-3) var(--s-3) var(--s-4);
-  border-left: 3px solid var(--spk);
-  border-radius: 0 var(--r-chip) var(--r-chip) 0;
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  column-gap: var(--s-3);
+  max-width: calc(var(--measure) + 72px);
+  padding: 10px var(--s-3) 12px;
+  border-radius: var(--r-ctl);
   scroll-margin: var(--s-8);
+  transition: background var(--t-fast) var(--ease);
+}
+.tx-line:hover {
+  background: var(--surface-sunk);
 }
 .tx-line + .tx-line {
-  margin-top: var(--s-1);
+  margin-top: 2px;
+}
+.tx-avatar {
+  grid-row: 1 / 3;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  margin-top: 1px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--spk) 14%, var(--surface));
+  color: var(--spk-text);
+  font-size: 13px;
+  font-weight: 650;
 }
 .tx-line.is-heard {
-  background: var(--surface-2);
+  background: color-mix(in srgb, var(--spk) 7%, var(--surface));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--spk) 22%, transparent);
 }
-.tx-line.is-heard .tx-name {
-  text-decoration: underline;
-  text-decoration-color: var(--spk);
-  text-decoration-thickness: 2px;
-  text-underline-offset: 3px;
+.tx-line.is-heard .tx-avatar {
+  background: var(--spk);
+  color: var(--on-spk);
 }
 .tx-line.is-flash {
   animation: tx-flash 1.8s var(--ease);
@@ -81,7 +99,7 @@
 @keyframes tx-flash {
   0%,
   35% {
-    background: color-mix(in srgb, var(--focus) 12%, var(--surface));
+    background: color-mix(in srgb, var(--focus) 10%, var(--surface));
   }
   100% {
     background: transparent;
@@ -92,12 +110,13 @@
   display: flex;
   align-items: center;
   gap: var(--s-2);
-  min-height: 26px;
+  min-height: 24px;
 }
 
 .tx-name {
+  color: var(--spk-text);
   font-size: var(--fs-sm);
-  font-weight: 650;
+  font-weight: 620;
 }
 
 .tx-unsure {
@@ -118,7 +137,8 @@
   border: 1px solid transparent;
   border-radius: var(--r-chip);
   background: none;
-  color: var(--ink-2);
+  color: var(--ink-3);
+  font-size: 12px;
   cursor: pointer;
 }
 .tx-time:hover {
@@ -128,8 +148,11 @@
 }
 
 .tx-text {
+  grid-column: 2;
   max-width: var(--measure);
+  margin-top: 2px;
   color: var(--ink);
+  font-size: 1.0625rem;
 }
 
 .tx-jump {
@@ -144,6 +167,6 @@
 @media (prefers-reduced-motion: reduce) {
   .tx-line.is-flash {
     animation: none;
-    background: color-mix(in srgb, var(--focus) 12%, var(--surface));
+    background: color-mix(in srgb, var(--focus) 10%, var(--surface));
   }
 }

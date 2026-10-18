@@ -76,6 +76,7 @@
   color: var(--ink-2);
   font: inherit;
   font-size: var(--fs-2xs);
+  font-family: var(--font-mono);
   font-variation-settings: var(--ui-mono);
   line-height: 1.7;
   text-align: center;

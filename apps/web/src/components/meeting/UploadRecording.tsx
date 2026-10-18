@@ -1,6 +1,6 @@
 import { useRef, useState, type ChangeEvent } from "react";
 import { useNavigate } from "react-router-dom";
-import { LoaderCircle, Upload } from "lucide-react";
+import { CircleNotchIcon, UploadSimpleIcon } from "@phosphor-icons/react";
 import { api } from "../../api/client";
 
 function titleFromFile(name: string): string {
@@ -36,7 +36,7 @@ export default function UploadRecording() {
     <div className="upload">
       <div className="upload-row">
         <button type="button" className="btn" onClick={() => input.current?.click()} disabled={!!busyName}>
-          {busyName ? <LoaderCircle className="spin" aria-hidden="true" /> : <Upload aria-hidden="true" />}
+          {busyName ? <CircleNotchIcon className="spin" aria-hidden="true" /> : <UploadSimpleIcon aria-hidden="true" />}
           {busyName ? `Uploading ${busyName}` : "Upload a recording"}
         </button>
         <input ref={input} type="file" accept="audio/*" hidden onChange={(e) => void onFile(e)} />

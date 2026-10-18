@@ -1,7 +1,8 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
+import { ArrowRightIcon } from "@phosphor-icons/react";
 import ProductMark from "../components/shell/ProductMark";
+import ThemeToggle from "../components/shell/ThemeToggle";
 import { isDemo } from "../api/mode";
 import { brand } from "../lib/brand";
 import AskDemo from "./AskDemo";
@@ -77,9 +78,14 @@ function Nav({ deck }: { deck: Deck }) {
       const el = document.getElementById(id);
       if (el) io.observe(el);
     });
-    const top = document.getElementById("top");
-    const ioTop = new IntersectionObserver(([e]) => e.isIntersecting && setActive(null), { rootMargin: "-45% 0px -50% 0px" });
-    if (top) ioTop.observe(top);
+    // the hero and the closing belong to no section
+    const ioTop = new IntersectionObserver((entries) => entries.some((e) => e.isIntersecting) && setActive(null), {
+      rootMargin: "-45% 0px -50% 0px",
+    });
+    for (const id of ["top", "closing"]) {
+      const el = document.getElementById(id);
+      if (el) ioTop.observe(el);
+    }
     return () => {
       io.disconnect();
       ioTop.disconnect();
@@ -118,6 +124,7 @@ function Nav({ deck }: { deck: Deck }) {
           ))}
         </nav>
         <div className="l-nav-end">
+          <ThemeToggle className="l-icon-link" />
           <a className="l-icon-link" href={REPO} target="_blank" rel="noreferrer" aria-label="Source on GitHub">
             <GitHubMark />
           </a>
@@ -125,8 +132,8 @@ function Nav({ deck }: { deck: Deck }) {
             Open the demo
           </Link>
         </div>
+        <span className="l-nav-progress" ref={progressRef} aria-hidden="true" />
       </div>
-      <span className="l-nav-progress" ref={progressRef} aria-hidden="true" />
     </header>
   );
 }
@@ -139,14 +146,11 @@ function Hero({ deck }: { deck: Deck }) {
         <h1 id="hero-title" className="hero-title">
           Every meeting, remembered by who said it.
         </h1>
-        <p className="hero-sub">
-          {brand.name} listens to your meetings, works out who said what, and keeps every line in a graph you can question out loud. Each
-          answer comes with the moment it came from.
-        </p>
+        <p className="hero-sub">It transcribes live, knows every voice, and answers spoken questions with the exact moment it came from.</p>
         <div className="hero-ctas">
           <Link className="l-btn l-btn--light" to={demoLink()}>
             Open the demo
-            <ArrowRight aria-hidden="true" />
+            <ArrowRightIcon aria-hidden="true" />
           </Link>
           <a className="l-btn l-btn--dark" href="#how">
             See how it works
@@ -193,15 +197,15 @@ function Section({ id, title, lede, children }: { id: string; title: ReactNode; 
 }
 
 const STAGES: [string, string, string][] = [
-  ["Finds the speech", "Silero VAD", "Silence and noise are dropped before anything else runs."],
-  ["Tells voices apart", "TitaNet", "Each voice gets an embedding; similar ones cluster into one speaker, live."],
-  ["Writes it down", "faster-whisper", "The words for each turn, with timings, a moment after the speaker pauses."],
-  ["Remembers it", "FalkorDB", "One UNWIND batch per few lines: utterance, speaker and meeting, linked."],
+  ["Finds the speech", "Silero VAD", "Drops silence and noise."],
+  ["Tells voices apart", "TitaNet", "Clusters voices into speakers, live."],
+  ["Writes it down", "faster-whisper", "Words and timings for every turn."],
+  ["Remembers it", "FalkorDB", "Every line, linked in a graph."],
 ];
 
 function Closing() {
   return (
-    <section className="closing" aria-labelledby="closing-title">
+    <section className="closing" id="closing" aria-labelledby="closing-title">
       <div className="closing-disc" aria-hidden="true">
         <img className="closing-record" src="/landing/record.webp" alt="" loading="lazy" width={1600} height={1600} />
         <span className="closing-sheen" />
@@ -213,7 +217,7 @@ function Closing() {
         <div className="hero-ctas closing-ctas" data-reveal style={{ ["--d" as string]: 2 }}>
           <Link className="l-btn l-btn--light" to={demoLink()}>
             Open the demo
-            <ArrowRight aria-hidden="true" />
+            <ArrowRightIcon aria-hidden="true" />
           </Link>
           <a className="l-btn l-btn--dark" href={REPO} target="_blank" rel="noreferrer">
             <GitHubMark />
@@ -313,7 +317,7 @@ export default function LandingPage() {
         <Section
           id="listen"
           title="It listens while you talk."
-          lede="Speech is found, voices are told apart, words are written down, and each line lands in the graph a couple of seconds after its speaker pauses. Below is the app itself, replaying the record above as if it were live."
+          lede="Each line lands in the graph about two seconds after the speaker pauses. Below, the real app replays the meeting as if it were live."
         >
           <ol className="stages">
             {STAGES.map(([what, who, how], i) => (

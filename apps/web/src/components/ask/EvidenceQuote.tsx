@@ -1,4 +1,4 @@
-import { Play } from "lucide-react";
+import { PlayIcon } from "@phosphor-icons/react";
 import { speakerIndex, timecode } from "../../lib/format";
 import { useJump } from "./useJump";
 import "./evidence.css";
@@ -48,7 +48,7 @@ export default function EvidenceQuote({
           }}
           aria-label={`Play ${speakerName} at ${timecode(t)}${where}`}
         >
-          <Play aria-hidden="true" />
+          <PlayIcon weight="fill" aria-hidden="true" />
           <span className="tc">{timecode(t)}</span>
         </button>
       </figcaption>

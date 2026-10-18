@@ -1,5 +1,5 @@
 import { useEffect, useEffectEvent, useRef, useState } from "react";
-import { Check, LoaderCircle, Mic, Play, RotateCcw } from "lucide-react";
+import { CheckIcon, CircleNotchIcon, MicrophoneIcon, PlayIcon, ArrowCounterClockwiseIcon } from "@phosphor-icons/react";
 import { demoApi } from "../api/demo/demoApi";
 import type { AskResult, Hit } from "../api/types";
 import { newSessionId, timecode } from "../lib/format";
@@ -24,7 +24,7 @@ function Citation({ deck, c }: { deck: Deck; c: Hit }) {
   return (
     <li className={`cite spk spk-${side.colours.get(u.speaker) ?? 7}`}>
       <button type="button" className="cite-play" onClick={() => playLine(deck, side, u)} aria-label={`Play ${u.speaker_name} at ${timecode(u.t_start)}`}>
-        <Play aria-hidden="true" />
+        <PlayIcon weight="fill" aria-hidden="true" />
       </button>
       <div className="cite-body">
         <span className="cite-meta">
@@ -169,8 +169,7 @@ export default function AskDemo({ deck }: { deck: Deck }) {
             Ask it out loud.
           </h2>
           <p className="l-lede" data-reveal style={{ ["--d" as string]: 1 }}>
-            Hold the talkback button and ask. Gemma 4 hears the question itself, with no separate speech-to-text step, searches the graph,
-            and answers with the moment it came from. Follow-ups work, and so does “mark it done”.
+            Gemma 4 hears your question, searches the graph and answers with the moment it came from. Follow-ups work. So does “mark it done.”
           </p>
 
           <div className="talk" data-reveal style={{ ["--d" as string]: 2 }}>
@@ -188,10 +187,10 @@ export default function AskDemo({ deck }: { deck: Deck }) {
                 <i />
                 <i />
               </span>
-              {stage === "thinking" ? <LoaderCircle className="spin" aria-hidden="true" /> : next ? <Mic aria-hidden="true" /> : <RotateCcw aria-hidden="true" />}
+              {stage === "thinking" ? <CircleNotchIcon className="spin" aria-hidden="true" /> : next ? <MicrophoneIcon aria-hidden="true" /> : <ArrowCounterClockwiseIcon aria-hidden="true" />}
             </button>
             <div className="talk-state" aria-live="polite">
-              {stage === "listening" ? "Listening…" : stage === "thinking" ? "Searching the graph…" : next ? "Press to ask the next question" : "That’s the whole conversation"}
+              {stage === "listening" ? "Listening…" : stage === "thinking" ? "Searching the graph…" : next ? "Press to ask next" : "Start again"}
             </div>
             </div>
           </div>
@@ -202,7 +201,7 @@ export default function AskDemo({ deck }: { deck: Deck }) {
               return (
                 <li key={q} className={`script-q${done ? " is-done" : ""}${i === turns.length ? " is-next" : ""}`}>
                   <span className="script-n tc" aria-hidden="true">
-                    {done ? <Check /> : i + 1}
+                    {done ? <CheckIcon /> : i + 1}
                   </span>
                   {q}
                 </li>
@@ -214,10 +213,10 @@ export default function AskDemo({ deck }: { deck: Deck }) {
         <div className="console" aria-label="Conversation" data-reveal="frame" style={{ ["--d" as string]: 2 }}>
           <div className="console-bar">
             <span className="console-title">Ask</span>
-            <span className="console-model">{last ? `${last.model} · demo answers from the same two meetings` : "gemma4:12b-it-qat"}</span>
+            <span className="console-model">{last ? `${last.model} · demo answers` : "gemma4:12b-it-qat"}</span>
           </div>
           <ol className="thread" ref={threadRef}>
-            {turns.length === 0 && <li className="thread-empty">Press the talkback button to ask the first question.</li>}
+            {turns.length === 0 && <li className="thread-empty">Press the mic to ask the first question.</li>}
             {turns.map((t, i) => (
               <li key={i} className="turn">
                 <p className="turn-q">{t.q}</p>
@@ -234,14 +233,14 @@ export default function AskDemo({ deck }: { deck: Deck }) {
                   </>
                 ) : (
                   <p className="turn-wait">
-                    <LoaderCircle className="spin" aria-hidden="true" /> Searching the graph
+                    <CircleNotchIcon className="spin" aria-hidden="true" /> Searching the graph
                   </p>
                 )}
               </li>
             ))}
           </ol>
           {last && (
-            <details className="console-why" open>
+            <details className="console-why">
               <summary>Why this answer</summary>
               <Why r={last} />
             </details>

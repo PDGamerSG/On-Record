@@ -16,29 +16,25 @@
   align-items: center;
   gap: 6px;
   margin-bottom: var(--s-3);
-  padding: 0 var(--s-2);
-  border: 1px solid var(--line);
-  border-radius: var(--r-chip);
-  color: var(--ink-2);
-  font-size: var(--fs-xs);
+  padding: 0 9px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-round);
+  color: var(--ink-3);
+  font-size: 11.5px;
   font-weight: 600;
-  line-height: 1.7;
+  line-height: 20px;
 }
 .dc-status::before {
   content: "";
   width: 6px;
   height: 6px;
-  border: 1px solid var(--ink-3);
   border-radius: 50%;
+  background: currentColor;
 }
 .dc-status--current {
-  border-color: var(--line-strong);
-  background: var(--surface-3);
-  color: var(--ink);
-}
-.dc-status--current::before {
-  border-color: var(--ink);
-  background: var(--ink);
+  border-color: color-mix(in srgb, var(--ok) 30%, transparent);
+  background: var(--ok-soft);
+  color: var(--ok);
 }
 
 .dc-text {

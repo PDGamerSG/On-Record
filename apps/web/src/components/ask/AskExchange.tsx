@@ -1,5 +1,5 @@
 import { forwardRef, useState } from "react";
-import { CircleAlert, Ear, LoaderCircle, Play, RotateCcw, Volume2, Workflow } from "lucide-react";
+import { WarningCircleIcon, EarIcon, CircleNotchIcon, PlayIcon, ArrowCounterClockwiseIcon, SpeakerHighIcon, FlowArrowIcon } from "@phosphor-icons/react";
 import type { AskResult, ClientAction } from "../../api/types";
 import { speakerName, timecode } from "../../lib/format";
 import { answerBlocks, answeredBy, describeAction, heardByLabel } from "./askFormat";
@@ -38,7 +38,7 @@ const AskExchange = forwardRef<HTMLLIElement, AskExchangeProps>(function AskExch
         </p>
         {x.mode === "voice" ? (
           <p className="ask-prov">
-            <Ear aria-hidden="true" />
+            <EarIcon aria-hidden="true" />
             <span>{heard ?? "Recorded question"}</span>
             {x.seconds ? <span className="tc">{x.seconds.toFixed(1)} s</span> : null}
           </p>
@@ -49,7 +49,7 @@ const AskExchange = forwardRef<HTMLLIElement, AskExchangeProps>(function AskExch
         <span className="visually-hidden">Answer: </span>
         {x.status === "pending" ? (
           <p className="ask-a__wait">
-            <LoaderCircle aria-hidden="true" className="ask-spin" />
+            <CircleNotchIcon aria-hidden="true" className="ask-spin" />
             <span>{waiting?.stage ?? "Working…"}</span>
             {waiting ? <span className="tc">{timecode(waiting.elapsed)}</span> : null}
           </p>
@@ -59,11 +59,11 @@ const AskExchange = forwardRef<HTMLLIElement, AskExchangeProps>(function AskExch
 
         {x.status === "error" ? (
           <div className="ask-err" role="alert">
-            <CircleAlert aria-hidden="true" />
+            <WarningCircleIcon aria-hidden="true" />
             <p>{x.error}</p>
             {onRetry ? (
               <button type="button" className="btn btn--ghost ask-mini" onClick={onRetry}>
-                <RotateCcw aria-hidden="true" />
+                <ArrowCounterClockwiseIcon aria-hidden="true" />
                 Try again
               </button>
             ) : null}
@@ -135,7 +135,7 @@ function Answer({ result, titles, canSpeak, onSpeak, onJumped }: AnswerProps) {
         <p className="ask-prov">{answeredBy(result.model, result.provider)}</p>
         {canSpeak && result.answer.trim() ? (
           <button type="button" className="btn btn--ghost ask-mini" onClick={() => onSpeak(result.answer)}>
-            <Volume2 aria-hidden="true" />
+            <SpeakerHighIcon aria-hidden="true" />
             Read aloud
           </button>
         ) : null}
@@ -192,7 +192,7 @@ function ActionNote({ action, titles, onJumped }: { action: ClientAction; titles
   if (!text) return null;
   return (
     <li className="ask-act">
-      <Workflow aria-hidden="true" />
+      <FlowArrowIcon aria-hidden="true" />
       <span>{text}</span>
       {action.type === "seek" ? (
         <button
@@ -203,7 +203,7 @@ function ActionNote({ action, titles, onJumped }: { action: ClientAction; titles
             onJumped();
           }}
         >
-          <Play aria-hidden="true" />
+          <PlayIcon weight="fill" aria-hidden="true" />
           Play again
         </button>
       ) : null}

@@ -1,5 +1,5 @@
 import { memo, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { ArrowDown } from "lucide-react";
+import { ArrowDownIcon } from "@phosphor-icons/react";
 import type { Utterance } from "../../api/types";
 import { timecode } from "../../lib/format";
 import { prefersReducedMotion } from "./timeline";
@@ -58,9 +58,12 @@ export default function Transcript({ utterances, colours, nameOf, heardId, targe
 
   useEffect(() => {
     if (!target) return;
-    const el = scrollRef.current?.querySelector<HTMLElement>(`[data-uid="${CSS.escape(target.id)}"]`);
-    if (!el) return;
-    el.scrollIntoView({ block: "center", behavior: prefersReducedMotion() ? "auto" : "smooth" });
+    const box = scrollRef.current;
+    const el = box?.querySelector<HTMLElement>(`[data-uid="${CSS.escape(target.id)}"]`);
+    if (!box || !el) return;
+    // centre the line inside the transcript only; scrollIntoView would also move the page under the lanes
+    const top = el.getBoundingClientRect().top - box.getBoundingClientRect().top + box.scrollTop;
+    box.scrollTo({ top: top - (box.clientHeight - el.offsetHeight) / 2, behavior: prefersReducedMotion() ? "auto" : "smooth" });
     setFlashId(target.id);
     const t = window.setTimeout(() => setFlashId(null), FLASH_MS);
     return () => window.clearTimeout(t);
@@ -114,7 +117,7 @@ export default function Transcript({ utterances, colours, nameOf, heardId, targe
         )}
         {live && !following && (
           <button type="button" className="btn btn--primary tx-jump" onClick={jumpToLive}>
-            <ArrowDown aria-hidden="true" />
+            <ArrowDownIcon aria-hidden="true" />
             Jump to live{unseen > 0 ? ` (${unseen} new)` : ""}
           </button>
         )}
@@ -139,6 +142,9 @@ const Line = memo(function Line({ u, colour, name, heard, flash, canPlay, onSeek
   const cls = ["tx-line", "spk", `spk-${colour}`, heard && "is-heard", flash && "is-flash"].filter(Boolean).join(" ");
   return (
     <li className={cls} data-uid={u.id} aria-current={heard ? "true" : undefined}>
+      <span className="tx-avatar" aria-hidden="true">
+        {name.trim().charAt(0).toUpperCase() || "?"}
+      </span>
       <div className="tx-meta">
         <span className="tx-name">{name}</span>
         {unsure && (
