@@ -147,6 +147,10 @@ class Retriever:
         return kept
 
     def _self_match(self, hit: dict[str, Any]) -> bool | None:
+        """Re-embed the hit's text and look for its stored copy among the 5 nearest vectors in its meeting.
+        True when that copy scores SELF_MATCH_MIN or better, False when it scores lower (the meeting was
+        embedded by another embedder), and None (no verdict, the hit is kept) for texts under three words,
+        embedding or search failures, and a copy missing from the results."""
         uid, text = hit.get("utterance_id"), str(hit.get("text") or "")
         if not uid or len(text.split()) < 3:
             return None
