@@ -85,6 +85,17 @@ def test_upload_runs_a_background_job(client):
     assert client.get("/api/documents/jobs/missing").status_code == 404
 
 
+def test_jobs_endpoint_lists_uploaded_jobs(client):
+    response = client.post("/api/documents", files={"file": ("queued.pdf", make_pdf(1), "application/pdf")})
+    assert response.status_code == 200
+    job_id = response.json()["job"]["id"]
+
+    listing = client.get("/api/documents/jobs")
+
+    assert listing.status_code == 200
+    assert any(job["id"] == job_id and job["filename"] == "queued.pdf" for job in listing.json())
+
+
 def test_ask_translates_when_a_language_is_requested(client):
     plain = client.post("/api/documents/ask", json={"question": "When?"}).json()
     assert "translated_answer" not in plain

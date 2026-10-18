@@ -193,6 +193,13 @@ async def upload(
     return {"job": job.view(), "pages": parts[-1].last_page, "parts": len(parts)}
 
 
+@router.get("/jobs")
+def list_jobs() -> list[dict[str, Any]]:
+    """List recent document ingestion jobs for clients that need a job overview."""
+    _prune_jobs()
+    return [job.view() for job in sorted(_jobs.values(), key=lambda item: item.started_at, reverse=True)]
+
+
 @router.get("/jobs/{job_id}")
 def job_status(job_id: str) -> dict[str, Any]:
     job = _jobs.get(job_id)
