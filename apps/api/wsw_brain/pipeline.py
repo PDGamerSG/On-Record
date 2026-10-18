@@ -190,6 +190,7 @@ class IngestPipeline:
         *,
         wait_final: bool = False,
         ended_at_ms: int | None = None,
+        publish_event: bool = True,
     ) -> dict[str, Any] | None:
         """Flush, mark the meeting ended and publish meeting.ended, then run the final extraction and the
         summary (awaited when `wait_final`, otherwise in the background; a second meeting.ended carries the
@@ -209,7 +210,8 @@ class IngestPipeline:
             ended = await asyncio.to_thread(self.store.end_meeting, meeting_id, ended_at, round(duration, 3))
             if ended is None:
                 return None
-            self.bus.publish("meeting.ended", ended, meeting_id)
+            if publish_event:
+                self.bus.publish("meeting.ended", ended, meeting_id)
         task = asyncio.ensure_future(self._finalize(meeting_id, state))
         self._tasks.add(task)
         task.add_done_callback(self._tasks.discard)

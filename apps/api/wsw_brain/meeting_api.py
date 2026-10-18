@@ -31,6 +31,7 @@ from fastapi import (
 )
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
+from starlette.websockets import WebSocketState
 
 from .brain.agent import MeetingAgent
 from .config import Settings, settings
@@ -153,7 +154,9 @@ def create_router() -> APIRouter:
         ingest = pipeline(request)
         try:
             if ingest is not None:
-                meeting = await ingest.end_meeting(meeting_id, wait_final=False)
+                meeting = await ingest.end_meeting(meeting_id, wait_final=False, publish_event=False)
+                if meeting is not None:
+                    bus(request).publish("meeting.ended", meeting, meeting_id)
             else:
                 existing = store(request).get_meeting(meeting_id)
                 if existing is None:
@@ -175,10 +178,11 @@ def create_router() -> APIRouter:
     @router.delete("/api/meetings/{meeting_id}")
     def delete_meeting(meeting_id: str, request: Request) -> dict[str, bool]:
         try:
+            graph = store(request)
             ingest = pipeline(request)
-            if ingest is not None:
+            deleted = graph.delete_meeting(meeting_id)
+            if deleted and ingest is not None:
                 ingest.forget(meeting_id)
-            deleted = store(request).delete_meeting(meeting_id)
         except HTTPException:
             raise
         except Exception as exc:
@@ -234,6 +238,7 @@ def create_router() -> APIRouter:
         incoming_dir = settings().audio_dir / ".incoming"
         incoming_dir.mkdir(parents=True, exist_ok=True)
         source = incoming_dir / f"{uuid.uuid4().hex}{suffix}"
+        scheduled = False
         try:
             source.write_bytes(await file.read())
             graph = store(request)
@@ -242,18 +247,22 @@ def create_router() -> APIRouter:
             ingest.begin_meeting(meeting_id)
             audio_path = settings().audio_dir / f"{meeting_id}.wav"
             background.add_task(_process_upload, request, source, meeting_id, pace, audio_path)
+            scheduled = True
             return meeting
         except HTTPException:
-            with contextlib.suppress(OSError):
-                source.unlink()
+            if not scheduled:
+                with contextlib.suppress(OSError):
+                    source.unlink()
             raise
         except (AudioTooLong, ValueError) as exc:
-            with contextlib.suppress(OSError):
-                source.unlink()
+            if not scheduled:
+                with contextlib.suppress(OSError):
+                    source.unlink()
             raise HTTPException(status_code=422, detail=str(exc)) from exc
         except Exception as exc:
-            with contextlib.suppress(OSError):
-                source.unlink()
+            if not scheduled:
+                with contextlib.suppress(OSError):
+                    source.unlink()
             raise error(exc) from exc
 
     @router.get("/api/stats")
@@ -381,12 +390,15 @@ def create_router() -> APIRouter:
             return data
         except HTTPException:
             raise
+        except GraphError as exc:
+            raise HTTPException(status_code=503, detail=str(exc)) from exc
         except (AudioTooLong, ValueError, RuntimeError, NotImplementedError) as exc:
             raise HTTPException(status_code=422, detail=str(exc)) from exc
 
     @router.websocket("/ws/meetings/{meeting_id}/audio")
     async def meeting_audio_socket(websocket: WebSocket, meeting_id: str) -> None:
         try:
+            await websocket.accept()
             state = _runtime_from_websocket(websocket)
             graph: GraphStore = state.graph_store
             detail = graph.get_meeting(meeting_id)
@@ -397,7 +409,6 @@ def create_router() -> APIRouter:
             if ingest is None:
                 await websocket.close(code=4503, reason="live ingestion is not configured")
                 return
-            await websocket.accept()
             _start_ingest(state)
             asr = getattr(state, "listener_asr", None)
             if asr is None:
@@ -453,12 +464,14 @@ def create_router() -> APIRouter:
                             await ingest.end_meeting(meeting_id, wait_final=False)
                         break
         except HTTPException:
-            await websocket.close(code=4503, reason="runtime unavailable")
+            with contextlib.suppress(Exception):
+                await websocket.close(code=4503, reason="runtime unavailable")
         except Exception as exc:  # the socket must not leak a listener thread
             log.exception("meeting audio socket failed for %s", meeting_id)
             with contextlib.suppress(Exception):
-                await websocket.send_json({"type": "error", "detail": str(exc)})
-                await websocket.close(code=1011, reason="listener failed")
+                if websocket.application_state == WebSocketState.CONNECTED:
+                    await websocket.send_json({"type": "error", "detail": str(exc)})
+                    await websocket.close(code=1011, reason="listener failed")
         finally:
             session = getattr(websocket.app.state, "live_sessions", {}).pop(meeting_id, None)
             if session is not None and session.running:

@@ -135,5 +135,5 @@ def test_capabilities_endpoint_describes_supported_api_features() -> None:
     assert response.json() == {
         "product": "On Record",
         "api_version": "v1",
-        "features": ["status", "documents", "events", "meetings", "search", "live", "agent"],
+        "features": ["status", "documents", "events", "meetings", "search", "live"],
     }

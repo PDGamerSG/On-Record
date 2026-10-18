@@ -81,7 +81,7 @@ def create_app(
     @app.get("/api/capabilities")
     def capabilities() -> dict[str, object]:
         features = ["status", "documents", "events", "meetings", "search", "live"]
-        if meeting_agent is not None or auto_configure:
+        if meeting_agent is not None:
             features.append("agent")
         return {
             "product": product_name(),
@@ -111,6 +111,7 @@ def _ensure_runtime(app: FastAPI, *, auto_configure: bool) -> None:
             pipeline = IngestPipeline(store, embedder, extractor, app.state.event_bus, cfg)
         except Exception as exc:
             app.state.runtime_error = exc
+            store.close()
             raise
         app.state.graph_store = store
         app.state.retriever = retriever
