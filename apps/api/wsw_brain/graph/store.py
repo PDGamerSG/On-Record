@@ -277,7 +277,7 @@ class GraphStore:
         _require_id(meeting_id, "meeting_id")
         if not isinstance(summary, str):
             raise TypeError("summary must be a string")
-        self._query(cq.SET_MEETING_SUMMARY, {"meeting_id": meeting_id, "summary": summary})
+        self._query(cq.SET_MEETING_SUMMARY, {"meeting_id": meeting_id, "summary": " ".join(summary.split())})
 
     def set_meeting_has_audio(self, meeting_id: str, has_audio: bool) -> None:
         _require_id(meeting_id, "meeting_id")
