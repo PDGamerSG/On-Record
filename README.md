@@ -1,8 +1,65 @@
 # On Record
 
+<p align="center">
+  <img src="apps/web/public/og.jpg" width="760"
+       alt="On Record's landing page: a turntable playing a meeting, beside the headline 'Every meeting, remembered by who said it.'">
+</p>
+
 A meeting assistant that connects what was said to the person who said it. It keeps a meeting's transcript attributed to each speaker, pulls out the decisions and action items, and answers questions about past meetings with the quotes that back them up.
 
 This repository is being assembled in feature-sized PRs from [Who Said What Brain](https://github.com/Hydra-Of-Malice/hack-october-who-said-what-brain). It currently includes shared Python contracts, graph storage and queries, audio decoding and transcription, text embeddings, hybrid meeting retrieval, local and hosted text model adapters, document search, the live listener, the web interface, and an HTTP app with the event stream. The meeting API and the assistant are still to come, so the web app runs on two bundled demo meetings; [the architecture notes](docs/ARCHITECTURE.md#what-is-not-in-the-repository-yet) list what is missing.
+
+## How it works
+
+On Record turns meeting audio into a graph of who said what, then answers questions from that graph, quoting the lines it used as evidence.
+
+```mermaid
+flowchart TB
+  audio["Meeting audio<br/>microphone or file"]
+  subgraph listener["Listener · wsw_brain.listen"]
+    direction LR
+    vad["Find speech<br/>Silero VAD"] --> voices["Tell voices apart<br/>speaker embeddings"] --> asr["Transcribe<br/>faster-whisper or Saaras"]
+  end
+  extract["Extract decisions and action items<br/>Gemma 4 · brain/extract.py"]
+  db[("FalkorDB<br/>meetings, people, utterances,<br/>decisions, action items")]
+  subgraph assistant["Assistant · wsw_brain.brain"]
+    direction LR
+    question["Question<br/>typed or spoken"] --> retrieve["Retrieve evidence<br/>full-text, vector, speaker, recent"] --> answer["Answer with Gemma 4<br/>citing the lines it used"]
+  end
+  web["Web app<br/>lanes, transcript, insights"]
+
+  audio --> listener
+  listener -. utterances .-> db
+  listener -. utterances .-> extract
+  extract -. insights .-> db
+  db --> assistant
+  db -. "live updates (SSE)" .-> web
+```
+
+Dashed links are designed but not connected yet. Nothing writes the listener's utterances or the extractor's insights to the graph so far (`scripts/seed_demo_meetings.py` loads the demo meetings directly), and the web app still runs on its bundled demo data. [The architecture notes](docs/ARCHITECTURE.md) have the component diagram, the data flows and the graph schema.
+
+## Screenshots
+
+The web app running on its bundled demo meetings (`npm run dev`, 1440 × 900). They were captured in Chrome with reduced motion turned on, so nothing is mid-animation; retake them the same way when the UI changes.
+
+<p align="center">
+  <img src="docs/images/meeting-room.png" width="860"
+       alt="Meeting room: four speaker lanes showing when Priya, Rahul, Meera and Arjun spoke, the transcript below, and decisions extracted by Gemma 4 on the right">
+  <br><em>The meeting room: who spoke when, the transcript, and what Gemma 4 extracted.</em>
+</p>
+
+<table>
+  <tr>
+    <td width="50%"><img src="docs/images/ask-drawer.png"
+         alt="Ask drawer answering 'What did Priya commit to?' with two cited moments from the meetings"></td>
+    <td width="50%"><img src="docs/images/graph.png"
+         alt="Graph page showing a meeting's speakers, utterances, decisions, action items and topics as a force-directed graph"></td>
+  </tr>
+  <tr>
+    <td><em>Ask: answers cite the exact lines, and each quote plays.</em></td>
+    <td><em>The graph: what FalkorDB stores for a meeting.</em></td>
+  </tr>
+</table>
 
 ## Quick start
 
