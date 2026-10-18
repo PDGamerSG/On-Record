@@ -33,8 +33,8 @@ function Room({ id }: { id: string }) {
   const { phase, error, meeting } = room.state;
   const notFound = error?.status === 404;
   const failed = phase === "error" || (phase !== "loading" && !meeting);
-  // RoomReady names the tab after the meeting; a failed load names it here instead of keeping the last page's title
-  usePageTitle(failed ? (notFound ? "Meeting not found" : "Couldn't load meeting") : null);
+  // RoomReady names the tab after the meeting; until then the tab says what is happening, not the last page's title
+  usePageTitle(phase === "loading" ? "Loading meeting" : failed ? (notFound ? "Meeting not found" : "Couldn't load meeting") : null);
 
   if (phase === "loading") return <RoomLoading />;
   if (phase === "error" || !meeting) {
