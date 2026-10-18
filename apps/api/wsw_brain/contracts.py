@@ -7,7 +7,8 @@ Layers:
   documents/  uploaded documents: digitise, chunk, search, answer
   app.py      FastAPI entrypoint; the REST, SSE and WebSocket routes arrive in later PRs
 
-All times on utterances are SECONDS from meeting start. Wall-clock times are epoch milliseconds.
+Times inside a meeting (Utterance.t_start/t_end, Decision.made_at, duration_s) are SECONDS from meeting
+start. Wall-clock times are epoch milliseconds, except event `ts` in events.py, which is epoch seconds.
 Graph dicts returned to the API are plain JSON-serialisable dicts with the keys documented here.
 """
 
