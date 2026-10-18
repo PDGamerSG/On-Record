@@ -9,6 +9,17 @@ Columns:
 - **Code**: the first implementing location, as `path:line` at `8943885`. The SRS lists further locations.
 - **Tests**: the pytest modules (and test names or lines, where the SRS gives them) that cover the requirement, or "None" when it is verified by inspection or demonstration only. Web requirements marked "None" are covered by the manual cases in the test plan.
 
+## Summary
+
+| | Implemented | Partial | Planned | Total | No automated test |
+| --- | --- | --- | --- | --- | --- |
+| Functional (FR) | 26 | 35 | 4 | 65 | 17 |
+| Quality (NFR) | 16 | 9 | 3 | 28 | 8 |
+
+NFR-014 is counted as Partial: it is Implemented for documents but Partial for the meeting agent and the extractor, as in the SRS. "No automated test" counts rows whose Tests column is "None"; those requirements are verified by inspection or demonstration.
+
+## Matrix
+
 | ID | Status | Design | Code | Tests |
 |---|---|---|---|---|
 | FR-001 | Partial (library only, G4) | [SDS](../design/SDS.md) | `apps/api/wsw_brain/listen/session.py:1-21` | apps/api/tests/test_session.py |
