@@ -7,3 +7,5 @@ uv run --project apps/api --with onnx python apps/api/tests/fixtures/make_embedd
 ```
 
 `onnx` is needed only to regenerate the fixtures. It is not a runtime or test dependency.
+
+`two_speakers.wav` (16 kHz mono PCM16) and `two_speakers.truth.json` come from the source project. They hold a 50-second dialogue between two synthetic voices: nine alternating turns separated by 0.6 seconds of low-level noise. The truth file lists each turn's speaker, text, and start and end times. The speaker tests use them to check voice separation and in-segment change points.

@@ -12,17 +12,21 @@ from .audio import (
     write_wav,
 )
 from .sarvam_asr import SaarasASR, SarvamASRError
+from .speakers import OnlineClusterer, SherpaSpeakerEmbedder, speaker_change_points
 
 __all__ = [
     "AudioTooLong",
     "FasterWhisperASR",
     "FileASR",
+    "OnlineClusterer",
     "SaarasASR",
     "SarvamASRError",
+    "SherpaSpeakerEmbedder",
     "WavAppender",
     "decode_file",
     "float_to_pcm16",
     "iter_decode",
     "pcm16_to_float",
+    "speaker_change_points",
     "write_wav",
 ]
