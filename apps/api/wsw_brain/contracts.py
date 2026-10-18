@@ -1,10 +1,11 @@
 """Shared types and interfaces. Every module codes against these; keep them stable.
 
 Layers:
-  listen/  audio -> Utterance (speaker-attributed, timestamped)      [ListenerCallbacks]
-  graph/   GraphStore: FalkorDB writes + reads                        [GraphStore]
-  brain/   LLM (Gemma 4 adapter), Embedder, Extractor, Agent          [LLM, Embedder, Extractor]
-  api/     FastAPI wiring (REST, SSE, WebSocket)
+  listen/     audio -> speaker-attributed, timestamped Utterance  [ASR, FileASR, SpeakerEmbedder, ListenerCallbacks]
+  graph/      GraphStore: FalkorDB writes + reads
+  brain/      text model adapters, embeddings, retrieval           [LLM, Embedder]
+  documents/  uploaded documents: digitise, chunk, search, answer
+  app.py      FastAPI entrypoint; the REST, SSE and WebSocket routes arrive in later PRs
 
 All times on utterances are SECONDS from meeting start. Wall-clock times are epoch milliseconds.
 Graph dicts returned to the API are plain JSON-serialisable dicts with the keys documented here.
@@ -227,7 +228,7 @@ class Insights:
 
 
 # ---------------------------------------------------------------------------
-# Gemma 4 adapter
+# Text model adapters (brain/llm.py)
 # ---------------------------------------------------------------------------
 
 
@@ -242,15 +243,17 @@ class LLMResult:
     text: str
     tool_calls: list[ToolCall]
     model: str
-    provider: str  # "ollama" | "gemini" | "openai" | "fake"
+    provider: str  # "ollama" | "gemini" | "openai" | "sarvam" | "fake"
     latency_ms: float
 
 
 @dataclass
 class Transcript:
+    """Returned by LLM.transcribe. No adapter in this repository produces one yet."""
+
     text: str
     model: str
-    provider: str  # "gemma4-audio:ollama" | "whisper"
+    provider: str
     latency_ms: float
 
 
@@ -273,7 +276,8 @@ class LLM(Protocol):
         ...
 
     async def transcribe(self, wav_bytes: bytes, *, hint: str | None = None) -> Transcript:
-        """Native audio understanding (Gemma 4 E2B/E4B/12B). Raise NotImplementedError if unsupported."""
+        """Hear a spoken question with the model's own audio input, for adapters with supports_audio = True.
+        Others raise NotImplementedError; every adapter in brain/llm.py does today."""
         ...
 
 
