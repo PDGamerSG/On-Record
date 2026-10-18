@@ -245,6 +245,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
                 <li key={meeting.id}>
                   <Link
                     to={`/m/${encodeURIComponent(meeting.id)}`}
+                    aria-current={pathname === `/m/${encodeURIComponent(meeting.id)}` ? "page" : undefined}
                     data-label={meeting.title}
                     onClick={() => setRailOpen(false)}
                   >
@@ -279,7 +280,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
           <div className="shell-tools">
             <SystemStatus />
             <ThemeToggle className="shell-icon" />
-            <button type="button" className="shell-ask" onClick={openAsk} aria-keyshortcuts="/" data-label="Ask out loud">
+            <button type="button" className="shell-ask" onClick={openAsk} aria-label="Ask out loud" aria-keyshortcuts="/" data-label="Ask out loud">
               <MicrophoneIcon aria-hidden="true" weight="fill" />
               <span className="shell-ask-label">Ask</span>
               <span className="shell-ask-expanded-label">Ask out loud</span>

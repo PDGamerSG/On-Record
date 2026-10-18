@@ -712,6 +712,11 @@
   .shell-recent a:focus-visible {
     background: var(--surface-2);
   }
+  /* the meeting that is open sits on a white key, like the current section */
+  .shell:not(.is-rail-open) .shell-recent a[aria-current="page"] {
+    background: var(--surface);
+    box-shadow: 0 0 0 1px var(--line), 0 1px 2px rgb(var(--shade) / 0.06);
+  }
   .shell-recent .mark {
     width: 32px;
     height: 32px;
