@@ -40,7 +40,7 @@ Dashed links are designed but not connected yet. Nothing writes the listener's u
 
 ## Screenshots
 
-The web app running on its bundled demo meetings (`npm run dev`, 1440 × 900).
+The web app running on its bundled demo meetings (`npm run dev`, 1440 × 900). They were captured in Chrome with reduced motion turned on, so nothing is mid-animation; retake them the same way when the UI changes.
 
 <p align="center">
   <img src="docs/images/meeting-room.png" width="860"
