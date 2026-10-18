@@ -12,6 +12,21 @@ This document describes the design of the On Record backend (`apps/api/wsw_brain
 
 Status labels follow the SRS: Implemented, Partial or Planned.
 
+## Viewpoints at a glance
+
+| Viewpoint | Question it answers | Where |
+| --- | --- | --- |
+| [Context](#1-context-viewpoint) | What surrounds the system | Links the arc42 context view |
+| [Composition](#2-composition-viewpoint) | Which packages make up the backend | Package table |
+| [Logical](#3-logical-viewpoint) | Which classes and protocols each package defines | Three class diagrams: contracts, graph and brain, documents |
+| [Dependency](#4-dependency-viewpoint) | Which modules import which | Module import flowchart |
+| [Information](#5-information-viewpoint) | What is stored | Links the data model |
+| [Patterns](#6-patterns-viewpoint) | Which design patterns recur | Protocols and adapters, factories, event bus, demo proxy |
+| [Interface](#7-interface-viewpoint) | How parts and clients talk to each other | Python protocols; links the API reference |
+| [Interaction and state](#8-interaction-and-state-viewpoints) | How flows run and how items change state | Links the behaviour diagrams |
+| [Algorithm](#9-algorithm-viewpoint) | How the non-obvious logic works | Fusion, grounding, extraction windows, chunking and splitting, over-fetch |
+| [Resource](#10-resource-viewpoint) | Which limits, timeouts and concurrency caps apply | Limits table |
+
 ## 1. Context viewpoint
 
 The system context (users, the browser client, FalkorDB, local and hosted model services, Sarvam) is described in [../architecture/README.md](../architecture/README.md) and in the system overview of [../ARCHITECTURE.md](../ARCHITECTURE.md). This document starts at the package boundary.
