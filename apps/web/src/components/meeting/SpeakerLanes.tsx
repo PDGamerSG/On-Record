@@ -1,3 +1,5 @@
+// The speaker lanes: one row per speaker with a block for each turn, like a studio multitrack, plus the
+// playhead and the rename key on each lane name.
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent, type MouseEvent, type ReactNode } from "react";
 import { PencilSimpleIcon } from "@phosphor-icons/react";
 import type { Speaker, Utterance } from "../../api/types";

@@ -1,3 +1,5 @@
+// The landing page (/): the nav, the turntable hero and the sections described in docs/DESIGN.md.
+// App.tsx loads it lazily, so three.js and the turntable only download on this page.
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRightIcon } from "@phosphor-icons/react";

@@ -1,3 +1,5 @@
+// The graph (/graph): one meeting's subgraph (the newest by default) or the whole graph, with a node picker
+// and a details panel. It refetches when live events change the graph.
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { ArrowLeftIcon, ArrowRightIcon, CircleNotchIcon, PlayIcon } from "@phosphor-icons/react";

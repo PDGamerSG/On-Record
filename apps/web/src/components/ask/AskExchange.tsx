@@ -1,3 +1,5 @@
+// One question and answer in the Ask drawer: the question (and which model heard a spoken one), then the
+// answer with its top citations and the actions it took, or the waiting and error states.
 import { forwardRef, useState } from "react";
 import { WarningCircleIcon, EarIcon, CircleNotchIcon, PlayIcon, ArrowCounterClockwiseIcon, SpeakerHighIcon, FlowArrowIcon } from "@phosphor-icons/react";
 import type { AskResult, ClientAction } from "../../api/types";

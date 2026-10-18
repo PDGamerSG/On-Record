@@ -1,3 +1,5 @@
+// The meeting room's rail of what Gemma 4 extracted: decisions, action items (with a done toggle) and
+// topics, each with the evidence quote it came from.
 import { useState, type MouseEvent } from "react";
 import { CheckSquareIcon, HashIcon, PlayIcon, SignpostIcon } from "@phosphor-icons/react";
 import { Link } from "react-router-dom";
