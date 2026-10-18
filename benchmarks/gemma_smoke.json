@@ -1,0 +1,31 @@
+{
+  "corpus_version": "gemma-smoke-v1",
+  "description": "Small smoke corpus for checking structured Gemma responses; not a quality benchmark.",
+  "cases": [
+    {
+      "id": "classify_question",
+      "messages": [{"role": "user", "content": "Classify this meeting question as open or closed: Is the launch date final?"}],
+      "expected": {"answer": "closed"}
+    },
+    {
+      "id": "extract_action",
+      "messages": [{"role": "user", "content": "Extract the action item from: Priya will send the rollout notes on Friday."}],
+      "expected": {"answer": "Priya will send the rollout notes on Friday."}
+    },
+    {
+      "id": "answer_with_evidence",
+      "messages": [{"role": "user", "content": "Answer from the evidence: who owns the API migration?"}],
+      "expected": {"answer": "unknown"}
+    },
+    {
+      "id": "unsupported_claim",
+      "messages": [{"role": "user", "content": "If the transcript does not say, say that the answer is unknown. Who approved the budget?"}],
+      "expected": {"answer": "unknown"}
+    },
+    {
+      "id": "short_summary",
+      "messages": [{"role": "user", "content": "Summarize in one sentence: The team selected the staged rollout and will review metrics next week."}],
+      "expected": {"answer": "The team selected the staged rollout and will review metrics next week."}
+    }
+  ]
+}

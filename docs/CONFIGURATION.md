@@ -36,15 +36,15 @@ Both folder defaults are relative to the repository root.
 | --- | --- | --- | --- |
 | `WSW_LLM_PROVIDER` | `auto` | `auto`, `gemini`, `sarvam`, `openai`, `ollama` or `fake` | `brain/llm.py` |
 | `GEMINI_API_KEY` | unset | Google AI Studio key for the hosted Gemini API | `brain/llm.py` |
-| `WSW_GEMINI_MODEL` | `gemma-4-31b-it` | Model name on the Gemini API | `brain/llm.py` |
+| `WSW_GEMINI_MODEL` | `gemma-4-26b-a4b-it` | Model name on the Gemini API | `brain/llm.py`, `brain/gemma.py` |
 | `SARVAM_API_KEY` | unset | Sarvam key for Gemma 4 chat, Saaras speech recognition, Document AI, translation and speech. Keep it server-side | `brain/llm.py`, `listen/sarvam_asr.py`, document API |
 | `WSW_SARVAM_BASE_URL` | `https://api.sarvam.ai` | Sarvam API origin | `brain/llm.py`, `listen/sarvam_asr.py`, document API |
 | `WSW_SARVAM_MODEL` | `gemma4` | Chat model on Sarvam; any model your key can use | `brain/llm.py` |
 | `WSW_OPENAI_BASE_URL` | unset | Base URL of an OpenAI-compatible `/v1/chat/completions` endpoint | `brain/llm.py` |
 | `WSW_OPENAI_API_KEY` | unset | Bearer token for that endpoint, if it needs one | `brain/llm.py` |
-| `WSW_OPENAI_MODEL` | `gemma-4-31B-it` | Model name on that endpoint | `brain/llm.py` |
+| `WSW_OPENAI_MODEL` | `gemma-4-26b-a4b-it` | Model name on that endpoint | `brain/llm.py`, `brain/gemma.py` |
 | `WSW_OLLAMA_URL` | `http://127.0.0.1:11434` | Local Ollama server | `brain/llm.py` |
-| `WSW_OLLAMA_MODEL` | `gemma4:e4b` | Ollama model tag (install with `ollama pull gemma4:e4b`) | `brain/llm.py` |
+| `WSW_OLLAMA_MODEL` | `gemma4:12b-it-qat` | Ollama model tag (install with `ollama pull gemma4:12b-it-qat`) | `brain/llm.py`, `brain/gemma.py` |
 | `WSW_QUESTION_AUDIO` | `auto` | Which runtime will transcribe spoken questions: `auto`, `ollama` (Gemma 4 audio input) or `whisper` | *Not read yet* |
 
 ### Request queue
