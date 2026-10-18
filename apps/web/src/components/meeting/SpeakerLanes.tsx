@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent, type MouseEvent, type ReactNode } from "react";
 import { PencilSimpleIcon } from "@phosphor-icons/react";
 import type { Speaker, Utterance } from "../../api/types";
-import { duration, speakerName, timecode } from "../../lib/format";
+import { duration, sentence, speakerName, timecode } from "../../lib/format";
 import { minTrackPx, pct, rulerTicks } from "./timeline";
 import "./SpeakerLanes.css";
 
@@ -255,7 +255,7 @@ function LaneName({ speaker, colour, talkS, onRename, onError }: LaneNameProps) 
       await onRename(speaker.track, v);
       onError(null);
     } catch (e) {
-      onError(`Couldn't rename ${speaker.label || name}: ${e instanceof Error ? e.message : String(e)}. Click the name to try again.`);
+      onError(`Couldn't rename ${speaker.label || name}: ${sentence(e instanceof Error ? e.message : String(e))} Click the name to try again.`);
     } finally {
       setSaving(false);
     }

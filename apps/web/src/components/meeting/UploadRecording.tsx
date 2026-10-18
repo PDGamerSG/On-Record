@@ -1,7 +1,8 @@
 import { useRef, useState, type ChangeEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { CircleNotchIcon, UploadSimpleIcon } from "@phosphor-icons/react";
-import { api } from "../../api/client";
+import { api, ApiError } from "../../api/client";
+import { sentence } from "../../lib/format";
 
 function titleFromFile(name: string): string {
   return name.replace(/\.[^.]+$/, "").replace(/[_-]+/g, " ").replace(/\s+/g, " ").trim() || "Uploaded recording";
@@ -25,7 +26,10 @@ export default function UploadRecording() {
       const m = await api.uploadMeeting(file, titleFromFile(file.name), realtime ? "realtime" : "fast");
       navigate(`/m/${encodeURIComponent(m.id)}`);
     } catch (err) {
-      setError(`Couldn't upload ${file.name}: ${err instanceof Error ? err.message : String(err)}. WAV, MP3, M4A, WebM and OGG files work.`);
+      // the format hint only helps when the server turned the file down, not when there is no server to take it
+      const rejected = err instanceof ApiError && err.status >= 400 && err.status < 500;
+      const reason = sentence(err instanceof Error ? err.message : String(err));
+      setError(`Couldn't upload ${file.name}: ${reason}${rejected ? " WAV, MP3, M4A, WebM and OGG files work." : ""}`);
       setBusyName(null);
     } finally {
       el.value = "";

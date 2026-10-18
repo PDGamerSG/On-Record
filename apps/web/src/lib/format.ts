@@ -1,3 +1,9 @@
+/** "Can't reach the server." or "Bad file" -> a clause ending in exactly one full stop, for joining into a longer message. */
+export function sentence(text: string): string {
+  const t = text.trim();
+  return /[.!?…]$/.test(t) ? t : `${t}.`;
+}
+
 /** 192.4 -> "03:12"; >= 1h -> "1:03:12" */
 export function timecode(seconds: number): string {
   const s = Math.max(0, Math.floor(seconds));
