@@ -98,5 +98,8 @@ def test_main_app_mounts_agent_router_when_an_agent_is_injected():
         "status",
         "documents",
         "events",
+        "meetings",
+        "search",
+        "live",
         "agent",
     ]
