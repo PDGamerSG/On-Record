@@ -11,6 +11,17 @@ Where to find each part of the On Record documentation. Everything here describe
 | [Glossary](glossary.md) | Terms used in the code and the documents, with their source files |
 | [Troubleshooting](TROUBLESHOOTING.md) | Docker, Colima, Node and Python setup problems |
 
+## Suggested reading order
+
+For a reviewer with half an hour:
+
+1. [README](../README.md): what On Record does, the "How it works" diagram and the screenshots.
+2. [User guide](user-guide.md): try the web app in demo mode.
+3. [Architecture overview](ARCHITECTURE.md): how the parts connect and what is not in the repository yet.
+4. [Software requirements specification](requirements/SRS.md): what is Implemented, Partial or Planned, with evidence.
+5. [Traceability matrix](testing/traceability.md): the status and test coverage summary, then each requirement's code and tests.
+6. [Threat model](security/threat-model.md): what data leaves the machine and which model providers see it.
+
 ## Requirements
 
 | Document | What it covers |
