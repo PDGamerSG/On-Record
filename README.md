@@ -20,6 +20,7 @@ flowchart TB
     direction LR
     vad["Find speech<br/>Silero VAD"] --> voices["Tell voices apart<br/>speaker embeddings"] --> asr["Transcribe<br/>faster-whisper or Saaras"]
   end
+  extract["Extract decisions and action items<br/>Gemma 4 · brain/extract.py"]
   db[("FalkorDB<br/>meetings, people, utterances,<br/>decisions, action items")]
   subgraph assistant["Assistant · wsw_brain.brain"]
     direction LR
@@ -29,11 +30,13 @@ flowchart TB
 
   audio --> listener
   listener -. utterances .-> db
+  listener -. utterances .-> extract
+  extract -. insights .-> db
   db --> assistant
   db -. "live updates (SSE)" .-> web
 ```
 
-Dashed links are designed but not connected yet. Nothing writes the listener's utterances to the graph so far (`scripts/seed_demo_meetings.py` loads the demo meetings directly), and the web app still runs on its bundled demo data. [The architecture notes](docs/ARCHITECTURE.md) have the component diagram, the data flows and the graph schema.
+Dashed links are designed but not connected yet. Nothing writes the listener's utterances or the extractor's insights to the graph so far (`scripts/seed_demo_meetings.py` loads the demo meetings directly), and the web app still runs on its bundled demo data. [The architecture notes](docs/ARCHITECTURE.md) have the component diagram, the data flows and the graph schema.
 
 ## Screenshots
 
