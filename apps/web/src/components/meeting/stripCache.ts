@@ -1,5 +1,5 @@
 // Lazily fetched speaker segments for the tape strips on the meetings index (one detail fetch per visible row).
-import { useCallback, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useSyncExternalStore } from "react";
 import { api } from "../../api/client";
 import type { MeetingDetail, Utterance } from "../../api/types";
 import { speakerIndex, speakerName } from "../../lib/format";
@@ -113,6 +113,20 @@ export function appendToStrip(u: Utterance): void {
     status: "ready",
     data: { speakers, segments: [...e.data.segments, { track: u.speaker, t0, t1 }], lastEnd: Math.max(e.data.lastEnd, t1) },
   });
+}
+
+/**
+ * A speaker's palette index in a meeting. Colours are assigned per meeting
+ * (a renamed or merged speaker keeps theirs), so the track number alone can
+ * be wrong; use the track default until the strip data arrives.
+ */
+export function useSpeakerColour(meetingId: string | null | undefined, track: string | null | undefined): number {
+  const id = meetingId ?? "";
+  const entry = useStrip(id);
+  useEffect(() => {
+    if (id && entry.status === "idle") requestStrip(id);
+  }, [id, entry.status]);
+  return entry.data?.speakers.find((s) => s.track === track)?.colour ?? speakerIndex(track);
 }
 
 export function useStrip(id: string): StripEntry {
