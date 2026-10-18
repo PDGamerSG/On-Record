@@ -1,6 +1,6 @@
 // The frame around every app page (all but the landing): the top bar and navigation dock, which opens into
 // a drawer that Escape or the backdrop closes, and the page itself.
-import { useEffect, useState, type MouseEvent, type ReactNode } from "react";
+import { useEffect, useState, type FocusEvent, type MouseEvent, type PointerEvent, type ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
   CheckSquareIcon,
@@ -41,6 +41,7 @@ const NAV: NavItem[] = [
 ];
 
 const isMac = typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform);
+const dockQuery = typeof window !== "undefined" ? window.matchMedia("(min-width: 768px)") : null;
 const recentDate = new Intl.DateTimeFormat(undefined, { day: "numeric", month: "short" });
 
 interface RailData {
@@ -81,6 +82,46 @@ function useScrolled(): boolean {
   return scrolled;
 }
 
+interface DockTip {
+  label: string;
+  top: number;
+}
+
+/**
+ * Names a dock key beside the dock while it is hovered or keyboard-focused. The dock hides its labels, and the bar
+ * both scrolls and blurs what is behind it, which clips anything positioned inside it, so the tip is drawn outside
+ * the bar. Keys opt in with `data-label`.
+ */
+function useDockTip(railOpen: boolean) {
+  const [tip, setTip] = useState<DockTip | null>(null);
+
+  const show = (target: EventTarget) => {
+    const key = target instanceof Element ? target.closest<HTMLElement>("[data-label]") : null;
+    if (!key || !dockQuery?.matches) {
+      setTip(null);
+      return;
+    }
+    const box = key.getBoundingClientRect();
+    setTip({ label: key.dataset.label ?? "", top: box.top + box.height / 2 });
+  };
+  const hide = () => setTip(null);
+
+  return {
+    tip: railOpen ? null : tip,
+    hide,
+    handlers: {
+      onPointerOver: (e: PointerEvent<HTMLElement>) => {
+        if (e.pointerType === "mouse") show(e.target);
+      },
+      onPointerLeave: hide,
+      onFocus: (e: FocusEvent<HTMLElement>) => {
+        if (e.target.matches(":focus-visible")) show(e.target);
+      },
+      onBlur: hide,
+    },
+  };
+}
+
 function useRailData(): RailData {
   const [data, setData] = useState<RailData>(EMPTY_RAIL);
 
@@ -113,6 +154,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
   const scrolled = useScrolled();
   const railData = useRailData();
   const [railOpen, setRailOpen] = useState(false);
+  const dockTip = useDockTip(railOpen);
 
   useEffect(() => {
     if (!railOpen) return;
@@ -144,8 +186,8 @@ export default function AppShell({ children }: { children: ReactNode }) {
         Skip to main content
       </a>
       {railOpen && <button type="button" className="shell-backdrop" aria-label="Close navigation" onClick={() => setRailOpen(false)} />}
-      <header className={`shell-bar${scrolled ? " is-scrolled" : ""}`}>
-        <div className="shell-bar-inner">
+      <header className={`shell-bar${scrolled ? " is-scrolled" : ""}`} {...dockTip.handlers}>
+        <div className="shell-bar-inner" onScroll={dockTip.hide}>
           <div className="shell-brand-row">
             <button type="button" className="shell-dock-brand" onClick={() => setRailOpen(true)} aria-label="Open navigation">
               <ProductMark size={30} />
@@ -195,7 +237,12 @@ export default function AppShell({ children }: { children: ReactNode }) {
             <ul>
               {railData.meetings.slice(0, 2).map((meeting) => (
                 <li key={meeting.id}>
-                  <Link to={`/m/${encodeURIComponent(meeting.id)}`} onClick={() => setRailOpen(false)}>
+                  <Link
+                    to={`/m/${encodeURIComponent(meeting.id)}`}
+                    aria-current={pathname === `/m/${encodeURIComponent(meeting.id)}` ? "page" : undefined}
+                    data-label={meeting.title}
+                    onClick={() => setRailOpen(false)}
+                  >
                     <ProductMark size={34} />
                     <span className="shell-recent-copy">
                       <strong>{meeting.title}</strong>
@@ -227,7 +274,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
           <div className="shell-tools">
             <SystemStatus />
             <ThemeToggle className="shell-icon" />
-            <button type="button" className="shell-ask" onClick={openAsk} aria-keyshortcuts="/">
+            <button type="button" className="shell-ask" onClick={openAsk} aria-label="Ask out loud" aria-keyshortcuts="/" data-label="Ask out loud">
               <MicrophoneIcon aria-hidden="true" weight="fill" />
               <span className="shell-ask-label">Ask</span>
               <span className="shell-ask-expanded-label">Ask out loud</span>
@@ -236,6 +283,11 @@ export default function AppShell({ children }: { children: ReactNode }) {
           </div>
         </div>
       </header>
+      {dockTip.tip && (
+        <span key={dockTip.tip.label} className="shell-tip" style={{ top: dockTip.tip.top }} aria-hidden="true">
+          {dockTip.tip.label}
+        </span>
+      )}
 
       <main id="main" className="shell-content" tabIndex={-1}>
         {children}
