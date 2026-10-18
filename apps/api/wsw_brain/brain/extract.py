@@ -9,7 +9,7 @@ import re
 from typing import Any
 
 from ..contracts import LLM, ActionItemDraft, DecisionDraft, Insights
-from .llm import LLMError, get_llm, llm_priority
+from .llm import UNTRUSTED_NOTE, LLMError, get_llm, llm_priority
 
 log = logging.getLogger(__name__)
 
@@ -41,7 +41,9 @@ Rules:
 - "due" is the deadline as spoken ("Friday", "next week"), or null.
 - Evidence ids must be copied exactly from the [brackets] at the start of transcript lines.
 - Only include what the transcript actually says. Empty lists are fine.
-- At most 5 decisions and 8 action items."""
+- At most 5 decisions and 8 action items.
+"""
+SYSTEM_PROMPT += UNTRUSTED_NOTE
 
 
 # A decision that keeps something as it was is not a change ("The launch date still holds").
