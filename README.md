@@ -7,7 +7,15 @@
 
 A meeting assistant that connects what was said to the person who said it. It keeps a meeting's transcript attributed to each speaker, pulls out the decisions and action items, and answers questions about past meetings with the quotes that back them up.
 
-This repository is being assembled in feature-sized PRs from [Who Said What Brain](https://github.com/Hydra-Of-Malice/hack-october-who-said-what-brain). It currently includes shared Python contracts, graph storage and queries, audio decoding and transcription, text embeddings, hybrid meeting retrieval, local and hosted text model adapters, document search, the live listener, the web interface, and an HTTP app with the event stream. The meeting API and the assistant are still to come, so the web app runs on two bundled demo meetings; [the architecture notes](docs/ARCHITECTURE.md#what-is-not-in-the-repository-yet) list what is missing.
+On Record includes shared Python contracts, graph storage and queries, audio decoding and transcription, text embeddings, hybrid meeting retrieval, local and hosted text model adapters, document search, the live listener, the web interface, and the HTTP API that connects them.
+
+## Team
+
+- Aditya Arnav
+- Pallab Das
+- Aditi Akansha
+
+Live site: [onrecord.pallabdas.me](https://onrecord.pallabdas.me/)
 
 ## How it works
 
@@ -36,7 +44,7 @@ flowchart TB
   db -. "live updates (SSE)" .-> web
 ```
 
-Dashed links are designed but not connected yet. Nothing writes the listener's utterances or the extractor's insights to the graph so far (`scripts/seed_demo_meetings.py` loads the demo meetings directly), and the web app still runs on its bundled demo data. [The architecture notes](docs/ARCHITECTURE.md) have the component diagram, the data flows and the graph schema.
+The listener writes attributed utterances to the graph, the extractor records decisions and action items, and the web app receives live updates over SSE. Demo fixtures remain available for local development. [The architecture notes](docs/ARCHITECTURE.md) have the component diagram, data flows and graph schema.
 
 ## Screenshots
 
@@ -141,7 +149,7 @@ The [documentation index](docs/README.md) lists every document, including the re
 - [Local Gemma runtime](docs/LOCAL_GEMMA.md): Ollama setup, provider selection and the smoke benchmark.
 - [Design](docs/DESIGN.md): the visual design, tokens and motion.
 - [Web app](apps/web/README.md): routes, demo mode and rebuilding the 3D assets.
-- [Source notes](docs/UPSTREAM.md): the original snapshot and attribution.
+- [Architecture](docs/ARCHITECTURE.md): runtime components, data flows and graph schema.
 
 ## Backend modules
 

@@ -24,7 +24,7 @@ Terms (utterance, speaker track, supersession, RRF, demo mode and others) are de
 
 ### 1.4 References
 
-[README](../../README.md), [architecture](../ARCHITECTURE.md), [configuration](../CONFIGURATION.md), [design](../DESIGN.md), [troubleshooting](../TROUBLESHOOTING.md), [upstream](../UPSTREAM.md), [local Gemma](../LOCAL_GEMMA.md), [web app README](../../apps/web/README.md), [REST API reference](../api/README.md).
+[README](../../README.md), [architecture](../ARCHITECTURE.md), [configuration](../CONFIGURATION.md), [design](../DESIGN.md), [troubleshooting](../TROUBLESHOOTING.md), [local Gemma](../LOCAL_GEMMA.md), [web app README](../../apps/web/README.md), [REST API reference](../api/README.md).
 
 ### 1.5 Status summary
 

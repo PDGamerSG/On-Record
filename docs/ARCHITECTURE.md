@@ -32,7 +32,7 @@ flowchart LR
 ```
 
 - **`apps/web`**: the landing page and the app, built with React 19, Vite and TypeScript. All server calls go through `src/api/`.
-- **`apps/api`**: the Python 3.12 package `wsw_brain` ("who said what"). Internal names keep the `wsw` prefix from the source project ([UPSTREAM.md](UPSTREAM.md)).
+- **`apps/api`**: the Python 3.12 package `wsw_brain` ("who said what").
 - **FalkorDB**: a graph database that stores meetings, people, decisions, action items and documents. It also provides the full-text and vector search. Run it with `docker compose up -d --wait falkordb`.
 
 | Package | What it holds |

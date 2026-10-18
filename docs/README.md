@@ -57,9 +57,3 @@ For a reviewer with half an hour:
 | [Deployment and operations](operations/deployment.md) | Local topology, services, ports, model downloads and logs |
 | [Threat model](security/threat-model.md) | STRIDE analysis, what data leaves the machine, key handling and prompt-injection mitigations |
 | [Local Gemma runtime](LOCAL_GEMMA.md) | Running Gemma 4 locally with Ollama, and the smoke benchmark |
-
-## History
-
-| Document | What it covers |
-| --- | --- |
-| [Source notes](UPSTREAM.md) | The upstream snapshot this repository is assembled from, and attribution |

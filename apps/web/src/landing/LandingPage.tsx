@@ -18,7 +18,6 @@ import Unspool from "./Unspool";
 import "./landing.css";
 
 const REPO = "https://github.com/PDGamerSG/On-Record";
-const UPSTREAM = "https://github.com/Hydra-Of-Malice/hack-october-who-said-what-brain";
 // The bundled demo has fixed meeting ids; a live API names its own, so send people to the list there.
 const demoLink = () => (isDemo() ? "/m/demo-pricing-review" : "/meetings");
 
@@ -250,9 +249,6 @@ function Footer() {
           <h3>Project</h3>
           <a href={REPO} target="_blank" rel="noreferrer">
             Source on GitHub
-          </a>
-          <a href={UPSTREAM} target="_blank" rel="noreferrer">
-            Who Said What Brain
           </a>
           <a href={`${REPO}/blob/main/LICENSE`} target="_blank" rel="noreferrer">
             Apache 2.0 licence

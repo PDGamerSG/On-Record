@@ -1,7 +1,7 @@
-"""Build the web UI's offline demo data from the source project's scripted Kitepost meetings.
+"""Build the web UI's offline demo data from scripted Kitepost meetings.
 
 Usage (from apps/web):
-    python3 scripts/build_demo_fixtures.py --source <path to hack-october-who-said-what-brain/demo>
+    python3 scripts/build_demo_fixtures.py --source <path to the demo directory>
 
 Writes src/api/demo/fixtures.json and public/demo/audio/*.m4a (needs ffmpeg for the audio).
 The transcript timings come from the ground-truth files written during synthesis, so the
@@ -308,7 +308,7 @@ def encode_audio(source: Path) -> None:
 
 def main() -> None:
     p = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    p.add_argument("--source", type=Path, required=True, help="the source project's demo/ directory")
+    p.add_argument("--source", type=Path, required=True, help="the demo directory")
     p.add_argument("--no-audio", action="store_true")
     args = p.parse_args()
     data = build(args.source)
