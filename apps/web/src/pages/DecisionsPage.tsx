@@ -90,12 +90,14 @@ export default function DecisionsPage() {
         <div>
           <h1>Decisions</h1>
           <p className="mp-sub">Newest first. When a later meeting changes a decision, the earlier version stays underneath.</p>
-          {decisions ? (
-            <p className="mp-count">
-              {chains.length === 1 ? "1 decision" : `${chains.length} decisions`}
-              {replacedCount ? `, ${replacedCount} replaced along the way` : ""}
-            </p>
-          ) : null}
+          <p className="mp-count">
+            {decisions ? (
+              <>
+                {chains.length === 1 ? "1 decision" : `${chains.length} decisions`}
+                {replacedCount ? `, ${replacedCount} replaced along the way` : ""}
+              </>
+            ) : null}
+          </p>
         </div>
       </header>
 
