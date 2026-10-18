@@ -194,7 +194,8 @@ export default function GraphPage() {
 
           <div className="gp-body">
             <div className="panel gp-canvas">
-              {!graph && !error ? (
+              {/* a failed meeting list means no graph is on its way, so the alert above stands alone */}
+              {!graph && !error && !meetingsError ? (
                 <p className="gp-state">
                   <CircleNotchIcon className="spin" aria-hidden="true" />
                   Loading the graph…
