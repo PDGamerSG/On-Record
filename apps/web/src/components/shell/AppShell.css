@@ -389,6 +389,13 @@
 .spin {
   animation: shell-spin 900ms linear infinite;
 }
+@keyframes shell-tip-in {
+  from {
+    opacity: 0;
+    transform: translate(-4px, -50%);
+  }
+}
+
 @keyframes shell-spin {
   to {
     transform: rotate(360deg);
@@ -647,13 +654,14 @@
     clip: rect(0 0 0 0);
     white-space: nowrap;
   }
-  .shell-link::after {
-    content: attr(data-label);
-    position: absolute;
-    top: 50%;
-    left: calc(100% + var(--s-2));
+  /* a dock key's name, drawn beside the dock by useDockTip in AppShell.tsx */
+  .shell-tip {
+    position: fixed;
+    left: calc(var(--shell-dock-w) + var(--s-2));
     z-index: 90;
+    max-width: 280px;
     padding: 6px 10px;
+    overflow: hidden;
     border-radius: var(--r-chip);
     background: var(--ink);
     box-shadow: var(--shadow-float);
@@ -661,15 +669,11 @@
     font-size: 12px;
     font-weight: 600;
     line-height: 1;
-    opacity: 0;
+    text-overflow: ellipsis;
+    white-space: nowrap;
     pointer-events: none;
-    transform: translate(-4px, -50%);
-    transition: opacity var(--t-fast) var(--ease-out), transform var(--t-fast) var(--ease-out);
-  }
-  .shell-link:hover::after,
-  .shell-link:focus-visible::after {
-    opacity: 1;
-    transform: translate(0, -50%);
+    transform: translateY(-50%);
+    animation: shell-tip-in var(--t-fast) var(--ease-out);
   }
 
   .shell-recent {
@@ -859,9 +863,6 @@
   }
   .shell.is-rail-open .shell-link.is-active .shell-count {
     background: var(--surface-3);
-  }
-  .shell.is-rail-open .shell-link::after {
-    display: none;
   }
   .shell.is-rail-open .shell-recent {
     flex-shrink: 0;
