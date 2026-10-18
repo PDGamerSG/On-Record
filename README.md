@@ -85,6 +85,17 @@ uv sync --project apps/api --frozen
 uv run --project apps/api python -c "from wsw_brain.brand import product_name; print(product_name())"
 ```
 
+### Local Gemma runtime
+
+The brain package can run Gemma 4 through Ollama without a hosted API key. The helper starts Ollama and pulls the configured model on first use:
+
+```bash
+./scripts/gemma.sh
+uv run --project apps/api python scripts/bench_gemma.py --provider fake
+```
+
+Use `--provider ollama` for a live local benchmark. See [the local Gemma guide](docs/LOCAL_GEMMA.md) for provider settings, model choices, and report fields.
+
 ### Graph database
 
 ```bash
@@ -125,6 +136,7 @@ CI does not check the web app yet; run `npm run lint` and `npm run build` in `ap
 - [Architecture](docs/ARCHITECTURE.md): how the web app, the API and the graph fit together, the data flows, and the graph schema.
 - [Configuration](docs/CONFIGURATION.md): every environment variable, its default, and what reads it.
 - [Troubleshooting](docs/TROUBLESHOOTING.md): Docker, Colima, Node and Python setup problems.
+- [Local Gemma runtime](docs/LOCAL_GEMMA.md): Ollama setup, provider selection and the smoke benchmark.
 - [Design](docs/DESIGN.md): the visual design, tokens and motion.
 - [Web app](apps/web/README.md): routes, demo mode and rebuilding the 3D assets.
 - [Source notes](docs/UPSTREAM.md): the original snapshot and attribution.

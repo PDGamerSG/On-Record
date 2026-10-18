@@ -31,12 +31,12 @@ class Settings(BaseSettings):
         "auto", alias="WSW_LLM_PROVIDER"
     )
     ollama_url: str = Field("http://127.0.0.1:11434", alias="WSW_OLLAMA_URL")
-    ollama_model: str = Field("gemma4:e4b", alias="WSW_OLLAMA_MODEL")
+    ollama_model: str = Field("gemma4:12b-it-qat", alias="WSW_OLLAMA_MODEL")
     gemini_api_key: str | None = Field(None, alias="GEMINI_API_KEY")
-    gemini_model: str = Field("gemma-4-31b-it", alias="WSW_GEMINI_MODEL")
+    gemini_model: str = Field("gemma-4-26b-a4b-it", alias="WSW_GEMINI_MODEL")
     openai_base_url: str | None = Field(None, alias="WSW_OPENAI_BASE_URL")
     openai_api_key: str | None = Field(None, alias="WSW_OPENAI_API_KEY")
-    openai_model: str = Field("gemma-4-31B-it", alias="WSW_OPENAI_MODEL")
+    openai_model: str = Field("gemma-4-26b-a4b-it", alias="WSW_OPENAI_MODEL")
     # Sarvam AI: Gemma 4 31B ("gemma4") through Sarvam's chat API, and Document AI for uploaded documents.
     sarvam_api_key: str | None = Field(None, alias="SARVAM_API_KEY")
     sarvam_base_url: str = Field("https://api.sarvam.ai", min_length=1, alias="WSW_SARVAM_BASE_URL")
