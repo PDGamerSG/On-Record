@@ -20,6 +20,8 @@ from wsw_brain.contracts import ActionItemDraft, DecisionDraft, Insights, Uttera
 from wsw_brain.graph import GraphError, GraphStore
 from wsw_brain.graph import store as store_module
 
+pytestmark = pytest.mark.live
+
 URL = os.environ.get("WSW_FALKORDB_URL", "falkor://localhost:6379")
 RAW_URL = URL.replace("//localhost:", "//127.0.0.1:")  # skip the ~2 s IPv6-first localhost lookup on Windows
 DIM = 8

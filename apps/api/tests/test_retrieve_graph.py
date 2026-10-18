@@ -12,6 +12,8 @@ from wsw_brain.brain.retrieve import Retriever
 from wsw_brain.contracts import Utterance
 from wsw_brain.graph import GraphQueryError, GraphStore
 
+pytestmark = pytest.mark.live
+
 
 @pytest.fixture
 def embedder():

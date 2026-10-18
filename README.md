@@ -45,7 +45,7 @@ uv run --project apps/api pytest -q
 uv run --project apps/api ruff check apps/api/wsw_brain apps/api/tests
 ```
 
-Without the database, `test_graph.py` is skipped, but `test_graph_schema.py`, `test_retrieve_graph.py` and `test_documents_ingest.py` fail.
+Without the database, `test_graph.py` is skipped, but `test_graph_schema.py`, `test_retrieve_graph.py` and `test_documents_ingest.py` fail. All four are marked `live`, so `pytest -q -m "not live"` runs the rest without FalkorDB.
 
 CI does not check the web app yet; run `npm run lint` and `npm run build` in `apps/web` before opening a PR.
 

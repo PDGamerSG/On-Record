@@ -39,8 +39,7 @@ packages = ["wsw_brain"]
 testpaths = ["tests"]
 asyncio_mode = "auto"
 markers = [
-    "slow: loads EmbeddingGemma ONNX or Whisper models",
-    "live: needs Ollama gemma4:e4b and/or FalkorDB",
+    "live: needs a running FalkorDB (WSW_FALKORDB_URL); deselect with -m \"not live\"",
 ]
 
 [tool.ruff]
