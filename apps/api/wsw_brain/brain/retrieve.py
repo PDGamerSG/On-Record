@@ -13,9 +13,9 @@ from ..contracts import Embedder
 
 log = logging.getLogger(__name__)
 
-RRF_K = 60
+RRF_K = 60  # the usual reciprocal-rank fusion constant; larger values narrow the gap between top ranks
 SPACE_CHECK_TTL_S = 600.0  # how long a meeting's "vectors match this embedder" verdict is trusted
-SPACE_CHECKS_PER_QUERY = 2
+SPACE_CHECKS_PER_QUERY = 2  # meetings checked per question; each check costs one embedding and one KNN query
 SELF_MATCH_MIN = 0.95  # an utterance re-embedded now must find its stored vector at least this close
 _RECENT = re.compile(
     r"\b(just now|right now|latest|most recent(?:ly)?|recently|last (?:few|couple of) minutes|last minute|"

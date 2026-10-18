@@ -49,6 +49,7 @@ SET_DOCUMENT_SUMMARY = "MATCH (d:Document {id: $id}) SET d.summary = $summary, d
 
 DELETE_CHUNKS = "MATCH (c:DocChunk {doc_id: $id}) DETACH DELETE c"
 
+# FOREACH ... CASE sets the embedding only when there is one (see write_utterances in graph/cypher.py).
 WRITE_CHUNKS = """
 UNWIND $rows AS r
 CREATE (c:DocChunk {id: r.id, doc_id: r.doc_id, seq: r.seq, page_start: r.page_start, page_end: r.page_end,
@@ -143,7 +144,7 @@ def native_terms(query: str) -> list[str]:
 def vector_chunks(by_doc: bool) -> str:
     return (
         "CALL db.idx.vector.queryNodes('DocChunk', 'embedding', $knn, vecf32($vector)) YIELD node, score\n"
-        "WITH node AS c, 1.0 - score AS score\n"
+        "WITH node AS c, 1.0 - score AS score\n"  # cosine distance -> similarity (higher = better)
         f"{_scope(by_doc)}"
         "WITH c, score ORDER BY score DESC LIMIT $k" + _HIT_TAIL
     )
