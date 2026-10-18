@@ -1,8 +1,9 @@
 """Every Cypher statement GraphStore runs. Values always travel as $params; only labels, relationship types
 and small validated integers (index dimension, path bounds) are formatted into the text.
 
-Query rules (docs/TECH_NOTES.md §2.1): a WITH barrier between consecutive MATCH clauses, and inline property
+Query rules (also listed in store.py): a WITH barrier between consecutive MATCH clauses, and inline property
 maps after UNWIND, so the statements stay correct on the C engine (4.x) and the Rust engine (6.0.x).
+The nodes, relationships and indexes these statements use are described in docs/ARCHITECTURE.md.
 """
 
 from __future__ import annotations

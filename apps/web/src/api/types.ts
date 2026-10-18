@@ -1,4 +1,5 @@
-// Mirrors apps/api/wsw_brain/contracts.py and docs/API_CONTRACT.md. Keep in sync.
+// Mirrors apps/api/wsw_brain/contracts.py and the dicts GraphStore returns (graph/store.py). Keep in sync.
+// docs/ARCHITECTURE.md describes the graph schema and which time fields are seconds or epoch milliseconds.
 
 export type MeetingStatus = "live" | "ended";
 export type MeetingSource = "mic" | "upload" | "demo";

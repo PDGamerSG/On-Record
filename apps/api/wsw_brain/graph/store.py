@@ -1,6 +1,6 @@
-"""GraphStore: the only module that talks to FalkorDB.
+"""GraphStore: the only module that talks to FalkorDB. docs/ARCHITECTURE.md describes the graph schema.
 
-Rules (see docs/TECH_NOTES.md §2):
+Rules:
 - Writes are batched with UNWIND $rows (one query per batch, never one per utterance).
 - Put a WITH barrier between consecutive MATCH clauses; after UNWIND use inline property maps
   (MATCH (n:Label {id: r.id})) rather than WHERE n.id = r.id. This keeps queries correct on the
@@ -197,7 +197,7 @@ class GraphStore:
         return {"ok": True, "version": version, "graph": self.graph_name}
 
     def ensure_schema(self, embed_dim: int) -> None:
-        """Idempotently create range, full-text and vector indexes (see docs/STRATEGY.md §7)."""
+        """Idempotently create range, full-text and vector indexes (listed in docs/ARCHITECTURE.md)."""
         if isinstance(embed_dim, bool) or not isinstance(embed_dim, int) or embed_dim <= 0:
             raise ValueError(f"embed_dim must be a positive int, got {embed_dim!r}")
         for statement in cq.schema_statements():
