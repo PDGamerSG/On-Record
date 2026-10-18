@@ -15,6 +15,15 @@ def test_health_endpoint_returns_without_external_services() -> None:
     assert response.json() == {"status": "ok"}
 
 
+def test_web_health_probe_returns_boolean_live_mode_contract() -> None:
+    client = TestClient(create_app())
+
+    response = client.get("/api/health")
+
+    assert response.status_code == 200
+    assert response.json() == {"ok": True}
+
+
 def test_status_endpoint_exposes_product_identity() -> None:
     client = TestClient(create_app())
 
