@@ -1,5 +1,13 @@
 # On Record
 
+**Team Vulcan**
+
+- Aditya Arnav
+- Pallab Das
+- Aditi Akansha
+
+Live link: [onrecord.pallabdas.me](https://onrecord.pallabdas.me/)
+
 <p align="center">
   <img src="apps/web/public/og.jpg" width="760"
        alt="On Record's landing page: a turntable playing a meeting, beside the headline 'Every meeting, remembered by who said it.'">
@@ -8,14 +16,6 @@
 A meeting assistant that connects what was said to the person who said it. It keeps a meeting's transcript attributed to each speaker, pulls out the decisions and action items, and answers questions about past meetings with the quotes that back them up.
 
 On Record includes shared Python contracts, graph storage and queries, audio decoding and transcription, text embeddings, hybrid meeting retrieval, local and hosted text model adapters, document search, the live listener, the web interface, and the HTTP API that connects them.
-
-## Team
-
-- Aditya Arnav
-- Pallab Das
-- Aditi Akansha
-
-Live site: [onrecord.pallabdas.me](https://onrecord.pallabdas.me/)
 
 ## How it works
 
