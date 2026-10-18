@@ -140,6 +140,7 @@ Teams also decide things in contracts, specs and policies. The `wsw_brain.docume
 3. **Chunk and embed.** Passages follow section headings, keep their page range, and are embedded with the configured embedder (EmbeddingGemma by default).
 4. **Store and search.** `(:Document)-[:HAS_CHUNK]->(:DocChunk)` nodes get their own full-text and vector indexes. `DocumentRetriever` fuses both with reciprocal-rank fusion.
 5. **Ask.** `answer_question` has Gemma 4 answer only from retrieved passages and cite them as `[d:<chunk id>]`. Citations to passages that were not retrieved are removed. Each document also gets a short Gemma 4 summary of its deadlines, owners and obligations.
+6. **Check against meetings.** With `include_meetings`, the question also searches meeting transcripts, using the question itself plus the headings and text of the top passages. Gemma 4 cites meeting lines as `[u:<utterance id>]` with speaker, meeting and date. It says when a newer meeting changed an amount, date, owner or decision that a document states.
 
 Run the document API on its own until the main server is added. With FalkorDB running and `SARVAM_API_KEY` set:
 
@@ -155,9 +156,18 @@ cd apps/web && npm run dev    # the Documents page proxies /api to port 8000
 | `GET /api/documents/jobs/{id}` | Job progress: split, each digitised part, chunk, embed, store, summary |
 | `GET /api/documents`, `GET/DELETE /api/documents/{id}` | List, read (with chunks) and delete documents |
 | `GET /api/documents/search?q=` | Fused full-text and vector passage search |
-| `POST /api/documents/ask` | Gemma 4 answer with page citations; add `language` (e.g. `kn-IN`) for a translation |
+| `POST /api/documents/ask` | Gemma 4 answer with page citations; `include_meetings` adds meeting lines; `language` (e.g. `kn-IN`) adds a translation |
 | `POST /api/documents/speak` | Read text aloud with Bulbul v3 (`audio/wav`) |
 | `GET /api/documents/status` | Configured digitiser, model, embedder and limits |
+
+To try the meeting check with the bundled demo data, load the two demo meetings and generate a 12-page pricing policy. The policy still states the Starter terms that the later demo meeting changed. Its 12 pages are sent to Document AI as two parts:
+
+```bash
+uv run --project apps/api python scripts/seed_demo_meetings.py
+uv run --project apps/api python scripts/make_demo_document.py    # writes data/kitepost-pricing-policy.pdf
+```
+
+Upload the PDF on the Documents page. Then ask "What does the Starter plan cost?" with meetings included.
 
 `WSW_DOC_PART_PAGES` (at most 10), `WSW_DOC_MAX_PAGES`, `WSW_DOC_MAX_MB`, `WSW_DOC_CONCURRENCY` and `WSW_DOC_LANGUAGE` control the limits and the Document AI language. Upload jobs are tracked in memory by the serving process.
 

@@ -137,3 +137,12 @@ def test_long_paragraphs_split_at_sentences_or_hard_wrap():
     with pytest.raises(ValueError):
         chunk_pages([], max_chars=50)
     assert chunk_pages([Page(1, "   ")]) == []
+
+
+def test_grouped_citations_are_split():
+    from wsw_brain.documents.answer import split_grouped_citations
+
+    text = "Capped at 15 percent [u:m1:u00023, u:m1:u00028]; see [d:doc-a:c0006; d:doc-a:c0007]. Kept [d:doc-a:c1]."
+    assert split_grouped_citations(text) == (
+        "Capped at 15 percent [u:m1:u00023] [u:m1:u00028]; see [d:doc-a:c0006] [d:doc-a:c0007]. Kept [d:doc-a:c1]."
+    )

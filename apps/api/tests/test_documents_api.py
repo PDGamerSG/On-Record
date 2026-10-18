@@ -43,7 +43,7 @@ def client(monkeypatch):
     monkeypatch.setattr(routes, "_ingestor", lambda: FakeIngestor())
     monkeypatch.setattr(routes, "_speech", lambda: FakeSpeech())
 
-    async def fake_answer(llm, retriever, question, *, doc_id=None, k=6):
+    async def fake_answer(llm, retriever, question, *, doc_id=None, k=6, meetings=None):
         return {"answer": f"Answer to {question} [d:doc:c0001]", "citations": [], "hits": [], "model": "gemma4",
                 "provider": "sarvam", "timings": {"retrieval_ms": 1.0}}
 

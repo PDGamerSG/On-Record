@@ -17,7 +17,7 @@ from typing import Annotated, Any
 from fastapi import APIRouter, File, Form, HTTPException, Response, UploadFile
 from pydantic import BaseModel, Field
 
-from ..brain import get_embedder, get_llm
+from ..brain import Retriever, get_embedder, get_llm
 from ..config import settings
 from ..graph import GraphError, GraphStore
 from ..sarvam import SarvamSpeech, SarvamSpeechError
@@ -61,6 +61,8 @@ class AskBody(BaseModel):
     k: int = Field(6, ge=1, le=20)
     # Optional reply language (e.g. "kn-IN"); the answer is also returned translated by Sarvam.
     language: str | None = Field(None, pattern=LANGUAGE_PATTERN)
+    # Also search meeting transcripts, so Gemma 4 can point out where meetings changed what a document says.
+    include_meetings: bool = False
 
 
 class SpeakBody(BaseModel):
@@ -214,7 +216,9 @@ def search(q: str, doc_id: str | None = None, k: int = 8) -> list[dict[str, Any]
 async def ask(body: AskBody) -> dict[str, Any]:
     retriever = DocumentRetriever(_docs(), get_embedder())
     try:
-        result = await answer_question(get_llm(), retriever, body.question, doc_id=body.doc_id, k=body.k)
+        meetings = Retriever(_docs().graph, get_embedder()) if body.include_meetings else None
+        result = await answer_question(get_llm(), retriever, body.question, doc_id=body.doc_id, k=body.k,
+                                       meetings=meetings)
     except GraphError as exc:
         raise HTTPException(503, f"graph database unavailable: {exc}") from exc
     if body.language and body.language != "en-IN":

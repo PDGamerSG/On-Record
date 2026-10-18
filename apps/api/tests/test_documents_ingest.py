@@ -122,3 +122,46 @@ async def test_answer_without_matches_skips_the_model(docs):
     llm = EchoLLM()
     answer = await answer_question(llm, DocumentRetriever(docs, HashEmbedder(64)), "anything at all?")
     assert answer["citations"] == [] and llm.prompts == []
+
+
+class CrossSourceLLM:
+    provider = "sarvam"
+    model = "gemma4"
+    supports_audio = False
+
+    def __init__(self):
+        self.messages = []
+
+    async def chat(self, messages, **kwargs):
+        self.messages = messages
+        prompt = messages[-1]["content"]
+        doc = prompt.split("[d:")[1].split("]")[0]
+        line = prompt.split("[u:")[1].split("]")[0]
+        return LLMResult(f"The agreement says 45 days [d:{doc}], but Priya moved it to 30 days [u:{line}] "
+                         "[u:m9:u99999].", [], self.model, self.provider, 1.0)
+
+
+@pytest.mark.asyncio
+async def test_answers_can_combine_meetings_and_documents(docs):
+    from wsw_brain.brain import Retriever
+    from wsw_brain.contracts import Utterance
+
+    embedder = HashEmbedder(64)
+    docs.graph.ensure_schema(embedder.dim)
+    ingestor = DocumentIngestor(docs, embedder, FakeDigitiser(), max_pages=10)
+    await ingestor.ingest("vendor.pdf", make_pdf(12), title="Vendor agreement", summarise=False)
+    docs.graph.create_meeting("m-pay", "Payments review", "mic", 1792062000000)
+    lines = [Utterance("m-pay", 0, "S1", 0.0, 4.0, "Invoices will now be paid within 30 days, not 45.")]
+    docs.graph.write_utterances(lines, embedder.embed_documents([u.text for u in lines]))
+    docs.graph.name_speaker("m-pay", "S1", "Priya")
+    llm = CrossSourceLLM()
+
+    answer = await answer_question(llm, DocumentRetriever(docs, embedder), "When are invoices paid?",
+                                   meetings=Retriever(docs.graph, embedder))
+
+    assert "Meeting lines:" in llm.messages[-1]["content"]
+    assert 'Meeting "Payments review"' in llm.messages[-1]["content"]
+    assert "disagree" in llm.messages[0]["content"]
+    assert [c["meeting_id"] for c in answer["meeting_citations"]] == ["m-pay"]
+    assert answer["meeting_citations"][0]["meeting_date"]
+    assert "[u:m9:u99999]" not in answer["answer"] and answer["citations"]

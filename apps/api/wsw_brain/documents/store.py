@@ -90,6 +90,8 @@ DETACH DELETE d
 RETURN count(id) AS deleted
 """
 
+MEETING_STARTS = "MATCH (m:Meeting) WHERE m.id IN $ids RETURN m.id AS id, m.started_at AS started_at"
+
 _HIT_TAIL = """
 WITH c, score
 MATCH (d:Document {id: c.doc_id})
@@ -214,6 +216,10 @@ class DocumentStore:
             self._query(DELETE_CHUNKS, {"id": doc_id})
             rows = self._query(DELETE_DOCUMENT, {"id": doc_id})
         return bool(rows and rows[0].get("deleted"))
+
+    def meeting_starts(self, meeting_ids: list[str]) -> list[dict[str, Any]]:
+        """Start times of meetings, so answers can tell which source is newer."""
+        return self._query(MEETING_STARTS, {"ids": list(meeting_ids)}) if meeting_ids else []
 
     def search_fulltext(self, query: str, k: int = 8, doc_id: str | None = None) -> list[dict[str, Any]]:
         terms = query_terms(query)
