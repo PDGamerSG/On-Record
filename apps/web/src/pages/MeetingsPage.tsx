@@ -3,6 +3,7 @@ import { api } from "../api/client";
 import { useBusEvents } from "../api/events";
 import type { MeetingSummary, Utterance } from "../api/types";
 import { brand } from "../lib/brand";
+import { sentence } from "../lib/format";
 import { usePageTitle } from "../lib/pageTitle";
 import GraphTotals from "../components/meeting/GraphTotals";
 import MeetingRow from "../components/meeting/MeetingRow";
@@ -80,7 +81,7 @@ export default function MeetingsPage() {
 
         {error ? (
           <div className="mp-alert" role="alert">
-            <p>Couldn't load meetings: {error}. Check that the API is running, then retry.</p>
+            <p>Couldn't load meetings: {sentence(error)} Check that the API is running, then retry.</p>
             <button type="button" className="btn" onClick={load}>
               Retry
             </button>

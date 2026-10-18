@@ -4,7 +4,7 @@ import { useState, type MouseEvent } from "react";
 import { CheckSquareIcon, HashIcon, PlayIcon, SignpostIcon } from "@phosphor-icons/react";
 import { Link } from "react-router-dom";
 import type { ActionItem, Decision, Topic, Utterance } from "../../api/types";
-import { timecode } from "../../lib/format";
+import { sentence, timecode } from "../../lib/format";
 import { prefersReducedMotion } from "./timeline";
 import "./InsightsRail.css";
 
@@ -162,7 +162,7 @@ function ActionRow({ a, fresh, nameOf, onToggleAction, ...rest }: Props & { a: A
     try {
       await onToggleAction(a, next);
     } catch (e) {
-      setError(`Couldn't update this item: ${e instanceof Error ? e.message : String(e)}. Try again.`);
+      setError(`Couldn't update this item: ${sentence(e instanceof Error ? e.message : String(e))} Try again.`);
     } finally {
       setPending(false);
     }

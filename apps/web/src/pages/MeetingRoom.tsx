@@ -6,7 +6,7 @@ import { ArrowLeftIcon, CircleNotchIcon, DatabaseIcon, MicrophoneIcon, StopIcon,
 import { api } from "../api/client";
 import { isDemo } from "../api/mode";
 import type { ActionItem, MeetingSummary, Utterance } from "../api/types";
-import { duration, speakerName, timecode, when } from "../lib/format";
+import { duration, sentence, speakerName, timecode, when } from "../lib/format";
 import { usePageTitle } from "../lib/pageTitle";
 import { takePendingSeek, useSeekRequests } from "../lib/player";
 import AudioTransport from "../components/meeting/AudioTransport";
@@ -46,7 +46,7 @@ function Room({ id }: { id: string }) {
           <p>
             {notFound
               ? "It may have been deleted, or the link is wrong. Pick a meeting from the list instead."
-              : `${error?.message ?? "Unknown error"}. Check that the API is running, then try again.`}
+              : `${sentence(error?.message ?? "Unknown error")} Check that the API is running, then try again.`}
           </p>
           <div className="room-message-actions">
             {!notFound && (
@@ -200,7 +200,7 @@ function RoomReady({ id, room, meeting }: { id: string; room: MeetingRoomApi; me
       const m = await api.endMeeting(id);
       dispatch({ type: "meeting", meeting: m });
     } catch (e) {
-      setEndError(`Couldn't end the meeting: ${e instanceof Error ? e.message : String(e)}. Everything said so far is saved; try again.`);
+      setEndError(`Couldn't end the meeting: ${sentence(e instanceof Error ? e.message : String(e))} Everything said so far is saved; try again.`);
     } finally {
       setEnding(false);
     }

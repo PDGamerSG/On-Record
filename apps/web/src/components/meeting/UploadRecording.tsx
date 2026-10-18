@@ -2,6 +2,7 @@ import { useRef, useState, type ChangeEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { CircleNotchIcon, UploadSimpleIcon } from "@phosphor-icons/react";
 import { api } from "../../api/client";
+import { sentence } from "../../lib/format";
 
 function titleFromFile(name: string): string {
   return name.replace(/\.[^.]+$/, "").replace(/[_-]+/g, " ").replace(/\s+/g, " ").trim() || "Uploaded recording";
@@ -25,7 +26,7 @@ export default function UploadRecording() {
       const m = await api.uploadMeeting(file, titleFromFile(file.name), realtime ? "realtime" : "fast");
       navigate(`/m/${encodeURIComponent(m.id)}`);
     } catch (err) {
-      setError(`Couldn't upload ${file.name}: ${err instanceof Error ? err.message : String(err)}. WAV, MP3, M4A, WebM and OGG files work.`);
+      setError(`Couldn't upload ${file.name}: ${sentence(err instanceof Error ? err.message : String(err))} WAV, MP3, M4A, WebM and OGG files work.`);
       setBusyName(null);
     } finally {
       el.value = "";
