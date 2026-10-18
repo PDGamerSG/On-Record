@@ -265,3 +265,32 @@ def test_gemini_rejects_remote_images_and_unknown_parts(message: dict[str, Any],
 
 def test_gemini_reports_image_support():
     assert _llm().supports_images is True
+
+
+@pytest.mark.asyncio
+async def test_gemini_compatibility_mode_keeps_images_in_one_user_turn():
+    """Models that reject system instructions get the prompt as a user turn; an image turn after it merges."""
+    import base64
+
+    from google.genai import types
+
+    calls: list[Any] = []
+
+    async def generate_content(*, model: str, contents: list[Any], config: Any) -> Any:
+        calls.append((contents, config))
+        return types.GenerateContentResponse(
+            candidates=[types.Candidate(content=types.Content(role="model", parts=[types.Part.from_text(text="A chart")]))]
+        )
+
+    llm = _llm()
+    llm._compat = True
+    llm._client.aio = SimpleNamespace(models=SimpleNamespace(generate_content=generate_content))
+    uri = f"data:image/png;base64,{base64.b64encode(PNG).decode('ascii')}"
+    result = await llm.chat([{"role": "system", "content": "Be brief."}, _image_message(uri)])
+
+    contents, config = calls[0]
+    assert result.text == "A chart" and config.system_instruction is None
+    assert [content.role for content in contents] == ["user"]
+    system, prompt, image = contents[0].parts
+    assert (system.text, prompt.text) == ("Be brief.", "Describe the whiteboard.")
+    assert image.inline_data.mime_type == "image/png" and image.inline_data.data == PNG
