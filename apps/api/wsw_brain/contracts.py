@@ -65,6 +65,8 @@ class Utterance:
 
     @property
     def id(self) -> str:
+        """`<meeting_id>:u<seq, 5 digits>`, e.g. "m1:u00042". Citations wrap it as [u:m1:u00042], and
+        GraphStore rebuilds neighbouring ids from it to link NEXT edges, so keep the format stable."""
         return f"{self.meeting_id}:u{self.seq:05d}"
 
     def to_dict(self) -> dict[str, Any]:
@@ -83,6 +85,8 @@ class ListenerCallbacks:
 
 
 class ASR(Protocol):
+    """Speech to text for one clip (FasterWhisperASR and SaarasASR in listen/)."""
+
     name: str
 
     def transcribe(self, samples: np.ndarray) -> tuple[str, float]:
@@ -102,6 +106,8 @@ class FileASR(ASR, Protocol):
 
 
 class SpeakerEmbedder(Protocol):
+    """Voice clip to embedding, so the listener can tell speakers apart. Not implemented here yet."""
+
     name: str
     dim: int
 
@@ -130,6 +136,10 @@ class SpeakerEmbedder(Protocol):
 
 @dataclass
 class DecisionDraft:
+    """A decision extracted from a meeting, before GraphStore.write_insights stores it. Its id comes from a
+    hash of the text, so the same decision extracted twice is stored once. supersedes_text is matched by word
+    overlap against earlier active decisions in any meeting."""
+
     text: str
     evidence: list[str]  # utterance ids
     proposed_by: str | None = None  # speaker track ("S2"), label ("Speaker 2") or name
@@ -144,8 +154,11 @@ class DecisionDraft:
 
 @dataclass
 class ActionItemDraft:
+    """An action item extracted from a meeting, before GraphStore.write_insights stores it. Deduplicated by
+    text like DecisionDraft."""
+
     text: str
-    evidence: list[str]
+    evidence: list[str]  # utterance ids
     owner: str | None = None  # speaker track ("S2") or a person name
     due: str | None = None  # free text as spoken ("Friday", "next sprint")
 
@@ -206,6 +219,10 @@ def _clean_text(value: str) -> str:
 
 @dataclass
 class Insights:
+    """Everything one extraction pass found in a meeting, written by one GraphStore.write_insights call.
+    Entity and mention names are whitespace-normalised at construction. is_empty() ignores mentions;
+    write_insights still writes an Insights that has only mentions."""
+
     decisions: list[DecisionDraft] = field(default_factory=list)
     action_items: list[ActionItemDraft] = field(default_factory=list)
     topics: list[str] = field(default_factory=list)
@@ -235,12 +252,17 @@ class Insights:
 
 @dataclass
 class ToolCall:
+    """A function call the model asked for, with arguments already parsed. The caller runs the tool."""
+
     name: str
     arguments: dict[str, Any]
 
 
 @dataclass
 class LLMResult:
+    """One chat() reply: the answer text, any tool calls, the model and provider that produced it, and the
+    time the whole call took, retries included."""
+
     text: str
     tool_calls: list[ToolCall]
     model: str
@@ -259,6 +281,9 @@ class Transcript:
 
 
 class LLM(Protocol):
+    """A text model (brain/llm.py: Ollama, Gemini, OpenAI-compatible, Sarvam or fake). get_llm() returns the
+    configured one. Adapters raise LLMError for transport, response-shape and tool-argument failures."""
+
     provider: str
     model: str
     supports_audio: bool
@@ -283,6 +308,10 @@ class LLM(Protocol):
 
 
 class Embedder(Protocol):
+    """Text to L2-normalised vectors of length `dim`. Use embed_documents for stored text and embed_query
+    for questions: EmbeddingGemma applies a different prompt to each. Vectors from different embedders are
+    not comparable, even at the same dim."""
+
     name: str
     dim: int
 
@@ -298,6 +327,9 @@ class Embedder(Protocol):
 
 @dataclass
 class AskResult:
+    """The assistant's answer to one question, as the web app's AskResult type receives it. The assistant
+    that builds it is not in this repository yet."""
+
     answer: str
     citations: list[dict[str, Any]]  # Hit/Citation dicts actually cited in the answer
     actions: list[dict[str, Any]]  # client actions: {"type": "seek"|"open_meeting"|"refresh", ...}

@@ -48,6 +48,18 @@ class EventSubscription:
 
 
 class EventBus:
+    """Fans events out to subscribers (one per SSE connection).
+
+    The last `replay` events (500) are kept, so a reconnecting browser can resume after the last id it saw.
+    Each subscriber gets a queue of `queue_size` events (2000; keep it above `replay`, which is copied in on
+    subscribe). A full queue drops new events, and that client re-syncs over REST.
+
+    publish() can be called from any thread. Call bind_loop() with the server's event loop at startup:
+    publish() then delivers on that loop, directly when already on it or with call_soon_threadsafe from
+    another thread, because asyncio queues are not thread-safe. Without a running bound loop it delivers in
+    the calling thread, which suits tests and scripts.
+    """
+
     def __init__(self, replay: int = 500, queue_size: int = 2000) -> None:
         if replay <= 0:
             raise ValueError("replay must be positive")
@@ -60,6 +72,7 @@ class EventBus:
         self._loop: asyncio.AbstractEventLoop | None = None
 
     def bind_loop(self, loop: asyncio.AbstractEventLoop) -> None:
+        """Deliver events on this loop from now on (see the class docstring)."""
         self._loop = loop
 
     def publish(self, type_: str, data: dict[str, Any], meeting_id: str | None = None) -> dict[str, Any]:

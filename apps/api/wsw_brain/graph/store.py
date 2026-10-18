@@ -108,6 +108,11 @@ def _traced[**P, R](method: Callable[Concatenate[GraphStore, P], R]) -> Callable
 
 
 class GraphStore:
+    """Reads and writes one FalkorDB graph. One instance can be shared between threads: the client connects
+    on first use, each thread gets its own graph handle, and writes are serialised by a lock. Reads that feed
+    an answer leave the statements they ran in last_cypher; the attribute is shared, so the latest such call
+    wins. The query rules are in this module's docstring, and the schema is in docs/ARCHITECTURE.md."""
+
     last_cypher: list[str]
 
     def __init__(self, url: str, graph: str) -> None:

@@ -30,6 +30,7 @@ from ..contracts import LLM, LLMResult, ToolCall, Transcript
 
 log = logging.getLogger(__name__)
 
+# Also used by OpenAICompatLLM. The long read timeout allows for slow generation on local hardware.
 OLLAMA_TIMEOUT = httpx.Timeout(connect=5.0, read=180.0, write=60.0, pool=5.0)
 PROBE_TIMEOUT_S = 2.0
 _priority: ContextVar[int] = ContextVar("wsw_llm_priority", default=0)
@@ -58,7 +59,15 @@ def llm_priority(level: int = 1) -> Iterator[None]:
 
 
 class ModelGate:
-    """Bound concurrent model calls and schedule higher-priority work first."""
+    """Bound concurrent model calls and schedule higher-priority work first.
+
+    Up to `slots` calls run at once. The rest wait in a heap ordered by priority, then arrival; priorities are
+    stored negated because heapq pops the smallest item. Once `max_waiting` ordinary callers (priority 0)
+    are queued, further ones fail straight away, but work raised with llm_priority() is never refused. A
+    caller still waiting after `wait_s` gets LLMError. A released slot passes directly to the next waiter, on
+    that waiter's event loop. If a waiter times out or is cancelled just as its slot is granted, _acquire
+    releases the slot again so it is not lost.
+    """
 
     def __init__(self, slots: int, max_waiting: int, wait_s: float) -> None:
         if slots < 1 or max_waiting < 0 or wait_s <= 0:
@@ -338,6 +347,9 @@ class GeminiLLM:
 
         self.model = model
         self._client = genai.Client(api_key=api_key)
+        # Turned on for the rest of this instance's life the first time the model rejects system
+        # instructions or JSON mode: the system prompt then goes into the first user turn, and JSON mode
+        # becomes an instruction.
         self._compat = False
 
     async def chat(

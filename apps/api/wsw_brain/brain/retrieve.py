@@ -68,6 +68,10 @@ def refers_to_recent(question: str) -> bool:
 
 
 class Retriever:
+    """Hybrid search over meeting utterances: full-text, vector (`embedder` must match the one that stored the
+    embeddings), speakers named in the question, and the newest utterances for questions like "just now",
+    fused with reciprocal-rank fusion. Speaker names are cached for names_ttl_s seconds."""
+
     def __init__(self, store: Any, embedder: Embedder, *, names_ttl_s: float = 30.0) -> None:
         self.store = store
         self.embedder = embedder

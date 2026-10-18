@@ -13,6 +13,10 @@ from .brand import REPO_ROOT
 
 
 class Settings(BaseSettings):
+    """Runtime settings from WSW_* environment variables and the repository's .env file; an environment
+    variable wins. Each alias is the variable name, and docs/CONFIGURATION.md lists them all. Read them with
+    settings(), which validates once per process."""
+
     model_config = SettingsConfigDict(env_file=str(REPO_ROOT / ".env"), extra="ignore")
 
     # Storage
