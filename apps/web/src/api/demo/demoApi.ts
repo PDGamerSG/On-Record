@@ -178,12 +178,12 @@ function subgraph(q: { meeting_id?: string; utterance_ids?: string[] }): Subgrap
     const kept = new Set(utts.map((u) => u.id));
     for (const x of d.decisions) {
       if (only && !x.evidence.some((e) => kept.has(e))) continue;
-      add({ id: x.id, label: x.text, kind: "Decision", status: x.status });
+      add({ id: x.id, label: x.text, kind: "Decision", status: x.status, meeting_id: mid });
       x.evidence.forEach((e) => link(x.id, e, "EVIDENCED_BY"));
     }
     for (const a of d.action_items) {
       if (only && !a.evidence.some((e) => kept.has(e))) continue;
-      add({ id: a.id, label: a.text, kind: "ActionItem", status: a.status });
+      add({ id: a.id, label: a.text, kind: "ActionItem", status: a.status, meeting_id: mid });
       a.evidence.forEach((e) => link(a.id, e, "EVIDENCED_BY"));
       if (a.owner_track) link(a.id, `${mid}:${a.owner_track}`, "ASSIGNED_TO");
     }
