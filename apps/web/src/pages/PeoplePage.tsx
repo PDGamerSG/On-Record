@@ -4,6 +4,7 @@ import { ArrowDownIcon, ArrowUpIcon, MagnifyingGlassIcon } from "@phosphor-icons
 import { api } from "../api/client";
 import type { Person, WhoKnows } from "../api/types";
 import { duration } from "../lib/format";
+import { usePageTitle } from "../lib/pageTitle";
 import EvidenceQuote from "../components/ask/EvidenceQuote";
 import { errorText, titleMap, useMeetings } from "../components/ask/meetingData";
 import { useLiveRefresh } from "../components/ask/useLiveRefresh";
@@ -20,6 +21,7 @@ const COLUMNS: { key: SortKey; label: string; numeric: boolean }[] = [
 ];
 
 export default function PeoplePage() {
+  usePageTitle("People");
   const [people, setPeople] = useState<Person[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [nonce, setNonce] = useState(0);

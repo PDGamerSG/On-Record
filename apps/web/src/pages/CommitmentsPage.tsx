@@ -7,6 +7,7 @@ import { api } from "../api/client";
 import { useBusEvents } from "../api/events";
 import type { ActionItem, Utterance } from "../api/types";
 import { speakerIndex, timecode, when } from "../lib/format";
+import { usePageTitle } from "../lib/pageTitle";
 import { errorText, loadDetails, utteranceIndex, utteranceStart } from "../components/ask/meetingData";
 import { useJump, meetingPath } from "../components/ask/useJump";
 import { useLiveRefresh } from "../components/ask/useLiveRefresh";
@@ -42,6 +43,7 @@ function groupByOwner(items: ActionItem[]): Group[] {
 }
 
 export default function CommitmentsPage() {
+  usePageTitle("Commitments");
   const [params, setParams] = useSearchParams();
   const filter: Filter = (["open", "done", "all"] as const).find((f) => f === params.get("status")) ?? "open";
   const ownerFilter = params.get("owner");

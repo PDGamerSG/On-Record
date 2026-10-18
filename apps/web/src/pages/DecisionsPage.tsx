@@ -6,6 +6,7 @@ import { PlayIcon } from "@phosphor-icons/react";
 import { api } from "../api/client";
 import type { Decision, MeetingDetail } from "../api/types";
 import { speakerName, timecode } from "../lib/format";
+import { usePageTitle } from "../lib/pageTitle";
 import EvidenceQuote from "../components/ask/EvidenceQuote";
 import { errorText, loadDetails, titleMap, trackName, useMeetings, utteranceIndex } from "../components/ask/meetingData";
 import { meetingPath, useJump } from "../components/ask/useJump";
@@ -33,6 +34,7 @@ function buildChains(decisions: Decision[]): Decision[][] {
 }
 
 export default function DecisionsPage() {
+  usePageTitle("Decisions");
   const [decisions, setDecisions] = useState<Decision[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [nonce, setNonce] = useState(0);
