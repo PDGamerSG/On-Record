@@ -1,7 +1,7 @@
 // Ctrl/Cmd+K: jump to a meeting or page, or ask a question (hands it to the ask drawer).
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChatCircleIcon, CheckSquareIcon, GraphIcon, MagnifyingGlassIcon, MicrophoneIcon, MoonIcon, SignpostIcon, SunIcon, UsersThreeIcon, WaveformIcon } from "@phosphor-icons/react";
+import { ChatCircleIcon, CheckSquareIcon, FileTextIcon, GraphIcon, MagnifyingGlassIcon, MicrophoneIcon, MoonIcon, SignpostIcon, SunIcon, UsersThreeIcon, WaveformIcon } from "@phosphor-icons/react";
 import { toggleTheme, useTheme } from "../lib/theme";
 import { duration, when } from "../lib/format";
 import { useMeetings } from "./ask/meetingData";
@@ -28,6 +28,7 @@ const PAGES: { label: string; path: string; icon: ReactNode; words: string }[] =
   { label: "Decisions", path: "/decisions", icon: <SignpostIcon aria-hidden="true" />, words: "decisions decided history" },
   { label: "People", path: "/people", icon: <UsersThreeIcon aria-hidden="true" />, words: "people speakers who knows" },
   { label: "Graph", path: "/graph", icon: <GraphIcon aria-hidden="true" />, words: "graph falkordb nodes knowledge" },
+  { label: "Documents", path: "/documents", icon: <FileTextIcon aria-hidden="true" />, words: "documents pdf upload sarvam scan pages" },
 ];
 
 function meetingDetail(startedAt: number, seconds: number): string {

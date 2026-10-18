@@ -9,6 +9,7 @@ import CommitmentsPage from "./pages/CommitmentsPage";
 import DecisionsPage from "./pages/DecisionsPage";
 import PeoplePage from "./pages/PeoplePage";
 import GraphPage from "./pages/GraphPage";
+import DocumentsPage from "./pages/DocumentsPage";
 
 // The landing page carries the 3D hero, so it loads in its own chunk and the app never pays for it.
 const LandingPage = lazy(() => import("./landing/LandingPage"));
@@ -44,6 +45,7 @@ export default function App() {
           <Route path="/decisions" element={<DecisionsPage />} />
           <Route path="/people" element={<PeoplePage />} />
           <Route path="/graph" element={<GraphPage />} />
+          <Route path="/documents" element={<DocumentsPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
