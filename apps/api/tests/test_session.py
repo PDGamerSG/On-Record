@@ -8,6 +8,7 @@ cannot cut, to exercise in-segment speaker-change detection.
 
 from __future__ import annotations
 
+import dataclasses
 import itertools
 import json
 import threading
@@ -22,7 +23,15 @@ import soundfile as sf
 
 from wsw_brain.config import settings
 from wsw_brain.contracts import SAMPLE_RATE, ListenerCallbacks, Utterance
-from wsw_brain.listen import ListenerOverloaded, LiveSession, decode_file, float_to_pcm16
+from wsw_brain.listen import (
+    AudioTooLong,
+    ListenerOverloaded,
+    LiveSession,
+    decode_file,
+    float_to_pcm16,
+    process_file,
+    write_wav,
+)
 from wsw_brain.listen.session import _is_garbage
 from wsw_brain.listen.speakers import SherpaSpeakerEmbedder
 
@@ -223,6 +232,59 @@ def test_session_reports_a_missing_vad_model(tmp_path: Path) -> None:
             max_utterance_s=12.0,
             vad_model_path=tmp_path / "missing.onnx",
         )
+
+
+def test_process_file_rejects_an_unknown_pace(tmp_path: Path) -> None:
+    with pytest.raises(ValueError, match="pace"):
+        process_file(
+            tmp_path / "clip.wav",
+            "m",
+            StubASR(),
+            _NoEmbedder(),
+            Collector().callbacks(),
+            pace="slow",  # type: ignore[arg-type]
+            threshold=THRESHOLD,
+            max_utterance_s=12.0,
+        )
+
+
+def test_process_file_returns_nothing_when_cancelled_before_it_starts() -> None:
+    cancel = threading.Event()
+    cancel.set()
+    utterances = process_file(
+        FIXTURE_WAV,
+        "m",
+        StubASR(),
+        _NoEmbedder(),
+        Collector().callbacks(),
+        threshold=THRESHOLD,
+        max_utterance_s=12.0,
+        cancel=cancel,
+    )
+    assert utterances == []
+
+
+def test_process_file_refuses_missing_and_too_long_audio_before_listening(tmp_path: Path) -> None:
+    kwargs: dict[str, Any] = {"threshold": THRESHOLD, "max_utterance_s": 12.0}
+    with pytest.raises(FileNotFoundError):
+        process_file(
+            tmp_path / "missing.wav", "m", StubASR(), _NoEmbedder(), Collector().callbacks(), **kwargs
+        )
+    clip = tmp_path / "clip.wav"
+    write_wav(clip, np.zeros(2 * SAMPLE_RATE, dtype=np.float32))
+    rec = tmp_path / "rec.wav"
+    with pytest.raises(AudioTooLong):
+        process_file(
+            clip,
+            "m",
+            StubASR(),
+            _NoEmbedder(),
+            Collector().callbacks(),
+            recording_path=rec,
+            max_duration_s=1.0,
+            **kwargs,
+        )
+    assert not rec.exists()  # refused before the session opened a recording
 
 
 # ---------------------------------------------------------------------------
@@ -451,3 +513,63 @@ def test_session_feed_refuses_audio_past_max_queued(titanet: SherpaSpeakerEmbedd
     session.feed(second)  # room again
     session.close()
     assert session.metrics()["audio_s"] == 6.0 and session.lag_s == 0.0
+
+
+def test_process_file_realtime_pace_follows_the_clock(
+    titanet: SherpaSpeakerEmbedder, fixture_audio: np.ndarray, tmp_path: Path
+) -> None:
+    clip = tmp_path / "clip.wav"
+    write_wav(clip, fixture_audio[: int(1.5 * SAMPLE_RATE)])
+    t0 = time.monotonic()
+    process_file(
+        clip,
+        "m_rt",
+        StubASR(),
+        titanet,
+        Collector().callbacks(),
+        pace="realtime",
+        threshold=THRESHOLD,
+        max_utterance_s=12.0,
+    )
+    assert time.monotonic() - t0 >= 1.4
+
+
+class _SlowASR(StubASR):
+    def transcribe(self, samples: np.ndarray) -> tuple[str, float]:
+        time.sleep(0.05)
+        return super().transcribe(samples)
+
+
+def test_process_file_cancel_mid_run_abandons_the_rest(
+    titanet: SherpaSpeakerEmbedder, fixture_audio: np.ndarray, tmp_path: Path
+) -> None:
+    """Deleting a meeting while its upload is processed: a "fast" file must not already be queued in
+    full, and closing must not transcribe whatever is still queued."""
+    path = tmp_path / "long.wav"
+    write_wav(path, np.tile(fixture_audio, 4))  # ~200 s
+    cancel = threading.Event()
+    collector = Collector()
+    callbacks = collector.callbacks()
+
+    def on_utterance(u: Utterance) -> None:
+        callbacks.on_utterance(u)
+        cancel.set()  # the meeting is deleted as soon as its first utterance appears
+
+    asr = _SlowASR()
+    rec = tmp_path / "rec.wav"
+    utterances = process_file(
+        path,
+        "m_cancel",
+        asr,
+        titanet,
+        dataclasses.replace(callbacks, on_utterance=on_utterance),
+        threshold=THRESHOLD,
+        max_utterance_s=12.0,
+        recording_path=rec,
+        cancel=cancel,
+    )
+    assert utterances and utterances == collector.utterances
+    assert max(u.t_end for u in utterances) < 100.0, [(u.seq, u.t_end) for u in utterances]
+    assert asr.calls < 20  # the full file is ~36 utterances
+    assert sf.info(str(rec)).duration < 100.0  # the recording was finalised where the listener stopped
+    rec.unlink()  # closed: a deleted meeting's files can be removed at once

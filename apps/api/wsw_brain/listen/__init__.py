@@ -12,6 +12,7 @@ from .audio import (
     write_wav,
 )
 from .factory import get_speaker_embedder, speaker_clusterer, speaker_model_path, vad_model_path
+from .pipeline import process_file
 from .sarvam_asr import SaarasASR, SarvamASRError
 from .session import ListenerOverloaded, LiveSession
 from .speakers import OnlineClusterer, SherpaSpeakerEmbedder, speaker_change_points
@@ -32,6 +33,7 @@ __all__ = [
     "get_speaker_embedder",
     "iter_decode",
     "pcm16_to_float",
+    "process_file",
     "speaker_change_points",
     "speaker_clusterer",
     "speaker_model_path",
