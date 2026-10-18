@@ -7,6 +7,7 @@ import { ApiError, api } from "../../api/client";
 import { hub, useBusEvents } from "../../api/events";
 import type { BusEvent, MeetingSummary, Speaker, Utterance } from "../../api/types";
 import { asActionItem, initialRoom, roomReducer, type RoomAction, type RoomState } from "./meetingState";
+import { invalidateStrip } from "./stripCache";
 
 type Data = Record<string, unknown>;
 
@@ -137,6 +138,8 @@ export function useMeetingRoom(id: string): MeetingRoomApi {
       try {
         const speaker = await api.nameSpeaker(id, track, name);
         dispatch({ type: "speaker", speaker: { ...speaker, track: speaker.track ?? track } });
+        // the meetings list names speakers from its cached strip; drop it so the row shows the new name
+        invalidateStrip(id);
         return speaker;
       } catch (e) {
         dispatch({ type: "speaker-named", track, name: before?.name ?? null });
