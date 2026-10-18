@@ -216,7 +216,8 @@ export default function AppShell({ children }: { children: ReactNode }) {
   const counts: Record<RailCountKey, number> = {
     meetings: railData.meetings.length,
     commitments: railData.commitments.length,
-    decisions: railData.decisions.length,
+    // the Decisions page counts decisions that stand, and lists the ones they replaced underneath
+    decisions: railData.decisions.filter((d) => d.status === "active").length,
     people: railData.people.length,
   };
 
