@@ -114,6 +114,34 @@ def test_jobs_endpoint_filters_by_status(client):
     assert client.get("/api/documents/jobs", params={"status": "waiting"}).status_code == 422
 
 
+def test_completed_job_can_be_removed_from_the_job_store(client):
+    response = client.post("/api/documents", files={"file": ("remove-me.pdf", make_pdf(1), "application/pdf")})
+    assert response.status_code == 200
+    job_id = response.json()["job"]["id"]
+    for _ in range(50):
+        state = client.get(f"/api/documents/jobs/{job_id}").json()
+        if state["status"] != "running":
+            break
+    assert state["status"] == "done"
+
+    deleted = client.delete(f"/api/documents/jobs/{job_id}")
+
+    assert deleted.status_code == 200
+    assert deleted.json() == {"deleted": True}
+    assert client.get(f"/api/documents/jobs/{job_id}").status_code == 404
+
+
+def test_jobs_endpoint_limits_the_number_of_results(client):
+    client.post("/api/documents", files={"file": ("first.pdf", make_pdf(1), "application/pdf")})
+    client.post("/api/documents", files={"file": ("second.pdf", make_pdf(1), "application/pdf")})
+
+    listing = client.get("/api/documents/jobs", params={"limit": 1})
+
+    assert listing.status_code == 200
+    assert len(listing.json()) == 1
+    assert client.get("/api/documents/jobs", params={"limit": 0}).status_code == 422
+
+
 def test_ask_translates_when_a_language_is_requested(client):
     plain = client.post("/api/documents/ask", json={"question": "When?"}).json()
     assert "translated_answer" not in plain
