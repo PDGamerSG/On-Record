@@ -9,6 +9,7 @@ the matching tool_call_id. Helpers let every adapter share the same exchange.
 from __future__ import annotations
 
 import asyncio
+import base64
 import contextlib
 import heapq
 import itertools
@@ -337,6 +338,7 @@ class GeminiLLM:
 
     provider = "gemini"
     supports_audio = False
+    supports_images = True  # Gemma 4 31B and 26B-A4B accept inline PNG and JPEG images
 
     def __init__(self, api_key: str, model: str) -> None:
         if not isinstance(api_key, str) or not api_key.strip():
@@ -455,7 +457,7 @@ def to_gemini_contents(messages: list[dict[str, Any]]) -> tuple[str, list[Any]]:
         if role == "system":
             system_parts.append(text)
         elif role == "user":
-            contents.append(types.Content(role="user", parts=[types.Part.from_text(text=text)]))
+            contents.append(types.Content(role="user", parts=_user_parts(message.get("content"))))
         elif role == "assistant":
             parts = [types.Part.from_text(text=text)] if text else []
             parts.extend(
@@ -475,6 +477,34 @@ def to_gemini_contents(messages: list[dict[str, Any]]) -> tuple[str, list[Any]]:
         else:
             raise ValueError(f"unknown message role {role!r}")
     return "\n\n".join(system_parts), _merge_same_role(contents)
+
+
+_DATA_URI = re.compile(r"^data:(?P<mime>image/(?:png|jpeg));base64,(?P<data>[A-Za-z0-9+/]+={0,2})$")
+
+
+def _user_parts(content: Any) -> list[Any]:
+    """Gemini parts for a user message: a string, or OpenAI-style text and image_url parts. Images must be
+    base64 PNG or JPEG data URIs; remote URLs are refused so the server never fetches them."""
+    from google.genai import types
+
+    if isinstance(content, str) or content is None:
+        return [types.Part.from_text(text=content or "")]
+    parts: list[Any] = []
+    for item in content:
+        kind = item.get("type") if isinstance(item, dict) else None
+        if kind == "text":
+            parts.append(types.Part.from_text(text=item.get("text") or ""))
+        elif kind == "image_url":
+            image_url = item.get("image_url")
+            url = image_url.get("url") if isinstance(image_url, dict) else None
+            match = _DATA_URI.match(url or "")
+            if match is None:
+                raise ValueError("only base64 PNG or JPEG data URIs are supported for images")
+            data = base64.b64decode(match["data"], validate=True)
+            parts.append(types.Part.from_bytes(data=data, mime_type=match["mime"]))
+        else:
+            raise ValueError(f"unsupported content part {kind!r}")
+    return parts
 
 
 def _merge_same_role(contents: list[Any]) -> list[Any]:
