@@ -66,6 +66,8 @@ def rrf_fuse(ranked_lists: list[list[dict[str, Any]]], k: int, rrf_k: int = RRF_
 
 
 def refers_to_recent(question: str) -> bool:
+    """True for questions about the latest talk ("just now", "so far", "a moment ago", ...). retrieve() then
+    adds the k newest utterances as one more ranked list."""
     return bool(_RECENT.search(question))
 
 
@@ -90,6 +92,8 @@ class Retriever:
         if not question:
             return [], []
         cypher: list[str] = []
+        # Each source returns 2x k (at least 10). An utterance just below the cut in one list can then still
+        # reach the top k through its rank in another, and vector hits dropped by same_space_hits leave room.
         pool = max(k * 2, 10)
         lists = [
             self._call(cypher, self.store.search_fulltext, question, k=pool, meeting_id=meeting_id),
