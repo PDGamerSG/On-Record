@@ -1,4 +1,4 @@
-"""Every system prompt that carries outside material tells the model to treat it as material only."""
+"""Every prompt that carries outside material tells the model to treat it as material only."""
 
 from __future__ import annotations
 
@@ -6,7 +6,7 @@ import pytest
 
 from wsw_brain.brain import agent, extract
 from wsw_brain.brain.llm import UNTRUSTED_NOTE
-from wsw_brain.documents import answer
+from wsw_brain.documents import answer, vision
 
 PROMPTS = {
     "meeting agent": agent._SYSTEM_PROMPT,
@@ -14,6 +14,7 @@ PROMPTS = {
     "document answers": answer.ANSWER_SYSTEM,
     "document and meeting answers": answer.ANSWER_WITH_MEETINGS_SYSTEM,
     "document summaries": answer.SUMMARY_SYSTEM,
+    "image descriptions": vision.VISION_PROMPT,
 }
 
 

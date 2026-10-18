@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import base64
 
+from ..brain.llm import UNTRUSTED_NOTE
 from ..contracts import LLM
 
 MAX_IMAGE_BYTES = 7 * 1024 * 1024  # Sarvam rejects request bodies over 10 MB; base64 adds a third
@@ -17,7 +18,9 @@ VISION_PROMPT = """This image was uploaded to a team's meeting notes. It may be 
 a chart, a diagram or a scanned page. Describe what it shows that plain text extraction would miss:
 structure (boxes, arrows, groupings, tables), chart axes and trends, and any decisions, owners, dates or
 numbers it states. Use short plain sentences or "- " bullet points, at most 120 words. Do not invent
-details that are not visible."""
+details that are not visible.
+"""
+VISION_PROMPT += UNTRUSTED_NOTE
 
 
 def supports_images(llm: LLM | None) -> bool:
