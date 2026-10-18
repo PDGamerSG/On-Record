@@ -15,6 +15,11 @@ def speaker_model_path() -> Path:
     return cfg.models_dir / cfg.speaker_model
 
 
+def vad_model_path() -> Path:
+    """The Silero VAD model that LiveSession loads unless it is given another path."""
+    return settings().models_dir / "silero_vad.onnx"
+
+
 @lru_cache(maxsize=1)
 def get_speaker_embedder() -> SherpaSpeakerEmbedder:
     """The shared speaker embedder. Raises FileNotFoundError if the model file is missing."""
