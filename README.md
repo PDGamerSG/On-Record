@@ -161,14 +161,13 @@ cd apps/web && npm run dev    # the Documents page proxies /api to port 8000
 | `POST /api/documents/speak` | Read text aloud with Bulbul v3 (`audio/wav`) |
 | `GET /api/documents/status` | Configured digitiser, model, embedder and limits |
 
-To try the meeting check with the bundled demo data, load the two demo meetings and generate a 12-page pricing policy. The policy still states the Starter terms that the later demo meeting changed. Its 12 pages are sent to Document AI as two parts:
+To try it with the bundled demo data, load the two demo meetings into the graph:
 
 ```bash
 uv run --project apps/api python scripts/seed_demo_meetings.py
-uv run --project apps/api python scripts/make_demo_document.py    # writes data/kitepost-pricing-policy.pdf
 ```
 
-Upload the PDF on the Documents page. Then ask "What does the Starter plan cost?" with meetings included.
+On the Documents page, choose **Try the sample pricing policy**. This loads `apps/web/public/samples/kitepost-pricing-policy.pdf`, a 12-page Kitepost policy, and Document AI receives it as two parts. The policy still states the Starter terms that the later demo meeting changed. After ingesting it, ask "What does the Starter plan cost?" with meetings included. `scripts/make_demo_document.py` regenerates the sample PDF.
 
 `WSW_DOC_PART_PAGES` (at most 10), `WSW_DOC_MAX_PAGES`, `WSW_DOC_MAX_MB`, `WSW_DOC_CONCURRENCY` and `WSW_DOC_LANGUAGE` control the limits and the Document AI language. Upload jobs are tracked in memory by the serving process.
 

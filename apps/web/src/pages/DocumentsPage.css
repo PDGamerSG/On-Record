@@ -141,6 +141,18 @@
     border-color var(--t-fast) var(--ease),
     background-color var(--t-fast) var(--ease);
 }
+.dx-sample {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-2) var(--s-3);
+  margin-top: var(--s-3);
+}
+.dx-sample .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-1);
+}
 .dx-drop:hover {
   border-color: var(--ink-3);
 }

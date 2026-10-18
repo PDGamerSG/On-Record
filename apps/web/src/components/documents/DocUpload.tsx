@@ -31,6 +31,12 @@ const PART_LABEL: Record<PartState, string> = {
   stopped: "Stopped",
 };
 
+const SAMPLE = {
+  url: "/samples/kitepost-pricing-policy.pdf",
+  filename: "kitepost-pricing-policy.pdf",
+  title: "Kitepost pricing policy",
+};
+
 function bytes(n: number): string {
   if (n >= 1024 * 1024) return `${(n / (1024 * 1024)).toFixed(1)} MB`;
   if (n >= 1024) return `${Math.round(n / 1024)} KB`;
@@ -152,6 +158,7 @@ export default function DocUpload({ status, onIngested, onOpen }: Props) {
   const [jobError, setJobError] = useState<string | null>(null);
   const [pollFailures, setPollFailures] = useState(0);
   const [dragging, setDragging] = useState(false);
+  const [loadingSample, setLoadingSample] = useState(false);
   const pickToken = useRef(0);
   const onIngestedRef = useRef(onIngested);
   useEffect(() => {
@@ -185,6 +192,23 @@ export default function DocUpload({ status, onIngested, onOpen }: Props) {
       if (token === pickToken.current) setFileError(documentsErrorText(e));
     } finally {
       if (token === pickToken.current) setSplitting(false);
+    }
+  };
+
+  // A bundled 12-page policy: long enough to be split into two parts, and written to disagree with the demo meetings.
+  const trySample = async () => {
+    if (running || loadingSample) return;
+    setLoadingSample(true);
+    try {
+      const res = await fetch(SAMPLE.url);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const blob = await res.blob();
+      await choose(new File([blob], SAMPLE.filename, { type: "application/pdf" }));
+      setTitle(SAMPLE.title);
+    } catch {
+      setFileError("The sample document could not be loaded.");
+    } finally {
+      setLoadingSample(false);
     }
   };
 
@@ -290,6 +314,17 @@ export default function DocUpload({ status, onIngested, onOpen }: Props) {
             Long documents are split into parts of {partPages} pages, Sarvam Document AI's limit per job, and digitised in parallel.
           </span>
         </label>
+      ) : null}
+      {!file ? (
+        <div className="dx-sample">
+          <button type="button" className="btn btn--ghost mp-mini" onClick={() => void trySample()} disabled={loadingSample}>
+            {loadingSample ? <CircleNotchIcon aria-hidden="true" className="spin" /> : <FileTextIcon aria-hidden="true" />}
+            {loadingSample ? "Loading the sample…" : "Try the sample pricing policy"}
+          </button>
+          <span className="dx-hint">
+            12 pages, so it goes to Sarvam as two parts. It still lists the Starter price that a later demo meeting changed.
+          </span>
+        </div>
       ) : (
         <div className="dx-file">
           <FileTextIcon aria-hidden="true" className="dx-file__icon" />
