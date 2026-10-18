@@ -239,9 +239,11 @@ export default function CommitmentsPage() {
       ) : null}
 
       <div className="cm-groups">
-        {groups.map((g) => (
-          <section key={g.owner ?? "unassigned"} className="panel cm-group" aria-labelledby={`cm-${g.owner ?? "none"}`}>
-            <h2 className="cm-owner" id={`cm-${g.owner ?? "none"}`}>
+        {groups.map((g, i) => (
+          // ids by position: an owner's name can hold spaces ("Priya Sharma"), which split aria-labelledby into two
+          // missing ids, and an owner literally named "none" would collide with Unassigned
+          <section key={g.owner ?? "unassigned"} className="panel cm-group" aria-labelledby={`cm-owner-${i}`}>
+            <h2 className="cm-owner" id={`cm-owner-${i}`}>
               {g.owner ?? "Unassigned"}
               <span className="cm-owner__count">{groupCount(g.items, filter)}</span>
             </h2>
