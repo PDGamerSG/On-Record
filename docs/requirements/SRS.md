@@ -26,6 +26,15 @@ Terms (utterance, speaker track, supersession, RRF, demo mode and others) are de
 
 [README](../../README.md), [architecture](../ARCHITECTURE.md), [configuration](../CONFIGURATION.md), [design](../DESIGN.md), [troubleshooting](../TROUBLESHOOTING.md), [upstream](../UPSTREAM.md), [local Gemma](../LOCAL_GEMMA.md), [web app README](../../apps/web/README.md), [REST API reference](../api/README.md).
 
+### 1.5 Status summary
+
+| | Implemented | Partial | Planned | Total |
+| --- | --- | --- | --- | --- |
+| Functional requirements (FR) | 26 | 35 | 4 | 65 |
+| Quality requirements (NFR) | 16 | 9 | 3 | 28 |
+
+Most Partial requirements have working, tested code that nothing runs yet: the four gaps listed in [2.1 Product perspective](#21-product-perspective) explain why, chiefly the missing meeting routes (G1) and the unwired ingest pipeline (G4). The [traceability matrix](../testing/traceability.md) maps each requirement to its code and tests.
+
 ## 2. Product overview
 
 ### 2.1 Product perspective
