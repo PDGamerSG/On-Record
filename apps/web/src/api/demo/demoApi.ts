@@ -64,6 +64,7 @@ const allUtterances = () => allDetails().flatMap((d) => d.utterances);
 const allItems = () => allDetails().flatMap((d) => d.action_items);
 const allDecisions = () => allDetails().flatMap((d) => d.decisions);
 const titleOf = (meetingId: string) => db.details[meetingId]?.meeting.title ?? "";
+const startOf = (meetingId: string) => db.details[meetingId]?.meeting.started_at ?? 0;
 
 const STOP = new Set(
   "a an and are at be but by can did do does for from has have he her his how i in is it its me my of on or our she so that the their them then there they this to us was we were what when where which who why will with you your about any also just".split(
@@ -418,7 +419,13 @@ export const demoApi: Api = {
     a.done_at = status === "done" ? Date.now() : null;
     return wait<ActionItem>(a, 90);
   },
-  decisions: (meetingId) => wait<Decision[]>(allDecisions().filter((d) => !meetingId || d.meeting_id === meetingId)),
+  // newest first, as the API orders them (created_at, then made_at, descending): the later meeting, then the later moment
+  decisions: (meetingId) =>
+    wait<Decision[]>(
+      allDecisions()
+        .filter((d) => !meetingId || d.meeting_id === meetingId)
+        .sort((a, b) => startOf(b.meeting_id) - startOf(a.meeting_id) || b.made_at - a.made_at),
+    ),
   people: () => wait<Person[]>(db.people),
   whoKnows: (topic) => {
     const groups = new Map<string, WhoKnows>();
