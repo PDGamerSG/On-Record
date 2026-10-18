@@ -21,6 +21,7 @@ import { useSpeakerColour } from "../meeting/stripCache";
 import ProductMark from "./ProductMark";
 import { SystemStatus } from "./SystemStatus";
 import ThemeToggle from "./ThemeToggle";
+import { useRailFocus } from "./useRailFocus";
 import "./AppShell.css";
 
 type RailCountKey = "meetings" | "commitments" | "decisions" | "people";
@@ -172,6 +173,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
   const railData = useRailData();
   const [railOpen, setRailOpen] = useState(false);
   const dockTip = useDockTip(railOpen);
+  const railBar = useRailFocus(railOpen);
 
   useEffect(() => {
     if (!railOpen) return;
@@ -216,7 +218,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
         Skip to main content
       </a>
       {railOpen && <button type="button" className="shell-backdrop" aria-label="Close navigation" onClick={() => setRailOpen(false)} />}
-      <header className={`shell-bar${scrolled ? " is-scrolled" : ""}`} {...dockTip.handlers}>
+      <header ref={railBar} className={`shell-bar${scrolled ? " is-scrolled" : ""}`} {...dockTip.handlers}>
         <div className="shell-bar-inner" onScroll={dockTip.hide}>
           <div className="shell-brand-row">
             <button type="button" className="shell-dock-brand" onClick={() => setRailOpen(true)} aria-label="Open navigation">
