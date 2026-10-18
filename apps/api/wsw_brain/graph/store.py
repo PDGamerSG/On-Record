@@ -274,10 +274,16 @@ class GraphStore:
         return self._meeting(meeting_id)
 
     def set_meeting_summary(self, meeting_id: str, summary: str) -> None:
-        self._query(cq.SET_MEETING_SUMMARY, {"meeting_id": meeting_id, "summary": summary})
+        _require_id(meeting_id, "meeting_id")
+        if not isinstance(summary, str):
+            raise TypeError("summary must be a string")
+        self._query(cq.SET_MEETING_SUMMARY, {"meeting_id": meeting_id, "summary": " ".join(summary.split())})
 
     def set_meeting_has_audio(self, meeting_id: str, has_audio: bool) -> None:
-        self._query(cq.SET_MEETING_HAS_AUDIO, {"meeting_id": meeting_id, "has_audio": bool(has_audio)})
+        _require_id(meeting_id, "meeting_id")
+        if not isinstance(has_audio, bool):
+            raise TypeError("has_audio must be a bool")
+        self._query(cq.SET_MEETING_HAS_AUDIO, {"meeting_id": meeting_id, "has_audio": has_audio})
 
     @_traced
     def list_meetings(self) -> list[dict[str, Any]]:
