@@ -49,6 +49,31 @@ def test_agent_router_rejects_blank_questions():
     assert response.status_code == 422
 
 
+def test_agent_router_publishes_response_schema():
+    client = TestClient(FastAPI())
+    client.app.include_router(create_router(StubAgent()))
+
+    schema = client.get("/openapi.json").json()
+    response_schema = schema["paths"]["/api/agent/ask"]["post"]["responses"]["200"]["content"][
+        "application/json"
+    ]["schema"]
+
+    assert response_schema == {"$ref": "#/components/schemas/AskResponse"}
+    assert set(schema["components"]["schemas"]["AskResponse"]["properties"]) == {
+        "answer",
+        "citations",
+        "actions",
+        "tool_trace",
+        "cypher",
+        "model",
+        "provider",
+        "session_id",
+        "timings",
+        "transcript",
+        "transcript_provider",
+    }
+
+
 def test_main_app_mounts_agent_router_when_an_agent_is_injected():
     agent = StubAgent()
 

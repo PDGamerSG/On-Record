@@ -17,18 +17,34 @@ class AskRequest(BaseModel):
     k: int = Field(8, ge=1, le=20)
 
 
+class AskResponse(BaseModel):
+    """Stable JSON contract returned by the orchestration endpoint."""
+
+    answer: str
+    citations: list[dict[str, Any]]
+    actions: list[dict[str, Any]]
+    tool_trace: list[dict[str, Any]]
+    cypher: list[str]
+    model: str
+    provider: str
+    session_id: str
+    timings: dict[str, float]
+    transcript: str | None = None
+    transcript_provider: str | None = None
+
+
 def create_router(agent: MeetingAgent) -> APIRouter:
     """Build the agent router around an already configured agent instance."""
     router = APIRouter(prefix="/api/agent", tags=["agent"])
 
-    @router.post("/ask")
-    async def ask(body: AskRequest) -> dict[str, Any]:
+    @router.post("/ask", response_model=AskResponse)
+    async def ask(body: AskRequest) -> AskResponse:
         result = await agent.ask(
             body.question,
             session_id=body.session_id,
             meeting_id=body.meeting_id,
             k=body.k,
         )
-        return result.to_dict()
+        return AskResponse.model_validate(result.to_dict())
 
     return router
