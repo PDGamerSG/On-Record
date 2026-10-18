@@ -1,5 +1,6 @@
 """Text models, embeddings, and hybrid retrieval for meetings."""
 
+from .agent import MeetingAgent
 from .embed import GemmaEmbedder, HashEmbedder, get_embedder
 from .llm import (
     FakeLLM,
@@ -20,6 +21,7 @@ __all__ = [
     "GemmaEmbedder",
     "HashEmbedder",
     "LLMError",
+    "MeetingAgent",
     "ModelGate",
     "OllamaLLM",
     "OpenAICompatLLM",
