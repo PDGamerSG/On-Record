@@ -44,9 +44,11 @@ export function useCapture(meetingId: string): CaptureControl {
   const [status, setStatus] = useState<CaptureStatus | null>(null);
   const [level] = useState(createLevelStore);
   const handle = useRef<CaptureHandle | null>(null);
+  // A generation counter: every start, stop and unmount bumps it, so callbacks from an older capture see a
+  // stale number and do nothing, and a capture that finishes opening too late is stopped at once.
   const attempt = useRef(0);
   const mounted = useRef(true);
-  const inFlight = useRef(false);
+  const inFlight = useRef(false); // blocks a second start while the first is still opening the mic and socket
 
   useEffect(() => {
     mounted.current = true;

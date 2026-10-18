@@ -1,4 +1,18 @@
 // Meeting room state: REST snapshot merged with live SSE events. Pure reducer, no I/O.
+//
+// roomReducer actions:
+//   reset           back to the empty state while a meeting (re)loads
+//   loaded          apply the REST snapshot; anything that arrived over SSE first is kept, and its copy wins
+//   load-failed     show the error
+//   utterances      merge by seq; live ones are marked fresh for the highlight
+//   speaker-merged  move one track's utterances and items onto another track
+//   speaker-named   set a speaker's name on the speaker and its utterances
+//   speaker         apply the Speaker the API returned after a rename
+//   insight         add a decision (which may supersede another), action item or topic, marked fresh
+//   action-item     insert or replace one action item
+//   graph-write     record the latest graph write for the totals
+//   listener        record the listener's state and lag
+//   meeting         merge updated MeetingSummary fields
 import type { ActionItem, Decision, MeetingDetail, MeetingSummary, Speaker, Topic, Utterance } from "../../api/types";
 import { speakerIndex } from "../../lib/format";
 

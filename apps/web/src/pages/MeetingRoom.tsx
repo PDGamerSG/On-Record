@@ -143,6 +143,7 @@ function RoomReady({ id, room, meeting }: { id: string; room: MeetingRoomApi; me
       if (canPlayRef.current) seek(t, play);
       const list = stateRef.current.utterances;
       const known = utteranceId && list.some((u) => u.id === utteranceId) ? utteranceId : undefined;
+      // Look 50 ms ahead, so a seek to a rounded or slightly early time picks the line that starts there.
       const uid = known ?? list[utteranceIndexAt(list, t + 0.05)]?.id;
       if (uid) setTarget({ id: uid, n: Date.now() });
     },
@@ -426,6 +427,7 @@ function RecIndicator({ flowing, elapsed, capture }: { flowing: boolean; elapsed
   );
 }
 
+// Less than half a second of lag counts as live ("Keeping up"); beyond that, show how far behind it is.
 function listenerText(state: RoomState, captureLag: number | null, listenerFresh: boolean): string | null {
   const l = state.listener;
   if (l && listenerFresh && l.state === "error") return l.detail || "Error";

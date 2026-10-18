@@ -1,4 +1,7 @@
-// Loads one meeting and keeps it current from the shared SSE stream.
+// Loads one meeting and keeps it current from the shared SSE stream. The REST snapshot and each relevant bus
+// event (via toAction) go through roomReducer in meetingState.ts. After the stream reconnects, the hook fetches
+// the utterances it missed with utterancesAfter(lastSeq). Renames show at once and are reverted if the
+// request fails.
 import { useCallback, useEffect, useLayoutEffect, useReducer, useRef } from "react";
 import { ApiError, api } from "../../api/client";
 import { hub, useBusEvents } from "../../api/events";

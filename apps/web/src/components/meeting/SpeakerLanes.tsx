@@ -79,6 +79,8 @@ export default function SpeakerLanes(props: Props) {
     lanesRef.current = lanes;
   }, [lanes]);
 
+  // Left/Right/Home/End move within a lane. Up/Down jump to the turn nearest by start time in the next lane
+  // that has any.
   const onBlockKey = useCallback((e: KeyboardEvent<HTMLButtonElement>, li: number, bi: number) => {
     const all = lanesRef.current;
     const list = all[li]?.list ?? [];
@@ -117,6 +119,8 @@ export default function SpeakerLanes(props: Props) {
   const blocks = useMemo(
     () =>
       lanes.map((lane, li) => {
+        // Roving tabindex: one block per lane is in the Tab order (the last one focused, else the first), so
+        // Tab moves between lanes and the arrow keys move within them.
         const tabId = lane.list.some((u) => u.id === roving[lane.speaker.track]) ? roving[lane.speaker.track] : lane.list[0]?.id;
         return lane.list.map((u, bi) => {
           const unsure = u.confidence < 0.5;
@@ -319,6 +323,8 @@ interface PlayheadProps {
   tracksRef: React.RefObject<HTMLDivElement | null>;
 }
 
+// After a wheel, touch or pointer press on the lanes, the playhead stops auto-scrolling for this long so it
+// doesn't fight the user.
 const USER_SCROLL_GRACE_MS = 4000;
 
 function Playhead({ readHead, mode, domain, follow, scrollRef, tracksRef }: PlayheadProps) {
@@ -387,6 +393,7 @@ function Playhead({ readHead, mode, domain, follow, scrollRef, tracksRef }: Play
       const x = namesW + (tracks.offsetWidth * p) / 100;
       const viewStart = sc.scrollLeft + namesW;
       const viewEnd = sc.scrollLeft + sc.clientWidth;
+      // Scroll when the playhead is within 16 px of the left edge or 48 px of the right, putting it 30% in.
       if (x < viewStart + 16 || x > viewEnd - 48) {
         sc.scrollLeft = Math.max(0, x - namesW - (sc.clientWidth - namesW) * 0.3);
       }
