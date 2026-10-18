@@ -252,7 +252,8 @@ export default function DocAsk({ docs, scope, onScope }: Props) {
     jump({ meeting_id: h.meeting_id, t: h.t_start, utterance_id: h.utterance_id });
   };
 
-  const lineHref = (h: MeetingHit) => `${meetingPath(h.meeting_id)}?t=${Math.floor(h.t_start)}`;
+  const lineHref = (h: MeetingHit) =>
+    `${meetingPath(h.meeting_id)}?${new URLSearchParams({ t: String(Math.round(h.t_start * 100) / 100), u: h.utterance_id })}`;
 
   const chip = (ref: CiteRef, key: string) => {
     if (ref.kind === "u") {

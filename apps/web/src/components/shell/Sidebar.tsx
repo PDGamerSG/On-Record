@@ -2,7 +2,6 @@ import { useEffect, useLayoutEffect, useRef, type CSSProperties } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
   CheckSquareIcon,
-  FileTextIcon,
   GraphIcon,
   MagnifyingGlassIcon,
   MicrophoneIcon,
@@ -39,7 +38,6 @@ const NAV: NavItem[] = [
   { to: "/decisions", label: "Decisions", icon: SignpostIcon, count: "decisions", unit: "current", match: (p) => p.startsWith("/decisions") },
   { to: "/people", label: "People", icon: UsersThreeIcon, count: "people", match: (p) => p.startsWith("/people") },
   { to: "/graph", label: "Graph", icon: GraphIcon, match: (p) => p.startsWith("/graph") },
-  { to: "/documents", label: "Documents", icon: FileTextIcon, match: (p) => p.startsWith("/documents") },
 ];
 
 const RECENT = 5;
