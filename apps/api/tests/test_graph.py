@@ -115,6 +115,19 @@ def test_constructor_rejects_missing_connection_or_graph_name() -> None:
         GraphStore("falkor://127.0.0.1:6379", "")
 
 
+def test_meeting_metadata_updates_reject_invalid_inputs() -> None:
+    store = GraphStore("falkor://127.0.0.1:1", "wsw_test_validation")
+
+    with pytest.raises(ValueError, match="meeting_id"):
+        store.set_meeting_summary("", "Summary")
+    with pytest.raises(TypeError, match="summary"):
+        store.set_meeting_summary("m1", None)  # type: ignore[arg-type]
+    with pytest.raises(ValueError, match="meeting_id"):
+        store.set_meeting_has_audio("", True)
+    with pytest.raises(TypeError, match="has_audio"):
+        store.set_meeting_has_audio("m1", 1)  # type: ignore[arg-type]
+
+
 def test_end_meeting_rejects_invalid_lifecycle_values() -> None:
     store = GraphStore("falkor://127.0.0.1:1", "wsw_test_validation")
     invalid = [
