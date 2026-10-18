@@ -21,4 +21,6 @@ PROMPTS = {
 
 @pytest.mark.parametrize("name", sorted(PROMPTS))
 def test_prompt_marks_outside_material_as_untrusted(name: str) -> None:
-    assert PROMPTS[name].rstrip().endswith(UNTRUSTED_NOTE)
+    prompt = PROMPTS[name].rstrip()
+    assert prompt.endswith(UNTRUSTED_NOTE)
+    assert prompt.count(UNTRUSTED_NOTE) == 1
