@@ -153,9 +153,10 @@ def test_parse_due_and_json_helpers() -> None:
     assert parse_json_object("not json") is None
 
 
-def test_extractor_rejects_non_positive_max_tokens() -> None:
+@pytest.mark.parametrize("max_tokens", [0, -1, True, 1.5])
+def test_extractor_rejects_invalid_max_tokens(max_tokens: object) -> None:
     with pytest.raises(ValueError, match="max_tokens must be positive"):
-        Extractor(FakeLLM(), max_tokens=0)
+        Extractor(FakeLLM(), max_tokens=max_tokens)
 
 
 @pytest.mark.asyncio
