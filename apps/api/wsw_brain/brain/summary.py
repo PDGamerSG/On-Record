@@ -8,12 +8,17 @@ from typing import Any
 
 from ..contracts import LLM
 from .extract import mmss, speaker_display
-from .llm import LLMError, llm_priority, strip_thoughts
+from .llm import UNTRUSTED_NOTE, LLMError, llm_priority, strip_thoughts
 
 log = logging.getLogger(__name__)
 
 MAX_WORDS = 80
 MAX_TRANSCRIPT_CHARS = 6000
+
+SYSTEM_PROMPT = """You summarise meetings in one plain paragraph of at most 80 words. Name the people involved,
+the decisions, and each action item with its owner. No markdown, no bullet points, no preamble.
+"""
+SYSTEM_PROMPT += UNTRUSTED_NOTE
 
 
 def _participants(detail: dict[str, Any]) -> list[str]:
@@ -99,12 +104,7 @@ async def summarize_meeting(llm: LLM | None, meeting_detail: dict[str, Any]) -> 
         )
     title = (meeting_detail.get("meeting") or {}).get("title") or "the meeting"
     messages = [
-        {
-            "role": "system",
-            "content": "You summarise meetings in one plain paragraph of at most 80 words. Name the "
-            "people involved, the decisions, and each action item with its owner. No "
-            "markdown, no bullet points, no preamble.",
-        },
+        {"role": "system", "content": SYSTEM_PROMPT},
         {
             "role": "user",
             "content": f"Meeting: {title}\n"
