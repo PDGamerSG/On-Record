@@ -16,7 +16,8 @@ import {
 import { api } from "../../api/client";
 import type { ActionItem, Decision, MeetingSummary, Person } from "../../api/types";
 import { brand } from "../../lib/brand";
-import { duration, speakerIndex } from "../../lib/format";
+import { duration } from "../../lib/format";
+import { useSpeakerColour } from "../meeting/stripCache";
 import ProductMark from "./ProductMark";
 import { SystemStatus } from "./SystemStatus";
 import ThemeToggle from "./ThemeToggle";
@@ -145,6 +146,22 @@ function useRailData(): RailData {
   return data;
 }
 
+/** An open commitment in the rail, ruled in its owner's colour in that meeting. */
+function RailCommitment({ item, onOpen }: { item: ActionItem; onOpen: () => void }) {
+  const colour = useSpeakerColour(item.meeting_id, item.owner_track);
+  return (
+    <li className={`spk spk-${colour}`}>
+      <Link to={`/commitments?owner=${encodeURIComponent(item.owner ?? "")}`} onClick={onOpen}>
+        <span>{item.text}</span>
+        <small>
+          {item.owner ?? "Unassigned"}
+          {item.due ? ` · Due ${item.due}` : ""}
+        </small>
+      </Link>
+    </li>
+  );
+}
+
 function meetingMeta(meeting: MeetingSummary): string {
   return `${recentDate.format(new Date(meeting.started_at))} · ${duration(meeting.duration_s)}`;
 }
@@ -258,15 +275,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
             <h2 id="shell-commitments-title">Open commitments</h2>
             <ul>
               {railData.commitments.slice(0, 3).map((item) => (
-                <li key={item.id} className={`spk spk-${speakerIndex(item.owner_track)}`}>
-                  <Link to={`/commitments?owner=${encodeURIComponent(item.owner ?? "")}`} onClick={() => setRailOpen(false)}>
-                    <span>{item.text}</span>
-                    <small>
-                      {item.owner ?? "Unassigned"}
-                      {item.due ? ` · Due ${item.due}` : ""}
-                    </small>
-                  </Link>
-                </li>
+                <RailCommitment key={item.id} item={item} onOpen={() => setRailOpen(false)} />
               ))}
             </ul>
           </section>
