@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import logging
 import math
+import re
 import time
 from typing import Any
 
@@ -16,6 +17,11 @@ from ..graph.text import fulltext_query, query_terms
 from .split import Chunk
 
 log = logging.getLogger(__name__)
+
+SCAN_LIMIT = 5000  # chunks examined by the substring search for words in Indian scripts
+# Words in any non-Latin script. The full-text query keeps only ASCII terms, so Hindi, Kannada or Tamil
+# words in a question would otherwise never match document text.
+_TOKEN = re.compile(r"[^\s.,;:!?\"'()\[\]{}<>/\\|\u0964\u0965\-]+")
 
 SCHEMA = [
     "CREATE INDEX FOR (d:Document) ON (d.id)",
@@ -111,6 +117,27 @@ def fulltext_chunks(by_doc: bool) -> str:
         f"{_scope(by_doc)}"
         "WITH c, score ORDER BY score DESC LIMIT $k" + _HIT_TAIL
     )
+
+
+def scan_chunks(by_doc: bool) -> str:
+    """Substring match for words the full-text index cannot query (non-Latin scripts)."""
+    match = "MATCH (c:DocChunk {doc_id: $doc_id})" if by_doc else "MATCH (c:DocChunk)"
+    return (
+        f"{match}\n"
+        "WITH c LIMIT $scan_limit\n"
+        "WITH c, size([t IN $terms WHERE c.text CONTAINS t]) AS matched\n"
+        "WHERE matched > 0\n"
+        "WITH c, toFloat(matched) AS score ORDER BY score DESC LIMIT $k" + _HIT_TAIL
+    )
+
+
+def native_terms(query: str) -> list[str]:
+    """Distinct words of two or more characters that contain non-ASCII letters."""
+    terms: list[str] = []
+    for token in _TOKEN.findall(query or ""):
+        if len(token) >= 2 and not token.isascii() and token not in terms:
+            terms.append(token)
+    return terms[:12]
 
 
 def vector_chunks(by_doc: bool) -> str:
@@ -222,18 +249,24 @@ class DocumentStore:
         return self._query(MEETING_STARTS, {"ids": list(meeting_ids)}) if meeting_ids else []
 
     def search_fulltext(self, query: str, k: int = 8, doc_id: str | None = None) -> list[dict[str, Any]]:
+        """Text matches: the full-text index for Latin-script words, a substring scan for other scripts."""
+        k = max(1, min(int(k), 200))
+        scope: dict[str, Any] = {"doc_id": doc_id} if doc_id else {}
+        rows: list[dict[str, Any]] = []
         terms = query_terms(query)
-        if not terms:
-            return []
-        params: dict[str, Any] = {"query": fulltext_query(terms), "k": max(1, min(int(k), 200))}
-        if doc_id:
-            params["doc_id"] = doc_id
-        try:
-            rows = self._query(fulltext_chunks(bool(doc_id)), params)
-        except GraphQueryError as exc:
-            log.warning("document full-text search for %r failed: %s", query, exc)
-            return []
-        return [_hit(row, "fulltext") for row in rows]
+        if terms:
+            try:
+                rows += self._query(fulltext_chunks(bool(doc_id)), {"query": fulltext_query(terms), "k": k, **scope})
+            except GraphQueryError as exc:
+                log.warning("document full-text search for %r failed: %s", query, exc)
+        native = native_terms(query)
+        if native:
+            rows += self._query(scan_chunks(bool(doc_id)),
+                                {"terms": native, "k": k, "scan_limit": SCAN_LIMIT, **scope})
+        hits: dict[str, dict[str, Any]] = {}
+        for row in rows:
+            hits.setdefault(row["id"], _hit(row, "fulltext"))
+        return list(hits.values())[:k]
 
     def search_vector(self, vector: list[float], k: int = 8, doc_id: str | None = None) -> list[dict[str, Any]]:
         values = [float(v) for v in vector or []]

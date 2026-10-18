@@ -200,3 +200,25 @@ async def test_image_uploads_get_a_gemma_description(docs):
     plain = await DocumentIngestor(docs, HashEmbedder(64), ImageDigitiser(), llm=EchoLLM()).ingest(
         "whiteboard.png", png, summarise=False)
     assert plain["visual"] == []
+
+
+@pytest.mark.asyncio
+async def test_questions_in_indian_scripts_match_document_text(docs):
+    from wsw_brain.documents.store import native_terms
+
+    class HindiDigitiser:
+        async def digitise(self, filename, data, content_type, language="en-IN"):
+            return DigitisedPart(job_id="job-hi", status="completed", pages=[
+                Page(1, "## भुगतान की शर्तें\n\nसभी चालान 45 दिनों के भीतर भुगतान किए जाएंगे।"),
+                Page(2, "## Termination\n\nEither party may terminate with 60 days notice."),
+            ])
+
+    ingestor = DocumentIngestor(docs, HashEmbedder(64), HindiDigitiser(), language="hi-IN")
+    result = await ingestor.ingest("anubandh.pdf", make_pdf(2), summarise=False)
+
+    assert native_terms("चालान का भुगतान कब होगा? Invoice") == ["चालान", "का", "भुगतान", "कब", "होगा"]
+    hits = docs.search_fulltext("चालान का भुगतान कब होगा?", k=3)
+    assert hits and hits[0]["page_start"] == 1 and hits[0]["doc_id"] == result["doc_id"]
+    mixed = docs.search_fulltext("भुगतान terminate", k=5)
+    assert {h["page_start"] for h in mixed} == {1, 2}
+    assert docs.search_fulltext("भुगतान", k=3, doc_id="doc-other") == []
