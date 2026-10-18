@@ -56,7 +56,7 @@ The repository is being assembled in feature-sized PRs, so several things the we
 - `wsw_brain.app:app`, started with `python -m wsw_brain.cli`, serves `GET /healthz`, `GET /api/status`, `GET /api/capabilities` and the `GET /api/events` stream.
 - `wsw_brain.documents.app:app` serves only `/api/documents/*`. The web app on `main` has no Documents page yet.
 - No server provides the meeting routes listed in `apps/web/src/api/client.ts` (`/api/health`, `/api/meetings`, `/api/ask`, …) or the audio WebSocket.
-- The listener (`listen/session.py`) runs as a library: `listen/pipeline.py` feeds it an audio file as if it were streamed, but no route connects it to the browser yet.
+- The listener (`listen/session.py`) runs as a library: `listen/pipeline.py` feeds it an audio file as if it were streamed, and `IngestPipeline` (`wsw_brain/pipeline.py`) writes its utterances to the graph, extracts insights and summarises ended meetings. No route connects them to the browser yet.
 - The assistant (`brain/agent.py`) answers at `POST /api/agent/ask`, but only when `create_app()` is given a `MeetingAgent`; the default `app` has no agent. The web app calls `POST /api/ask` and `/api/ask/voice`, which no server provides.
 
 The web app decides its mode with `/api/health`, which no server answers yet, so its meeting views always run on the bundled demo data today. The live sections below describe what the client expects from the server.
@@ -93,9 +93,9 @@ The web client (`src/api/events.ts`) currently parses each frame's `data:` line 
 | `utterance.created` | `Utterance` | Meeting room, meetings, graph |
 | `speaker.merged` | `{from, to}` speaker tracks | Meeting room, graph, sidebar |
 | `speaker.named` | `{track, name, person_id}` | Meeting room, people, graph, sidebar |
-| `insight.created` | `{kind: "decision" \| "action_item" \| "topic", item}` | Meeting room, decisions, commitments, graph, sidebar |
+| `insight.created` | `{kind: "decision" \| "action_item" \| "topic", item, by}`; `by` names the extraction `provider`, `model`, `latency_ms` and any `fallback` reason | Meeting room, decisions, commitments, graph, sidebar |
 | `action.updated` | `ActionItem` | Meeting room, commitments, people, sidebar |
-| `graph.write` | `{utterances, ms, totals}` | Meeting room, graph, graph totals |
+| `graph.write` | `{utterances, ms, embed_ms, totals}`; `totals` is included at most every 3 s | Meeting room, graph, graph totals |
 | `listener.status` | `{state, lag_s, detail}` | Meeting room |
 
 **Browser.** `hub` (`src/api/events.ts`) is the app's single `EventSource` on `/api/events?since_id=<last id seen>`. It opens on the first subscription and never opens in demo mode. After an error, it reconnects with exponential backoff from 0.5 s to 10 s and resumes from the last id. Components subscribe with `useBusEvents(handler, filter)`.

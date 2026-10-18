@@ -327,6 +327,12 @@ Callbacks run on the worker thread. Errors reach `on_status("error", ...)` and t
 
 The VAD model is `silero_vad.onnx` in `WSW_MODELS_DIR` unless `vad_model_path` is given. The tests in `apps/api/tests/test_session.py` that need the VAD or a speaker model skip when either file is missing.
 
+### Meeting ingest
+
+`IngestPipeline` (`wsw_brain/pipeline.py`) connects the listener to the graph. `callbacks(meeting_id)` gives a `LiveSession` its `ListenerCallbacks`; utterances and speaker merges then go through one queue, so a merge is applied only after the utterances spoken before it are written. A writer thread embeds and writes utterances in small batches, publishes `utterance.created` and `graph.write` on the event bus, and writes text without vectors if embedding fails.
+
+Every `WSW_EXTRACT_EVERY` new utterances (default 6), the pipeline runs `Extractor` over the new lines plus some earlier context and publishes `insight.created`. Decisions and action items that a later window restates in other words are not added again. `end_meeting()` marks the meeting ended, runs a final extraction and `summarize_meeting()`, and publishes `meeting.ended` once when the meeting ends and again with the summary. No HTTP route starts the pipeline yet.
+
 ### Graph schema
 
 The schema definitions in `apps/api/wsw_brain/graph/cypher.py` cover range, full-text, and vector indexes. To verify them against the running database:
