@@ -57,7 +57,7 @@ The repository is being assembled in feature-sized PRs, so several things the we
 - `wsw_brain.documents.app:app` serves only `/api/documents/*`. The web app on `main` has no Documents page yet.
 - No server provides the meeting routes listed in `apps/web/src/api/client.ts` (`/api/health`, `/api/meetings`, `/api/ask`, …) or the audio WebSocket.
 - The listener (`listen/session.py`) runs as a library: `listen/pipeline.py` feeds it an audio file as if it were streamed, but no route connects it to the browser yet.
-- The assistant exists only as the `AskResult` contract in `contracts.py`. It will answer questions with tool calls.
+- The assistant (`brain/agent.py`) answers at `POST /api/agent/ask`, but only when `create_app()` is given a `MeetingAgent`; the default `app` has no agent. The web app calls `POST /api/ask` and `/api/ask/voice`, which no server provides.
 
 The web app decides its mode with `/api/health`, which no server answers yet, so its meeting views always run on the bundled demo data today. The live sections below describe what the client expects from the server.
 
@@ -162,7 +162,39 @@ The server-side pieces that exist today:
 - **`brain/llm.py`.** The text model adapters, the `get_llm()` provider factory, and `ModelGate`, which limits how many generations run at once against each endpoint.
 - **`documents/answer.py`.** The same approach for uploaded documents: it cites passages as `[d:<chunk id>]` and can check them against meetings.
 
-The assistant loop that ties these together is not in the repository yet.
+- **`brain/agent.py`.** `MeetingAgent` ties them together for a typed question, as below. `brain/agent_api.py` serves it at `POST /api/agent/ask`.
+
+```mermaid
+sequenceDiagram
+  autonumber
+  actor User
+  participant Drawer as Ask drawer (web)
+  participant Route as POST /api/agent/ask
+  participant Agent as MeetingAgent
+  participant Ret as Retriever
+  participant DB as FalkorDB
+  participant LLM as Text model
+
+  User->>Drawer: Types a question
+  Drawer->>Route: question, session_id, meeting_id?, k
+  Route->>Agent: ask()
+  Agent->>Ret: retrieve(question, meeting_id, k)
+  Ret->>DB: Full-text, vector, speaker and recent searches
+  DB-->>Ret: Matching utterances and the Cypher that found them
+  Ret-->>Agent: Hits fused with reciprocal-rank fusion
+  alt No hits
+    Agent-->>Route: "I couldn't find supporting evidence…", no citations
+  else Hits found
+    Agent->>LLM: System prompt, session history, evidence lines [u:id], question
+    LLM-->>Agent: Answer text
+    Agent->>Agent: Drop citations to lines it did not retrieve, remember the turn
+    Agent-->>Route: AskResult
+  end
+  Route-->>Drawer: answer, citations, tool_trace, cypher, timings
+  Drawer->>User: Shows the answer and its quotes, reads it aloud if enabled
+```
+
+The request's `k` (1 to 20, default 8) is how many fused hits the agent retrieves as evidence; `question` can be up to 2000 characters. The agent keeps the last six question-and-answer pairs of each session in memory; it does not write `Turn` nodes. Its `actions` list is always empty, and its `timings` keys are `retrieval_ms`, `model_ms` and `total_ms`. Before the drawer can use the agent, two gaps need closing: the drawer posts to `/api/ask` rather than `/api/agent/ask`, and spoken questions have no server route.
 
 ## Graph schema
 
