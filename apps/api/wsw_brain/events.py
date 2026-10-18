@@ -20,13 +20,40 @@ import asyncio
 import itertools
 import time
 from collections import deque
-from typing import Any
+from types import TracebackType
+from typing import Any, Self
+
+
+class EventSubscription:
+    """Own one event queue and remove it safely when the consumer disconnects."""
+
+    def __init__(self, bus: EventBus, queue: asyncio.Queue[dict[str, Any]]) -> None:
+        self._bus = bus
+        self.queue = queue
+        self._closed = False
+
+    def close(self) -> None:
+        """Detach this subscription; repeated cleanup calls are harmless."""
+        if not self._closed:
+            self._bus.unsubscribe(self.queue)
+            self._closed = True
+
+    async def __aenter__(self) -> Self:
+        return self
+
+    async def __aexit__(
+        self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: TracebackType | None
+    ) -> None:
+        self.close()
 
 
 class EventBus:
-    def __init__(self, replay: int = 500) -> None:
+    def __init__(self, replay: int = 500, queue_size: int = 2000) -> None:
         if replay <= 0:
             raise ValueError("replay must be positive")
+        if queue_size <= 0:
+            raise ValueError("queue_size must be positive")
+        self.queue_size = queue_size
         self._subs: dict[asyncio.Queue[dict[str, Any]], str | None] = {}
         self._ids = itertools.count(1)
         self._replay: deque[dict[str, Any]] = deque(maxlen=replay)
@@ -72,12 +99,16 @@ class EventBus:
             raise ValueError("since_id must be a non-negative int")
         if meeting_id is not None:
             _require_non_empty_text(meeting_id, "meeting_id")
-        q: asyncio.Queue[dict[str, Any]] = asyncio.Queue(maxsize=2000)
+        q: asyncio.Queue[dict[str, Any]] = asyncio.Queue(maxsize=self.queue_size)
         for e in self._replay:
             if e["id"] > since_id and (meeting_id is None or e.get("meeting_id") == meeting_id):
                 q.put_nowait(e)
         self._subs[q] = meeting_id
         return q
+
+    def subscription(self, since_id: int = 0, meeting_id: str | None = None) -> EventSubscription:
+        """Create a queue subscription that can be cleaned up with an async context manager."""
+        return EventSubscription(self, self.subscribe(since_id=since_id, meeting_id=meeting_id))
 
     def unsubscribe(self, q: asyncio.Queue[dict[str, Any]]) -> None:
         self._subs.pop(q, None)

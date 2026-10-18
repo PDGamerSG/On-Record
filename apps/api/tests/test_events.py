@@ -80,6 +80,24 @@ def test_subscriber_filters_replay_after_an_event_id() -> None:
     assert queue.get_nowait()["type"] == "utterance.created"
 
 
+@pytest.mark.asyncio
+async def test_subscription_context_replays_matching_events_and_cleans_up() -> None:
+    bus = EventBus()
+    bus.publish("meeting.started", {"title": "One"}, meeting_id="m1")
+    bus.publish("meeting.started", {"title": "Two"}, meeting_id="m2")
+
+    async with bus.subscription(meeting_id="m1") as subscription:
+        assert subscription.queue.qsize() == 1
+        assert subscription.queue.get_nowait()["meeting_id"] == "m1"
+
+        subscription.close()
+        subscription.close()
+        bus.publish("utterance.created", {"text": "after close"}, meeting_id="m1")
+
+    assert subscription.queue.empty()
+    assert bus._subs == {}
+
+
 def test_meeting_filter_handles_legacy_events_without_meeting_id() -> None:
     bus = EventBus()
     bus._replay.append({"id": 1, "type": "listener.status", "ts": 0.0, "data": {}})
@@ -98,3 +116,21 @@ def test_subscribe_rejects_non_positive_replay_size() -> None:
         assert "replay" in str(exc)
     else:
         raise AssertionError("EventBus should reject an empty replay buffer")
+
+
+@pytest.mark.parametrize("queue_size", [0, -1])
+def test_subscribe_rejects_non_positive_queue_size(queue_size: int) -> None:
+    with pytest.raises(ValueError, match="queue_size"):
+        EventBus(queue_size=queue_size)
+
+
+def test_subscriber_queue_uses_configured_capacity_and_drops_slow_events() -> None:
+    bus = EventBus(queue_size=1)
+    queue = bus.subscribe()
+
+    bus.publish("listener.status", {"state": "first"})
+    bus.publish("listener.status", {"state": "second"})
+
+    assert queue.maxsize == 1
+    assert queue.qsize() == 1
+    assert queue.get_nowait()["data"] == {"state": "first"}
