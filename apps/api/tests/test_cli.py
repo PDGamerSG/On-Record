@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from wsw_brain.__main__ import main
+from wsw_brain.cli import main
 
 
 def test_main_runs_api_app_with_uvicorn(monkeypatch):
@@ -11,7 +11,7 @@ def test_main_runs_api_app_with_uvicorn(monkeypatch):
     def fake_run(*args: object, **kwargs: object) -> None:
         calls.append((args, kwargs))
 
-    monkeypatch.setattr("wsw_brain.__main__.uvicorn.run", fake_run)
+    monkeypatch.setattr("wsw_brain.cli.uvicorn.run", fake_run)
 
     main([])
 
@@ -29,7 +29,7 @@ def test_main_accepts_server_options(monkeypatch):
     def fake_run(*args: object, **kwargs: object) -> None:
         calls.append((args, kwargs))
 
-    monkeypatch.setattr("wsw_brain.__main__.uvicorn.run", fake_run)
+    monkeypatch.setattr("wsw_brain.cli.uvicorn.run", fake_run)
 
     main(["--host", "0.0.0.0", "--port", "9100", "--reload"])
 
@@ -43,7 +43,7 @@ def test_main_accepts_server_options(monkeypatch):
 
 @pytest.mark.parametrize("port", ["0", "65536"])
 def test_main_rejects_ports_outside_tcp_range(monkeypatch, port: str) -> None:
-    monkeypatch.setattr("wsw_brain.__main__.uvicorn.run", lambda *args, **kwargs: None)
+    monkeypatch.setattr("wsw_brain.cli.uvicorn.run", lambda *args, **kwargs: None)
 
     with pytest.raises(SystemExit):
         main(["--port", port])
