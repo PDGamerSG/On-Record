@@ -124,7 +124,7 @@ export default function GraphPage() {
       <header className="mp-head">
         <div>
           <h1>Graph</h1>
-          <p className="mp-sub">Who spoke, what they said, and what it led to, as stored in FalkorDB.</p>
+          <p className="mp-sub">Who spoke, what they said, and what it led to, as stored in Neo4j.</p>
         </div>
         <label className="gp-pick">
           <span>Meeting</span>
@@ -159,7 +159,7 @@ export default function GraphPage() {
         <div className="panel mp-empty">
           <h2>No graph yet</h2>
           <p>
-            Record or upload a meeting. Each speaker, utterance, decision and action item is written to FalkorDB as it
+            Record or upload a meeting. Each speaker, utterance, decision and action item is written to Neo4j as it
             happens, and appears here.
           </p>
           <Link className="btn" to="/meetings">

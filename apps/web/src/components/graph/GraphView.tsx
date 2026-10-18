@@ -1,4 +1,4 @@
-// Force-directed view of a FalkorDB subgraph. react-force-graph-2d is loaded on demand so it stays
+// Force-directed view of a subgraph. react-force-graph-2d is loaded on demand so it stays
 // out of the main bundle.
 import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent, type ReactElement } from "react";
 import { FrameCornersIcon, MinusIcon, PlusIcon } from "@phosphor-icons/react";

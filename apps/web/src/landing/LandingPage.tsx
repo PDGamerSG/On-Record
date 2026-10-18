@@ -165,7 +165,7 @@ function Hero({ deck }: { deck: Deck }) {
 }
 
 function Stack() {
-  const items = ["Gemma 4", "EmbeddingGemma", "FalkorDB", "faster-whisper", "TitaNet", "Silero VAD"];
+  const items = ["Gemma 4", "EmbeddingGemma", "Neo4j", "faster-whisper", "TitaNet", "Silero VAD"];
   return (
     <div className="stack" aria-label="Built on">
       <span className="stack-label">Built on open models</span>
@@ -202,7 +202,7 @@ const STAGES: [string, string, string][] = [
   ["Finds the speech", "Silero VAD", "Drops silence and noise."],
   ["Tells voices apart", "TitaNet", "Clusters voices into speakers, live."],
   ["Writes it down", "faster-whisper", "Words and timings for every turn."],
-  ["Remembers it", "FalkorDB", "Every line, linked in a graph."],
+  ["Remembers it", "Neo4j", "Every line, linked in a graph."],
 ];
 
 function Closing() {

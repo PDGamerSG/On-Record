@@ -450,7 +450,7 @@ function GraphWrites({ state, live, captureLag, listenerFresh }: { state: RoomSt
       <div className="writes-item">
         <dt>
           <DatabaseIcon aria-hidden="true" />
-          In FalkorDB
+          In Neo4j
         </dt>
         <dd>
           {n.toLocaleString()} {n === 1 ? "line" : "lines"}

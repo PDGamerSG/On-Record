@@ -15,7 +15,7 @@ const ROWS: { key: string; label: string }[] = [
 const fmt = new Intl.NumberFormat();
 const REFETCH_DEBOUNCE_MS = 600;
 
-/** Node and relationship counts in FalkorDB, kept current from graph.write events. */
+/** Node and relationship counts in the graph, kept current from graph.write events. */
 export default function GraphTotals() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -56,7 +56,7 @@ export default function GraphTotals() {
   return (
     <section className="totals panel" aria-labelledby="totals-title">
       <h2 id="totals-title" className="totals-title">
-        In the FalkorDB graph
+        In the Neo4j graph
       </h2>
       {error && !stats ? (
         <p className="totals-error">
