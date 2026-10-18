@@ -1,11 +1,12 @@
 import { PlayIcon } from "@phosphor-icons/react";
-import { speakerIndex, timecode } from "../../lib/format";
+import { timecode } from "../../lib/format";
+import { useSpeakerColour } from "../meeting/stripCache";
 import { useJump } from "./useJump";
 import "./evidence.css";
 
 export interface EvidenceQuoteProps {
   text: string;
-  /** Speaker track ("S2"), for the colour of the rule. */
+  /** Speaker track ("S2"); with meetingId it picks the speaker's colour in that meeting. */
   track: string | null | undefined;
   speakerName: string;
   meetingId: string;
@@ -33,9 +34,10 @@ export default function EvidenceQuote({
   size = "md",
 }: EvidenceQuoteProps) {
   const jump = useJump();
+  const colour = useSpeakerColour(meetingId, track);
   const where = meetingTitle ? ` in ${meetingTitle}` : "";
   return (
-    <figure className={`evq evq--${size} spk spk-${speakerIndex(track)}`}>
+    <figure className={`evq evq--${size} spk spk-${colour}`}>
       <figcaption className="evq__meta">
         <span className="evq__who">{speakerName}</span>
         {meetingTitle ? <span className="evq__where">{meetingTitle}</span> : null}
