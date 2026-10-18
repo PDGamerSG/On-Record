@@ -66,6 +66,8 @@ def rrf_fuse(ranked_lists: list[list[dict[str, Any]]], k: int, rrf_k: int = RRF_
 
 
 def refers_to_recent(question: str) -> bool:
+    """True for questions about the latest talk ("just now", "so far", "a moment ago", ...). retrieve() then
+    adds the k newest utterances as one more ranked list."""
     return bool(_RECENT.search(question))
 
 
