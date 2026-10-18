@@ -12,7 +12,9 @@ interface Props {
 /** Transport for a recorded meeting: play/pause, position and a download. The speaker lanes are the scrubber. */
 export default function AudioTransport({ src, title, audio, fallbackDuration }: Props) {
   const total = audio.duration || fallbackDuration;
-  const fileName = `${title.replace(/[\\/:*?"<>|]+/g, " ").trim() || "meeting"}.wav`;
+  // the API serves WAV, but a recording with its own extension in the URL (the demo's .m4a) keeps it
+  const ext = /\.([a-z0-9]{2,4})$/i.exec(src.split(/[?#]/)[0])?.[1]?.toLowerCase() ?? "wav";
+  const fileName = `${title.replace(/[\\/:*?"<>|]+/g, " ").trim() || "meeting"}.${ext}`;
   return (
     <div className="transport">
       <div className="transport-row">
