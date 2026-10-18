@@ -1,6 +1,6 @@
 # Deployment and operations
 
-This page describes how On Record runs on a developer machine at commit `8943885`: which processes exist, which ports they use, where models come from and where logs go. Settings are described once, in [CONFIGURATION.md](../CONFIGURATION.md). Fixes for common start-up problems are in [TROUBLESHOOTING.md](../TROUBLESHOOTING.md). The security view of the same topology is in [the threat model](../security/threat-model.md).
+This page describes how On Record runs on a developer machine at commit `8943885`: which processes exist, which ports they use, where models come from and where logs go. Settings are described once, in [CONFIGURATION.md](../CONFIGURATION.md). Fixes for common start-up problems are in [the troubleshooting guide](../guides/troubleshooting.md). The security view of the same topology is in [the threat model](../security/threat-model.md).
 
 ## Local development topology
 
@@ -63,7 +63,7 @@ The main API on `main` does not mount the documents router, and the documents ap
 | Volume | named volume `falkordb_data` at `/var/lib/falkordb/data` | docker-compose.yml:9, docker-compose.yml:15-16 |
 | Health check | `redis-cli ping` every 5 s, 20 retries | docker-compose.yml:10-13 |
 
-Start it with `docker compose up -d --wait falkordb` (README.md:102). Port clashes, Colima and resetting the volume are covered in [TROUBLESHOOTING.md](../TROUBLESHOOTING.md#docker-and-the-graph-database).
+Start it with `docker compose up -d --wait falkordb` (README.md:102). Port clashes, Colima and resetting the volume are covered in [the troubleshooting guide](../guides/troubleshooting.md#docker-and-the-graph-database).
 
 ## Processes to run
 
@@ -73,9 +73,9 @@ Start it with `docker compose up -d --wait falkordb` (README.md:102). Port clash
 | Web dev server | `cd apps/web && npm run dev` | 5173 | Proxies `/api` and `/ws` to `WSW_API_URL`, default `http://127.0.0.1:8000` (apps/web/vite.config.ts:6-16; README.md:73) |
 | Main API | `uv run --project apps/api python -m wsw_brain.cli` | 8000 | Options `--host` (default `127.0.0.1`), `--port` (default 8000), `--reload` (apps/api/wsw_brain/cli.py:24-26); runs `wsw_brain.app:app` under Uvicorn (apps/api/wsw_brain/cli.py:31; README.md:153) |
 | Documents app | `uv run --project apps/api uvicorn wsw_brain.documents.app:app --port 8000` | 8000 | Serves only `/api/documents`; adds CORS headers from `WSW_CORS_ORIGINS` (apps/api/wsw_brain/documents/app.py:1-7, apps/api/wsw_brain/documents/app.py:22-25; README.md:275) |
-| Ollama (optional) | `./scripts/gemma.sh` | 11434 | Starts Ollama, waits up to 30 s for `/api/tags`, pulls the model if missing (scripts/gemma.sh:16-35); see [LOCAL_GEMMA.md](../LOCAL_GEMMA.md) |
+| Ollama (optional) | `./scripts/gemma.sh` | 11434 | Starts Ollama, waits up to 30 s for `/api/tags`, pulls the model if missing (scripts/gemma.sh:16-35); see [the local Gemma guide](../guides/local-gemma.md) |
 
-When the web app cannot reach a server that answers `/api/health`, it falls back to its bundled demo meetings (apps/web/src/api/mode.ts:3). See [TROUBLESHOOTING.md](../TROUBLESHOOTING.md) under "The app shows demo meetings, not my data".
+When the web app cannot reach a server that answers `/api/health`, it falls back to its bundled demo meetings (apps/web/src/api/mode.ts:3). See [the troubleshooting guide](../guides/troubleshooting.md) under "The app shows demo meetings, not my data".
 
 ## Settings
 
@@ -90,11 +90,11 @@ Every `WSW_*` setting, its default and the code that reads it is listed in [CONF
 | Speaker model `speaker_embedding_en.onnx` and `silero_vad.onnx` | Not recorded in the repository | Read from `WSW_MODELS_DIR` | No download code (apps/api/wsw_brain/listen/factory.py:12-20) |
 | faster-whisper `small` | Decided by the faster-whisper library [unverified] | Not set by repository code | No production caller (apps/api/wsw_brain/listen/asr.py:77-85) |
 
-`WSW_MODELS_DIR` defaults to `<repo>/models` (apps/api/wsw_brain/config.py:26). If the EmbeddingGemma download or load fails, the server falls back to the offline `HashEmbedder` and logs a warning (apps/api/wsw_brain/brain/embed.py:180-186). See [TROUBLESHOOTING.md](../TROUBLESHOOTING.md) under "The embedding model fails to download or load".
+`WSW_MODELS_DIR` defaults to `<repo>/models` (apps/api/wsw_brain/config.py:26). If the EmbeddingGemma download or load fails, the server falls back to the offline `HashEmbedder` and logs a warning (apps/api/wsw_brain/brain/embed.py:180-186). See [the troubleshooting guide](../guides/troubleshooting.md) under "The embedding model fails to download or load".
 
 ## Logs
 
-There is no log file, log rotation or structured logging. Python modules use the standard `logging` module (apps/api/wsw_brain/brain/embed.py:17, apps/api/wsw_brain/brain/llm.py:32, apps/api/wsw_brain/brain/extract.py:14), and output goes to the terminal that runs Uvicorn. Only the documents app configures logging, at `INFO` with the format `%(asctime)s %(levelname)s %(name)s: %(message)s` (apps/api/wsw_brain/documents/app.py:19). The main API does not call `logging.basicConfig`, so Uvicorn's defaults apply. FalkorDB logs are read with `docker compose logs --no-color --tail=200 falkordb` (docs/TROUBLESHOOTING.md:57).
+There is no log file, log rotation or structured logging. Python modules use the standard `logging` module (apps/api/wsw_brain/brain/embed.py:17, apps/api/wsw_brain/brain/llm.py:32, apps/api/wsw_brain/brain/extract.py:14), and output goes to the terminal that runs Uvicorn. Only the documents app configures logging, at `INFO` with the format `%(asctime)s %(levelname)s %(name)s: %(message)s` (apps/api/wsw_brain/documents/app.py:19). The main API does not call `logging.basicConfig`, so Uvicorn's defaults apply. FalkorDB logs are read with `docker compose logs --no-color --tail=200 falkordb` (docs/guides/troubleshooting.md:57).
 
 Messages worth knowing:
 

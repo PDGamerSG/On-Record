@@ -1,6 +1,6 @@
 # Architecture
 
-How the parts of On Record fit together, for anyone reading the code for the first time. The [README](../README.md) shows how to run and call each backend module, [CONFIGURATION.md](CONFIGURATION.md) lists every setting, [DESIGN.md](DESIGN.md) covers the visual design, and [TROUBLESHOOTING.md](TROUBLESHOOTING.md) helps with setup problems.
+How the parts of On Record fit together, for anyone reading the code for the first time. The [README](../README.md) shows how to run and call each backend module, [CONFIGURATION.md](CONFIGURATION.md) lists every setting, [DESIGN.md](DESIGN.md) covers the visual design, and [the troubleshooting guide](guides/troubleshooting.md) helps with setup problems.
 
 ## The two apps
 

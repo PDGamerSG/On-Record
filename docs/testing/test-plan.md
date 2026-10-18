@@ -71,7 +71,7 @@ Fixtures live in `apps/api/tests/fixtures` (a two-speaker WAV with its truth fil
 
 ## How to run
 
-The commands are in the [README checks section](../../README.md#checks) and are not repeated here. In short: start FalkorDB, run `pytest -q` from the API project, or deselect the live-graph modules with `-m "not live"` when no database is available. For database connection errors, model files that cause skips and other failures, see [TROUBLESHOOTING.md](../TROUBLESHOOTING.md).
+The commands are in the [README checks section](../../README.md#checks) and are not repeated here. In short: start FalkorDB, run `pytest -q` from the API project, or deselect the live-graph modules with `-m "not live"` when no database is available. For database connection errors, model files that cause skips and other failures, see [the troubleshooting guide](../guides/troubleshooting.md).
 
 ## CI pipeline
 
