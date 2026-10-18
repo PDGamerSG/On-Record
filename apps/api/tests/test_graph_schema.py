@@ -16,6 +16,8 @@ from redis.exceptions import ResponseError
 from wsw_brain.graph import cypher
 from wsw_brain.graph.text import fulltext_query, query_terms
 
+pytestmark = pytest.mark.live
+
 
 @pytest.fixture
 def graph():

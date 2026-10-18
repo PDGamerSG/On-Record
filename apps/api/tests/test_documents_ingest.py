@@ -14,6 +14,8 @@ from wsw_brain.documents.sarvam import DigitisedPart
 from wsw_brain.documents.split import DocumentError, Page
 from wsw_brain.graph import GraphStore
 
+pytestmark = pytest.mark.live
+
 TEXT = {
     1: "# Vendor agreement\n\nThis agreement is between Acme and Orbit.",
     4: "## Payment terms\n\nInvoices are paid within 45 days of receipt.",

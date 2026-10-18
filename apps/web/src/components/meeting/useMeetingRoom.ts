@@ -7,7 +7,7 @@ import { asActionItem, initialRoom, roomReducer, type RoomAction, type RoomState
 
 type Data = Record<string, unknown>;
 
-// The event stream replays recent history when the page connects; only events from after the page opened
+// The event stream replays recent history when the page connects; only events from after the app loaded
 // get the "just extracted" highlight (5 s slack for clock drift between server and browser).
 const PAGE_OPENED_S = Date.now() / 1000 - 5;
 

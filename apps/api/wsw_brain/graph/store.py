@@ -324,7 +324,7 @@ class GraphStore:
     # ---- live writes ------------------------------------------------------------
     def write_utterances(self, utterances: list[Utterance], embeddings: list[list[float]] | None) -> dict[str, Any]:
         """One UNWIND batch: MERGE Utterance + Speaker (+HAS_SPEAKER, SPOKEN_BY, HAS_UTTERANCE) and link
-        NEXT from the previous seq. Returns {"written": n, "ms": float}."""
+        NEXT to the neighbouring seqs on both sides. Returns {"written": n, "ms": float}."""
         if not utterances:
             return {"written": 0, "ms": 0.0}
         if embeddings is not None and len(embeddings) != len(utterances):
@@ -404,7 +404,8 @@ class GraphStore:
 
     def name_speaker(self, meeting_id: str, track: str, name: str) -> dict[str, Any]:
         """Set Speaker.name and MERGE (s)-[:IS]->(p:Person {id: slug(name)}). Returns the Speaker dict
-        with person_id. Also updates ActionItem.owner where owner_track == track.
+        with person_id. Also sets owner_name on this track's ActionItems, releases items the
+        transcript gave to a different name, and claims unassigned items given to this name.
         Raises LookupError when the meeting has no such speaker."""
         clean = " ".join((name or "").split())
         if not clean:

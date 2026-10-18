@@ -67,8 +67,12 @@ missing. Start FalkorDB first, then rerun the tests. To test against a different
 WSW_FALKORDB_URL=falkor://127.0.0.1:6379 uv run --project apps/api pytest -q
 ```
 
-Only `test_graph.py`, `test_graph_schema.py` and `test_retrieve_graph.py` need the database;
-the other test files run without it.
+Only `test_graph.py`, `test_graph_schema.py`, `test_retrieve_graph.py` and `test_documents_ingest.py`
+need the database, and they are marked `live`. To run everything else without it:
+
+```
+uv run --project apps/api pytest -q -m "not live"
+```
 
 ### Starting over with a clean database
 

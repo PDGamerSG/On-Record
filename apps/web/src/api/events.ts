@@ -40,7 +40,7 @@ class EventHub {
     this.statusListeners.forEach((fn) => fn(c));
   }
 
-  /** Deliver an event that didn't come from the server (the demo's live replay). */
+  /** Deliver an event that didn't come from the server, such as a client-side replay. Nothing calls it today. */
   emit(e: BusEvent) {
     this.lastId = Math.max(this.lastId, e.id);
     this.handlers.forEach((h) => h(e));

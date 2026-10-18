@@ -1,6 +1,6 @@
 // Decides once, before the first render, whether the UI talks to the API or to the bundled demo data.
 // VITE_DEMO=1 or ?demo=1 forces demo data; VITE_DEMO=0 or ?demo=0 forces the API. Otherwise the API is
-// used when /api/health answers, and the demo data when it doesn't (this branch ships before the API).
+// used when /api/health answers, and the demo data when it doesn't (this repository does not include the meeting API yet).
 import { API_BASE } from "./base";
 
 let demo = false;

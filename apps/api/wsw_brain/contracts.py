@@ -131,7 +131,7 @@ class SpeakerEmbedder(Protocol):
 class DecisionDraft:
     text: str
     evidence: list[str]  # utterance ids
-    proposed_by: str | None = None  # speaker track
+    proposed_by: str | None = None  # speaker track ("S2"), label ("Speaker 2") or name
     supersedes_text: str | None = None  # text of an earlier decision this one replaces, if any
 
     def __post_init__(self) -> None:
