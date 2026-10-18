@@ -1,7 +1,8 @@
-"""Text models, embeddings, and hybrid retrieval for meetings."""
+"""Text models, embeddings, hybrid retrieval and meeting-note extraction for meetings."""
 
 from .agent import MeetingAgent
 from .embed import GemmaEmbedder, HashEmbedder, get_embedder
+from .extract import Extractor, heuristic_extract
 from .llm import (
     FakeLLM,
     GeminiLLM,
@@ -16,6 +17,7 @@ from .llm import (
 from .retrieve import Retriever
 
 __all__ = [
+    "Extractor",
     "FakeLLM",
     "GeminiLLM",
     "GemmaEmbedder",
@@ -29,5 +31,6 @@ __all__ = [
     "SarvamLLM",
     "get_embedder",
     "get_llm",
+    "heuristic_extract",
     "llm_priority",
 ]
