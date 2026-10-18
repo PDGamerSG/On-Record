@@ -150,7 +150,7 @@ def test_insights_rejects_malformed_entities(entities: object) -> None:
     [None, []],
 )
 def test_insights_rejects_non_mapping_mentions(mentions: object) -> None:
-    with pytest.raises(TypeError, match="mentions"):
+    with pytest.raises(ValueError, match="mentions"):
         Insights(mentions=mentions)  # type: ignore[arg-type]
 
 

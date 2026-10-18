@@ -186,7 +186,7 @@ def _require_entities(value: object) -> list[dict[str, str]]:
 
 def _require_mentions(value: object) -> dict[str, list[str]]:
     if not isinstance(value, dict):
-        raise TypeError("Insights.mentions must be a dictionary")
+        raise ValueError("Insights.mentions must be a dictionary")  # noqa: TRY004 - contract validation uses ValueError
     normalised: dict[str, list[str]] = {}
     for utterance_id, names in value.items():
         _require_text(utterance_id, "Insights.mentions.utterance_id")
