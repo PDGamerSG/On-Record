@@ -23,6 +23,14 @@ def create_app(event_bus: EventBus | None = None) -> FastAPI:
     def status() -> dict[str, str]:
         return {"status": "ok", "product": product_name()}
 
+    @app.get("/api/capabilities")
+    def capabilities() -> dict[str, object]:
+        return {
+            "product": product_name(),
+            "api_version": "v1",
+            "features": ["status", "documents", "events"],
+        }
+
     return app
 
 

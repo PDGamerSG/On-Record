@@ -199,14 +199,16 @@ def test_gemini_settings_select_provider_before_local_probe():
 def test_explicit_gemini_requires_a_key_and_auto_can_fall_back_to_fake():
     missing = SimpleNamespace(
         llm_provider="gemini", gemini_api_key=None, gemini_model="gemma-4-31b-it",
-        openai_base_url=None, openai_api_key=None, ollama_url="http://ollama.test", ollama_model="gemma4:e4b",
+        openai_base_url=None, openai_api_key=None, sarvam_api_key=None, ollama_url="http://ollama.test",
+        ollama_model="gemma4:e4b",
     )
     with pytest.raises(LLMError, match="GEMINI_API_KEY"):
         select_llm(missing)
 
     offline = SimpleNamespace(
         llm_provider="auto", gemini_api_key=None, gemini_model="gemma-4-31b-it",
-        openai_base_url=None, openai_api_key=None, ollama_url="http://ollama.test", ollama_model="gemma4:e4b",
+        openai_base_url=None, openai_api_key=None, sarvam_api_key=None, ollama_url="http://ollama.test",
+        ollama_model="gemma4:e4b",
     )
     assert isinstance(select_llm(offline, lambda *args: None), FakeLLM)
 

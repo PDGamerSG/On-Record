@@ -8,6 +8,7 @@ from .llm import (
     ModelGate,
     OllamaLLM,
     OpenAICompatLLM,
+    SarvamLLM,
     get_llm,
     llm_priority,
 )
@@ -23,6 +24,7 @@ __all__ = [
     "OllamaLLM",
     "OpenAICompatLLM",
     "Retriever",
+    "SarvamLLM",
     "get_embedder",
     "get_llm",
     "llm_priority",

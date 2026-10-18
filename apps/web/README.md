@@ -9,7 +9,7 @@ npm ci
 npm run dev        # http://localhost:5173, proxies /api and /ws to :8000
 ```
 
-Without the API running, the UI uses the two bundled demo meetings. Force either mode with `?demo=1` or `?demo=0`, or set `VITE_DEMO`.
+Without the API running, the UI uses the two bundled demo meetings. Force either mode with `?demo=1` or `?demo=0`, or set `VITE_DEMO` (`1`/`true` or `0`/`false`). The query parameter wins over `VITE_DEMO`. With neither set, the app calls `/api/health` once at startup and uses the demo data if that fails.
 
 | Route | What |
 |---|---|
@@ -19,6 +19,28 @@ Without the API running, the UI uses the two bundled demo meetings. Force either
 | `/commitments`, `/decisions`, `/people`, `/graph` | Memory across meetings |
 
 `npm run build` type-checks and builds to `dist/`; `npm run lint` runs oxlint.
+
+## Talking to the API
+
+| Variable | Default | Effect |
+|---|---|---|
+| `WSW_API_URL` | `http://127.0.0.1:8000` | Where the dev server proxies `/api` and `/ws`. Read by `vite.config.ts`, so set it in the shell |
+| `VITE_API_BASE` | unset (same origin) | Origin of a separately hosted API. REST, SSE and WebSocket URLs are all built from it (`src/api/base.ts`) |
+| `VITE_DEMO` | unset | Forces demo or live mode, as above |
+
+All requests go through `api` in `src/api/client.ts`, which sends each call to the real API or to the demo data (`src/api/demo/`). Live updates arrive over one Server-Sent Events stream, `/api/events` (`src/api/events.ts`). The meeting room's WebSocket only sends microphone audio up. [docs/ARCHITECTURE.md](../../docs/ARCHITECTURE.md) describes these flows, and [docs/CONFIGURATION.md](../../docs/CONFIGURATION.md) lists every setting.
+
+## Window events
+
+Components that are far apart in the tree signal each other with `CustomEvent`s on `window`, alongside the server's event stream. To use one, dispatch it, for example `window.dispatchEvent(new CustomEvent("wsw:ask", { detail: { question } }))`.
+
+| Event | `detail` | Effect | Listened to in |
+|---|---|---|---|
+| `wsw:ask-open` | none | Opens the Ask drawer | `components/ask/AskDrawer.tsx` |
+| `wsw:ask` | `{ question }` | Opens the Ask drawer and asks the question | `components/ask/AskDrawer.tsx` |
+| `wsw:palette-open` | none | Opens the command palette (⌘K) | `components/CommandPalette.tsx` |
+| `wsw:refresh` | `"action_items"`, `"decisions"` or `"meeting"` | Refetches that data; the Ask drawer sends it after an answer changes something | `components/ask/useLiveRefresh.ts` |
+| `wsw:theme` | `"light"` or `"dark"` | Sent by `setTheme()` so canvas and WebGL art can repaint; subscribe with `onThemeChange()` or `useTheme()` | `lib/theme.ts` |
 
 ## 3D assets
 
