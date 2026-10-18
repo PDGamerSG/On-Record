@@ -123,6 +123,52 @@ The transport tests require neither a running model server nor a model download:
 uv run --project apps/api pytest apps/api/tests/test_llm.py -q
 ```
 
+## Gemma 4 and speech through Sarvam
+
+`SarvamLLM` calls Gemma 4 31B (`gemma4`) through Sarvam's OpenAI-compatible `/v2/chat/completions` endpoint, with the `api-subscription-key` header. Set `SARVAM_API_KEY` in `.env` and either `WSW_LLM_PROVIDER=sarvam`, or leave `auto`, which selects Sarvam when the key is set and no Gemini key is. `WSW_SARVAM_MODEL` can name another model your key can use (`GET https://api.sarvam.ai/v2/models`), such as `sarvam-105b`. Sarvam documents that `gemma4` returns blank output when `response_format` is combined with a JSON instruction in the prompt, so in JSON mode the adapter only sends `response_format` when no message already asks for JSON.
+
+`SaarasASR` (`wsw_brain.listen`) transcribes Indian-language and code-mixed speech with Saaras v4. It follows the same `ASR` contract as `FasterWhisperASR`, so the listener can use it for meetings held in Hindi, Kannada, Tamil, Hinglish and other languages. Each request covers at most 28 seconds of audio, within the 30-second REST limit. Pass speaker names and product terms as `keyterms` to improve recognition of those words. `WSW_SARVAM_ASR_LANGUAGE=auto` detects the language. `WSW_SARVAM_ASR_MODE` selects `transcribe`, `translate` (to English), `verbatim`, `translit` or `codemix`. Saaras returns no transcript confidence, so the adapter reports its language-identification probability.
+
+`SarvamSpeech` (`wsw_brain.sarvam`) translates answers with Sarvam's translation models and reads them aloud with Bulbul v3. Citation markers are removed first, so they are neither translated nor spoken.
+
+## Documents with Sarvam Document AI
+
+Teams also decide things in contracts, specs and policies. The `wsw_brain.documents` package adds those files to the same graph as the meetings:
+
+1. **Split.** Sarvam Document AI accepts at most 10 pages per job. `split_document` cuts a PDF into consecutive parts of up to 10 pages; a ZIP of page images is split the same way. A PNG or JPEG image is processed as a single page. Each part records the source pages it covers.
+2. **Digitise.** `SarvamDocAI` sends the parts to Sarvam Vision in parallel, waits for each job, and reads the per-page layout blocks. Running headers and page numbers are dropped, and tables become `cell | cell` rows. Page numbers are shifted back to the original document.
+3. **Chunk and embed.** Passages follow section headings, keep their page range, and are embedded with the configured embedder (EmbeddingGemma by default).
+4. **Store and search.** `(:Document)-[:HAS_CHUNK]->(:DocChunk)` nodes get their own full-text and vector indexes. `DocumentRetriever` fuses both with reciprocal-rank fusion.
+5. **Ask.** `answer_question` has Gemma 4 answer only from retrieved passages and cite them as `[d:<chunk id>]`. Citations to passages that were not retrieved are removed. Each document also gets a short Gemma 4 summary of its deadlines, owners and obligations.
+
+Run the document API on its own until the main server is added. With FalkorDB running and `SARVAM_API_KEY` set:
+
+```bash
+uv run --project apps/api uvicorn wsw_brain.documents.app:app --port 8000
+cd apps/web && npm run dev    # the Documents page proxies /api to port 8000
+```
+
+| Route | Purpose |
+| --- | --- |
+| `POST /api/documents/split` | Show how an upload would be split, without calling Sarvam |
+| `POST /api/documents` | Upload (`file`, optional `title`, `language` such as `hi-IN`); returns a job |
+| `GET /api/documents/jobs/{id}` | Job progress: split, each digitised part, chunk, embed, store, summary |
+| `GET /api/documents`, `GET/DELETE /api/documents/{id}` | List, read (with chunks) and delete documents |
+| `GET /api/documents/search?q=` | Fused full-text and vector passage search |
+| `POST /api/documents/ask` | Gemma 4 answer with page citations; add `language` (e.g. `kn-IN`) for a translation |
+| `POST /api/documents/speak` | Read text aloud with Bulbul v3 (`audio/wav`) |
+| `GET /api/documents/status` | Configured digitiser, model, embedder and limits |
+
+`WSW_DOC_PART_PAGES` (at most 10), `WSW_DOC_MAX_PAGES`, `WSW_DOC_MAX_MB`, `WSW_DOC_CONCURRENCY` and `WSW_DOC_LANGUAGE` control the limits and the Document AI language. Upload jobs are tracked in memory by the serving process.
+
+The document, Sarvam and speech tests use mock transports and a disposable graph. They make no Sarvam calls and download no models:
+
+```bash
+uv run --project apps/api pytest apps/api/tests/test_documents_split.py apps/api/tests/test_documents_sarvam.py \
+  apps/api/tests/test_documents_ingest.py apps/api/tests/test_documents_api.py apps/api/tests/test_sarvam_speech.py \
+  apps/api/tests/test_sarvam_asr.py -q
+```
+
 ## Local graph database
 
 Start Docker, then run:
