@@ -13,6 +13,8 @@ from fastapi.responses import StreamingResponse
 from .events import EventBus, EventSubscription
 
 router = APIRouter()
+QUEUE_POLL_S = 1.0
+KEEP_ALIVE_S = 15.0
 
 
 def format_sse(event: dict[str, Any]) -> str:
@@ -23,12 +25,17 @@ def format_sse(event: dict[str, Any]) -> str:
 
 async def _event_stream(request: Request, subscription: EventSubscription) -> AsyncIterator[str]:
     """Yield queued events until the client disconnects, then clean up."""
+    loop = asyncio.get_running_loop()
+    last_keep_alive = loop.time()
     try:
         while not await request.is_disconnected():
             try:
-                event = await asyncio.wait_for(subscription.queue.get(), timeout=15)
+                event = await asyncio.wait_for(subscription.queue.get(), timeout=QUEUE_POLL_S)
             except TimeoutError:
-                yield ": keep-alive\n\n"
+                now = loop.time()
+                if now - last_keep_alive >= KEEP_ALIVE_S:
+                    last_keep_alive = now
+                    yield ": keep-alive\n\n"
                 continue
             yield format_sse(event)
     finally:
