@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
+from wsw_brain.app import create_app
 from wsw_brain.brain.agent_api import create_router
 from wsw_brain.contracts import AskResult
 
@@ -46,3 +47,14 @@ def test_agent_router_rejects_blank_questions():
     response = TestClient(app).post("/api/agent/ask", json={"question": ""})
 
     assert response.status_code == 422
+
+
+def test_main_app_mounts_agent_router_when_an_agent_is_injected():
+    agent = StubAgent()
+
+    response = TestClient(create_app(meeting_agent=agent)).post(
+        "/api/agent/ask", json={"question": "When is the launch?"}
+    )
+
+    assert response.status_code == 200
+    assert agent.calls == [("When is the launch?", "default", None, 8)]

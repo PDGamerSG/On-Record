@@ -4,16 +4,20 @@ from __future__ import annotations
 
 from fastapi import FastAPI
 
+from .brain.agent import MeetingAgent
+from .brain.agent_api import create_router as create_agent_router
 from .brand import product_name
 from .event_stream import router as event_stream_router
 from .events import EventBus, bus
 
 
-def create_app(event_bus: EventBus | None = None) -> FastAPI:
+def create_app(event_bus: EventBus | None = None, meeting_agent: MeetingAgent | None = None) -> FastAPI:
     """Create the API application without connecting to external services."""
     app = FastAPI(title=product_name())
     app.state.event_bus = event_bus or bus
     app.include_router(event_stream_router)
+    if meeting_agent is not None:
+        app.include_router(create_agent_router(meeting_agent))
 
     @app.get("/healthz", include_in_schema=False)
     def health() -> dict[str, str]:
