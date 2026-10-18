@@ -2,7 +2,7 @@
 
 A meeting assistant that connects what was said to the person who said it. It keeps a meeting's transcript attributed to each speaker, pulls out the decisions and action items, and answers questions about past meetings with the quotes that back them up.
 
-This repository is being assembled in feature-sized PRs from [Who Said What Brain](https://github.com/Hydra-Of-Malice/hack-october-who-said-what-brain). It currently includes shared Python contracts, graph storage and queries, audio decoding and transcription, text embeddings, hybrid meeting retrieval, local and hosted text model adapters, document search, the web interface, and a small HTTP entrypoint. The meeting API, the live listener and the assistant are still to come, so the web app runs on two bundled demo meetings; [the architecture notes](docs/ARCHITECTURE.md#what-is-not-in-the-repository-yet) list what is missing.
+This repository is being assembled in feature-sized PRs from [Who Said What Brain](https://github.com/Hydra-Of-Malice/hack-october-who-said-what-brain). It currently includes shared Python contracts, graph storage and queries, audio decoding and transcription, text embeddings, hybrid meeting retrieval, local and hosted text model adapters, document search, the live listener, the web interface, and an HTTP app with the event stream. The meeting API and the assistant are still to come, so the web app runs on two bundled demo meetings; [the architecture notes](docs/ARCHITECTURE.md#what-is-not-in-the-repository-yet) list what is missing.
 
 ## Quick start
 
@@ -55,7 +55,7 @@ CI does not check the web app yet; run `npm run lint` and `npm run build` in `ap
 | --- | --- |
 | `apps/web/` | The web app: landing page and the app (React, Vite, TypeScript). See [its README](apps/web/README.md) |
 | `apps/web/scripts/` | Builds the demo data and, with Blender, the 3D landing assets |
-| `apps/api/wsw_brain/` | The Python package: `contracts`, `config`, `events`, `graph`, `listen`, `brain`, `documents` and the HTTP `app` |
+| `apps/api/wsw_brain/` | The Python package: `contracts`, `config`, `events`, `graph`, `listen`, `brain`, `documents`, and the HTTP `app`, `event_stream` and `cli` launcher |
 | `apps/api/tests/` | The pytest suite; `fixtures/` holds small synthetic ONNX models |
 | `scripts/` | Loads the demo meetings into the graph and generates a demo PDF |
 | `docs/` | The documentation listed below |
@@ -86,7 +86,7 @@ uv run --project apps/api python -m wsw_brain.cli
 
 The launcher binds to `127.0.0.1:8000` by default; pass `--host`, `--port`, or `--reload` for local development overrides.
 
-`GET /healthz` returns `{"status":"ok"}` for process health checks. `GET /api/status` returns the product identity without connecting to FalkorDB or loading a model. Feature routes can be mounted on the same app as they are added.
+`GET /healthz` returns `{"status":"ok"}` for process health checks. `GET /api/status` returns the product identity without connecting to FalkorDB or loading a model, and `GET /api/capabilities` lists the API version and the features it serves. `GET /api/events` streams the event bus as Server-Sent Events: `since_id` resumes after the last event id seen, and `meeting_id` limits the stream to one meeting. Feature routes can be mounted on the same app as they are added.
 
 ### Offline text embeddings
 
