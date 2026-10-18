@@ -7,16 +7,16 @@ Where to find each part of the On Record documentation. Everything here describe
 | Document | What it covers |
 | --- | --- |
 | [README](../README.md) | What On Record is, how it works, screenshots, the quick start and the repository map |
-| [User guide](user-guide.md) | Each page of the web app and the Ask drawer, and what works in demo mode |
+| [User guide](guides/user-guide.md) | Each page of the web app and the Ask drawer, and what works in demo mode |
 | [Glossary](glossary.md) | Terms used in the code and the documents, with their source files |
-| [Troubleshooting](TROUBLESHOOTING.md) | Docker, Colima, Node and Python setup problems |
+| [Troubleshooting](guides/troubleshooting.md) | Docker, Colima, Node and Python setup problems |
 
 ## Suggested reading order
 
 For a reviewer with half an hour:
 
 1. [README](../README.md): what On Record does, the "How it works" diagram and the screenshots.
-2. [User guide](user-guide.md): try the web app in demo mode.
+2. [User guide](guides/user-guide.md): try the web app in demo mode.
 3. [Architecture overview](ARCHITECTURE.md): how the parts connect and what is not in the repository yet.
 4. [Software requirements specification](requirements/SRS.md): what is Implemented, Partial or Planned, with evidence.
 5. [Traceability matrix](testing/traceability.md): the status and test coverage summary, then each requirement's code and tests.
@@ -56,7 +56,7 @@ For a reviewer with half an hour:
 | [Traceability matrix](testing/traceability.md) | Each requirement mapped to its design section, code and tests |
 | [Deployment and operations](operations/deployment.md) | Local topology, services, ports, model downloads and logs |
 | [Threat model](security/threat-model.md) | STRIDE analysis, what data leaves the machine, key handling and prompt-injection mitigations |
-| [Local Gemma runtime](LOCAL_GEMMA.md) | Running Gemma 4 locally with Ollama, and the smoke benchmark |
+| [Local Gemma runtime](guides/local-gemma.md) | Running Gemma 4 locally with Ollama, and the smoke benchmark |
 
 ## History
 

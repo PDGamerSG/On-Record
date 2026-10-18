@@ -1,6 +1,6 @@
 # Threat model
 
-This page applies STRIDE (spoofing, tampering, repudiation, information disclosure, denial of service, elevation of privilege) to On Record as it stands at commit `8943885`. It assumes the local topology in [deployment.md](../operations/deployment.md). Settings are described in [CONFIGURATION.md](../CONFIGURATION.md) and the local model runtime in [LOCAL_GEMMA.md](../LOCAL_GEMMA.md).
+This page applies STRIDE (spoofing, tampering, repudiation, information disclosure, denial of service, elevation of privilege) to On Record as it stands at commit `8943885`. It assumes the local topology in [deployment.md](../operations/deployment.md). Settings are described in [CONFIGURATION.md](../CONFIGURATION.md) and the local model runtime in [the local Gemma guide](../guides/local-gemma.md).
 
 The main assumption is a single developer on their own machine. No route checks who is calling, so every protection below depends on the services staying bound to `127.0.0.1`.
 

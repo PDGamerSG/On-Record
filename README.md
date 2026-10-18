@@ -63,7 +63,7 @@ The web app running on its bundled demo meetings (`npm run dev`, 1440 × 900). T
 
 ## Quick start
 
-You need Node 20.19 or 22.12 and later for the web app, [uv](https://docs.astral.sh/uv/) for the Python backend (it installs Python 3.12), and Docker or Colima for the graph database. If a step fails, see [the troubleshooting guide](docs/TROUBLESHOOTING.md).
+You need Node 20.19 or 22.12 and later for the web app, [uv](https://docs.astral.sh/uv/) for the Python backend (it installs Python 3.12), and Docker or Colima for the graph database. If a step fails, see [the troubleshooting guide](docs/guides/troubleshooting.md).
 
 ### Web app
 
@@ -94,7 +94,7 @@ The brain package can run Gemma 4 through Ollama without a hosted API key. The h
 uv run --project apps/api python scripts/bench_gemma.py --provider fake
 ```
 
-Use `--provider ollama` for a live local benchmark. See [the local Gemma guide](docs/LOCAL_GEMMA.md) for provider settings, model choices, and report fields.
+Use `--provider ollama` for a live local benchmark. See [the local Gemma guide](docs/guides/local-gemma.md) for provider settings, model choices, and report fields.
 
 ### Graph database
 
@@ -133,12 +133,12 @@ CI does not check the web app yet; run `npm run lint` and `npm run build` in `ap
 
 ## Documentation
 
-The [documentation index](docs/README.md) lists every document, including the requirements specification, architecture and design descriptions, API reference, test plan, threat model, [user guide](docs/user-guide.md) and [glossary](docs/glossary.md).
+The [documentation index](docs/README.md) lists every document, including the requirements specification, architecture and design descriptions, API reference, test plan, threat model, [user guide](docs/guides/user-guide.md) and [glossary](docs/glossary.md).
 
 - [Architecture](docs/ARCHITECTURE.md): how the web app, the API and the graph fit together, the data flows, and the graph schema.
 - [Configuration](docs/CONFIGURATION.md): every environment variable, its default, and what reads it.
-- [Troubleshooting](docs/TROUBLESHOOTING.md): Docker, Colima, Node and Python setup problems.
-- [Local Gemma runtime](docs/LOCAL_GEMMA.md): Ollama setup, provider selection and the smoke benchmark.
+- [Troubleshooting](docs/guides/troubleshooting.md): Docker, Colima, Node and Python setup problems.
+- [Local Gemma runtime](docs/guides/local-gemma.md): Ollama setup, provider selection and the smoke benchmark.
 - [Design](docs/DESIGN.md): the visual design, tokens and motion.
 - [Web app](apps/web/README.md): routes, demo mode and rebuilding the 3D assets.
 - [Source notes](docs/UPSTREAM.md): the original snapshot and attribution.

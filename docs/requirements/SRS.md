@@ -24,7 +24,7 @@ Terms (utterance, speaker track, supersession, RRF, demo mode and others) are de
 
 ### 1.4 References
 
-[README](../../README.md), [architecture](../ARCHITECTURE.md), [configuration](../CONFIGURATION.md), [design](../DESIGN.md), [troubleshooting](../TROUBLESHOOTING.md), [upstream](../UPSTREAM.md), [local Gemma](../LOCAL_GEMMA.md), [web app README](../../apps/web/README.md), [REST API reference](../api/README.md).
+[README](../../README.md), [architecture](../ARCHITECTURE.md), [configuration](../CONFIGURATION.md), [design](../DESIGN.md), [troubleshooting](../guides/troubleshooting.md), [upstream](../UPSTREAM.md), [local Gemma](../guides/local-gemma.md), [web app README](../../apps/web/README.md), [REST API reference](../api/README.md).
 
 ### 1.5 Status summary
 
@@ -244,7 +244,7 @@ All rows are served only by `wsw_brain.documents.app` (G6).
 | Audio | WebSocket PCM16 capture and WAV playback | Planned on the server | [audio](../ARCHITECTURE.md#audio), `apps/web/src/audio/mic.ts:34-36` |
 | Sarvam | Document AI, Mayura and sarvam-translate, Bulbul, Saaras, chat | Implemented for documents; Saaras unwired | `apps/api/wsw_brain/documents/sarvam.py:51-162`, `apps/api/wsw_brain/sarvam.py:12-27` |
 | Gemini | Text and image model through the SDK; REST in `GemmaClient` | Implemented through `get_llm()` | `apps/api/wsw_brain/brain/llm.py:346` |
-| Ollama | Local text model; native audio only in `GemmaClient` | Implemented through `get_llm()`; audio unwired (G7) | `apps/api/wsw_brain/brain/llm.py:875-887`, [local Gemma](../LOCAL_GEMMA.md) |
+| Ollama | Local text model; native audio only in `GemmaClient` | Implemented through `get_llm()`; audio unwired (G7) | `apps/api/wsw_brain/brain/llm.py:875-887`, [local Gemma](../guides/local-gemma.md) |
 | FalkorDB | Graph store and indexes through `GraphStore` | Implemented | [graph schema](../ARCHITECTURE.md#graph-schema), `apps/api/wsw_brain/graph/store.py:139-191` |
 
 ## 6. Use cases
