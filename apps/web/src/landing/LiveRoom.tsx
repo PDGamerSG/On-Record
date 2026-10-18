@@ -124,7 +124,9 @@ export default function LiveRoom({ deck }: { deck: Deck }) {
           activeId={speaking}
           onPick={seek}
           onScrub={(t) => deck.seek(t)}
+          // a replay has no server to save a new name to, so the names are not editable here
           onRename={async () => undefined}
+          canRename={false}
           meta={
             <span className="room-frame-writes">
               <DatabaseIcon aria-hidden="true" />
