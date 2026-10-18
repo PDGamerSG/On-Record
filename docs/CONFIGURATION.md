@@ -20,7 +20,7 @@ Some defaults in the code differ from the values in `.env.example`. The tables b
 | `WSW_FALKORDB_URL` | `falkor://127.0.0.1:6379` | FalkorDB connection URL. Use `falkors://` for TLS, and `falkor://default:<password>@<host>:<port>` for a hosted database | Document API, `scripts/seed_demo_meetings.py`, graph tests |
 | `WSW_GRAPH` | `wsw_demo` | Name of the graph that holds meetings and documents | Document API, `scripts/seed_demo_meetings.py` |
 | `WSW_DATA_DIR` | `data/` | Folder for runtime files; `audio/` inside it is created at startup | Created by `settings()`; *nothing else reads it yet* |
-| `WSW_MODELS_DIR` | `models/` | Where downloaded model files are kept | `brain/embed.py` |
+| `WSW_MODELS_DIR` | `models/` | Where downloaded model files are kept | `brain/embed.py`, `listen/factory.py` |
 
 Both folder defaults are relative to the repository root.
 
@@ -76,8 +76,8 @@ Each model endpoint gets a `ModelGate` that limits concurrent generations, so a 
 | `WSW_ASR_DEVICE` | `cpu` | Device for faster-whisper | *Not read yet* |
 | `WSW_ASR_COMPUTE` | `int8` | faster-whisper compute type | *Not read yet* |
 | `WSW_ASR_LANGUAGE` | `en` | Language passed to faster-whisper | *Not read yet* |
-| `WSW_SPEAKER_MODEL` | `speaker_embedding_en.onnx` | Speaker embedding model for telling voices apart | *Not read yet*; `SherpaSpeakerEmbedder` takes the model path as an argument |
-| `WSW_SPEAKER_THRESHOLD` | `0.55` | Voice similarity threshold (0 to 1) for matching a known speaker | *Not read yet*; `OnlineClusterer` takes it as an argument |
+| `WSW_SPEAKER_MODEL` | `speaker_embedding_en.onnx` | Speaker embedding model for telling voices apart | `listen/factory.py` |
+| `WSW_SPEAKER_THRESHOLD` | `0.55` | Voice similarity threshold (0 to 1) for matching a known speaker | `listen/factory.py` |
 | `WSW_MAX_UTTERANCE_S` | `12` | Longest utterance the listener should produce, in seconds | *Not read yet* |
 
 ## Documents

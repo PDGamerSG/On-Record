@@ -243,7 +243,7 @@ uv run --project apps/api pytest apps/api/tests/test_documents_split.py apps/api
 
 `SherpaSpeakerEmbedder` computes normalised voice embeddings with a sherpa-onnx speaker model such as NeMo TitaNet-small (`speaker_embedding_en.onnx`). `speaker_change_points()` finds where the voice changes inside one speech segment, for replies that follow each other with too little silence to split.
 
-To use the configured model, pass `settings().models_dir / settings().speaker_model` to `SherpaSpeakerEmbedder`. The embedder raises `FileNotFoundError` when the file is missing.
+`get_speaker_embedder()` loads the model named by `WSW_SPEAKER_MODEL` from `WSW_MODELS_DIR` once and shares it; an absolute `WSW_SPEAKER_MODEL` path is used as given. It raises `FileNotFoundError` while the file is missing, and a later call retries. `speaker_clusterer()` returns a fresh `OnlineClusterer` for one meeting, matching voices at `WSW_SPEAKER_THRESHOLD`.
 
 The model-backed tests in `apps/api/tests/test_speakers.py` skip when a speaker model is missing from `WSW_MODELS_DIR`. The clustering tests use synthetic vectors and always run.
 

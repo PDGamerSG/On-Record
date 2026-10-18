@@ -15,7 +15,14 @@ import pytest
 
 from wsw_brain.config import settings
 from wsw_brain.contracts import SAMPLE_RATE
-from wsw_brain.listen import OnlineClusterer, decode_file
+from wsw_brain.listen import (
+    OnlineClusterer,
+    decode_file,
+    get_speaker_embedder,
+    speaker_clusterer,
+    speaker_model_path,
+)
+from wsw_brain.listen import factory as listen_factory
 from wsw_brain.listen.speakers import SherpaSpeakerEmbedder, speaker_change_points
 
 FIXTURES = Path(__file__).parent / "fixtures"
@@ -192,3 +199,60 @@ def test_change_point_inside_a_segment(titanet: SherpaSpeakerEmbedder, fixture_a
     assert len(cuts) == 1 and abs(cuts[0] - david.size) < 0.25 * SAMPLE_RATE, (cuts, david.size)
     assert speaker_change_points(david, titanet, THRESHOLD - 0.1) == []
     assert speaker_change_points(david[:SAMPLE_RATE], titanet, THRESHOLD - 0.1) == []
+
+
+# ---------------------------------------------------------------------------
+# shared models from settings
+# ---------------------------------------------------------------------------
+
+
+@pytest.fixture
+def speaker_settings(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
+    monkeypatch.setenv("WSW_MODELS_DIR", str(tmp_path))
+    monkeypatch.setenv("WSW_SPEAKER_MODEL", "voice.onnx")
+    settings.cache_clear()
+    get_speaker_embedder.cache_clear()
+    yield tmp_path
+    settings.cache_clear()
+    get_speaker_embedder.cache_clear()
+
+
+def test_speaker_model_path_reads_settings(
+    speaker_settings: Path, monkeypatch: pytest.MonkeyPatch, tmp_path_factory: pytest.TempPathFactory
+) -> None:
+    assert speaker_model_path() == speaker_settings / "voice.onnx"
+    absolute = tmp_path_factory.mktemp("elsewhere") / "titanet.onnx"
+    monkeypatch.setenv("WSW_SPEAKER_MODEL", str(absolute))
+    settings.cache_clear()
+    assert speaker_model_path() == absolute  # an absolute WSW_SPEAKER_MODEL wins over WSW_MODELS_DIR
+
+
+def test_get_speaker_embedder_loads_the_configured_model_once(
+    speaker_settings: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    loaded: list[Path] = []
+
+    class FakeEmbedder:
+        def __init__(self, model_path: Path) -> None:
+            loaded.append(model_path)
+
+    monkeypatch.setattr(listen_factory, "SherpaSpeakerEmbedder", FakeEmbedder)
+    first = get_speaker_embedder()
+    assert get_speaker_embedder() is first
+    assert loaded == [speaker_settings / "voice.onnx"]
+
+
+def test_get_speaker_embedder_reports_a_missing_model_on_every_call(speaker_settings: Path) -> None:
+    for _ in range(2):  # a failed load is not cached, so adding the model later works without a restart
+        with pytest.raises(FileNotFoundError, match="voice.onnx"):
+            get_speaker_embedder()
+
+
+def test_speaker_clusterer_uses_the_configured_threshold(
+    speaker_settings: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("WSW_SPEAKER_THRESHOLD", "0.62")
+    settings.cache_clear()
+    clusterer = speaker_clusterer(max_speakers=3)
+    assert clusterer.threshold == pytest.approx(0.62) and clusterer.max_speakers == 3
+    assert speaker_clusterer() is not clusterer and speaker_clusterer().tracks == []
