@@ -133,7 +133,7 @@ export interface AskResult {
 export interface Health {
   ok: boolean;
   brand: Brand;
-  falkordb: { ok: boolean; version: string | null; graph: string };
+  falkordb?: { ok: boolean; version: string | null; graph: string }; // absent when the API doesn't report the database
   llm: { provider: string; model: string; audio: boolean };
   question_audio: string;
   embedder: { name: string; dim: number };

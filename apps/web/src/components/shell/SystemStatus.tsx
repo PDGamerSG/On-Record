@@ -88,12 +88,15 @@ function statusItems({ health, error, live, wasLive }: SystemState): StatusItem[
         : { key: "api", tone: "pending", text: "Checking the API" },
     );
   } else {
+    // /api/health may answer only {"ok": true}; a service it doesn't mention is unknown, not down
     const db = health.falkordb;
-    items.push(
-      db?.ok
-        ? { key: "db", tone: "ok", text: `FalkorDB ${db.version ?? ""}`.trim(), title: db.graph ? `Graph ${db.graph}` : undefined }
-        : { key: "db", tone: "warn", text: "FalkorDB not connected", title: "Start FalkorDB on port 6379, then reload." },
-    );
+    if (db) {
+      items.push(
+        db.ok
+          ? { key: "db", tone: "ok", text: `FalkorDB ${db.version ?? ""}`.trim(), title: db.graph ? `Graph ${db.graph}` : undefined }
+          : { key: "db", tone: "warn", text: "FalkorDB not connected", title: "Start FalkorDB on port 6379, then reload." },
+      );
+    }
     const llm = health.llm;
     if (llm?.model) {
       const where = PROVIDERS[llm.provider] ?? llm.provider;
