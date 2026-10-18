@@ -8,7 +8,7 @@ import wave
 import httpx
 import pytest
 
-from wsw_brain.sarvam import SarvamSpeech, SarvamSpeechError, join_wavs, strip_citations
+from wsw_brain.sarvam import SarvamSpeech, SarvamSpeechError, join_wavs, strip_citations, translator_name
 
 BASE = "https://sarvam.test"
 
@@ -91,3 +91,54 @@ def test_join_wavs_concatenates_frames():
     joined = join_wavs([wav(100), wav(50)])
     with wave.open(io.BytesIO(joined), "rb") as reader:
         assert reader.getnframes() == 150 and reader.getframerate() == 24000
+
+
+def lid_and_translate(calls, *, code="en-IN", translated="ترجمہ"):
+    """Answer /text-lid with `code` and /translate with `translated`, recording (path, body)."""
+
+    def handler(request):
+        body = json.loads(request.content)
+        calls.append((request.url.path, body))
+        if request.url.path == "/text-lid":
+            return httpx.Response(200, json={"language_code": code, "script_code": "Latn"})
+        return httpx.Response(200, json={"translated_text": translated})
+
+    return httpx.MockTransport(handler)
+
+
+@pytest.mark.asyncio
+async def test_translate_identifies_the_source_for_targets_mayura_cannot_reach():
+    calls = []
+    speech = SarvamSpeech("key", BASE, transport=lid_and_translate(calls))
+    assert await speech.translate("Paid in 45 days [d:x:c0001].", "ur-IN") == "ترجمہ"
+    assert calls == [
+        ("/text-lid", {"input": "Paid in 45 days."}),
+        ("/translate", {"input": "Paid in 45 days.", "source_language_code": "en-IN",
+                        "target_language_code": "ur-IN", "model": "sarvam-translate:v1"}),
+    ]
+
+
+@pytest.mark.asyncio
+async def test_translate_reports_an_unidentified_source_language():
+    calls = []
+    speech = SarvamSpeech("key", BASE, transport=lid_and_translate(calls, code=None))  # e.g. Urdu input
+    with pytest.raises(SarvamSpeechError, match="identify the source language"):
+        await speech.translate("انوائسز 45 دنوں میں", "as-IN")
+    assert [path for path, _ in calls] == ["/text-lid"]
+
+
+@pytest.mark.asyncio
+async def test_long_text_for_sarvam_translate_respects_both_input_limits():
+    calls = []
+    speech = SarvamSpeech("key", BASE, transport=lid_and_translate(calls))
+    await speech.translate("A sentence that repeats. " * 200, "kok-IN")
+    lid = [body for path, body in calls if path == "/text-lid"]
+    pieces = [body["input"] for path, body in calls if path == "/translate"]
+    assert len(lid) == 1 and len(lid[0]["input"]) <= 1000
+    assert len(pieces) > 1 and max(map(len, pieces)) <= 2000
+
+
+def test_translator_name_follows_the_model_choice():
+    assert translator_name("kn-IN") == "Sarvam Mayura"
+    assert translator_name("ur-IN") == "Sarvam Translate"
+    assert translator_name("kn-IN", source="en-IN") == "Sarvam Translate"

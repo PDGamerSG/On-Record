@@ -151,6 +151,40 @@ def test_ask_translates_when_a_language_is_requested(client):
     assert client.post("/api/documents/ask", json={"question": "When?", "language": "kannada"}).status_code == 422
 
 
+def test_ask_names_the_model_that_translated_the_answer(client):
+    mayura = client.post("/api/documents/ask", json={"question": "When?", "language": "kn-IN"}).json()
+    assert mayura["translated_by"] == "Sarvam Mayura"
+    translate = client.post("/api/documents/ask", json={"question": "When?", "language": "ur-IN"}).json()
+    assert translate["translated_answer"].startswith("[ur-IN] Answer to When?")
+    assert translate["translated_by"] == "Sarvam Translate"
+
+
+class FailingSpeech(FakeSpeech):
+    async def translate(self, text, target, source="auto"):
+        raise routes.SarvamSpeechError("Sarvam could not identify the source language")
+
+
+class SlowSpeech(FakeSpeech):
+    async def translate(self, text, target, source="auto"):
+        await asyncio.sleep(5)
+        return text
+
+
+@pytest.mark.parametrize(
+    ("speech", "error"),
+    [(FailingSpeech, "could not identify"), (SlowSpeech, "longer than 0.05 s")],
+)
+def test_ask_still_answers_when_translation_fails_or_times_out(client, monkeypatch, speech, error):
+    monkeypatch.setattr(routes, "_speech", lambda: speech())
+    monkeypatch.setattr(routes, "TRANSLATE_TIMEOUT_S", 0.05)
+    response = client.post("/api/documents/ask", json={"question": "When?", "language": "ur-IN"})
+    assert response.status_code == 200
+    result = response.json()
+    assert result["answer"].startswith("Answer to When?") and error in result["translation_error"]
+    assert "translated_answer" not in result and "translated_by" not in result
+    assert "translate_ms" in result["timings"]
+
+
 def test_speak_returns_wav(client):
     response = client.post("/api/documents/speak", json={"text": "Hello", "language": "hi-IN"})
     assert response.status_code == 200

@@ -186,7 +186,7 @@ uv run --project apps/api pytest apps/api/tests/test_llm.py -q
 
 `SaarasASR` (`wsw_brain.listen`) transcribes Indian-language and code-mixed speech with Saaras v4. It follows the same `ASR` contract as `FasterWhisperASR`, so the listener can use it for meetings held in Hindi, Kannada, Tamil, Hinglish and other languages. Each request covers at most 28 seconds of audio, within the 30-second REST limit. Pass speaker names and product terms as `keyterms` to improve recognition of those words. `WSW_SARVAM_ASR_LANGUAGE=auto` detects the language. `WSW_SARVAM_ASR_MODE` selects `transcribe`, `translate` (to English), `verbatim`, `translit` or `codemix`. Saaras returns no transcript confidence, so the adapter reports its language-identification probability.
 
-`SarvamSpeech` (`wsw_brain.sarvam`) translates answers with Sarvam's translation models and reads them aloud with Bulbul v3. Citation markers are removed first, so they are neither translated nor spoken.
+`SarvamSpeech` (`wsw_brain.sarvam`) translates answers with Sarvam's translation models and reads them aloud with Bulbul v3. Citation markers are removed first, so they are neither translated nor spoken. Answers can be translated into all 22 scheduled languages. Mayura handles the 11 languages Bulbul speaks and detects the source language itself. For the other 11, such as `ur-IN`, `as-IN` and `ne-IN`, `/text-lid` identifies the source and sarvam-translate translates it; `/text-lid` recognises only the 11 Mayura languages, so the text being translated must be in one of them. Bulbul still speaks only its 11 languages.
 
 ### Documents with Sarvam Document AI
 
@@ -214,7 +214,7 @@ cd apps/web && npm run dev    # the Documents page proxies /api to port 8000
 | `GET /api/documents/jobs/{id}` | Job progress: split, each digitised part, chunk, embed, store, summary |
 | `GET /api/documents`, `GET/DELETE /api/documents/{id}` | List, read (with chunks) and delete documents |
 | `GET /api/documents/search?q=` | Fused full-text and vector passage search |
-| `POST /api/documents/ask` | Gemma 4 answer with page citations; `include_meetings` adds meeting lines; `language` (e.g. `kn-IN`) adds a translation |
+| `POST /api/documents/ask` | Gemma 4 answer with page citations; `include_meetings` adds meeting lines; `language` (e.g. `kn-IN`) adds a translation, with `translated_by` naming the model. A failed or slow translation (over 20 seconds) returns the answer with `translation_error` |
 | `POST /api/documents/speak` | Read text aloud with Bulbul v3 (`audio/wav`) |
 | `GET /api/documents/status` | Configured digitiser, model, embedder and limits |
 
