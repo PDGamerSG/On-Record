@@ -241,7 +241,16 @@ function LaneName({ speaker, colour, talkS, onRename, onError }: LaneNameProps) 
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const settled = useRef(false);
+  const button = useRef<HTMLButtonElement>(null);
+  // Enter or Escape closes the field from the keyboard; focus goes back to the name, not to the page body
+  const refocus = useRef(false);
   const name = speakerName(speaker);
+
+  useEffect(() => {
+    if (editing || !refocus.current) return;
+    refocus.current = false;
+    button.current?.focus();
+  }, [editing]);
 
   const finish = async (value: string | null) => {
     if (settled.current) return;
@@ -281,19 +290,23 @@ function LaneName({ speaker, colour, talkS, onRename, onError }: LaneNameProps) 
             autoFocus
             onFocus={(e) => e.currentTarget.select()}
             onKeyDown={(e) => {
-              if (e.key === "Enter") void finish(e.currentTarget.value);
-              if (e.key === "Escape") void finish(null);
+              if (e.key !== "Enter" && e.key !== "Escape") return;
+              refocus.current = true;
+              void finish(e.key === "Enter" ? e.currentTarget.value : null);
             }}
             onBlur={(e) => void finish(e.currentTarget.value)}
           />
         ) : (
           <button
+            ref={button}
             type="button"
             className="lane-name-btn"
             title="Rename this speaker"
             aria-label={`${name}. Rename`}
-            disabled={saving}
+            // aria-disabled, not disabled, while saving: a disabled button can't take the focus coming back from the field
+            aria-disabled={saving || undefined}
             onClick={() => {
+              if (saving) return;
               settled.current = false;
               setEditing(true);
             }}
