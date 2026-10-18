@@ -35,6 +35,29 @@ flowchart TB
 
 Dashed links are designed but not connected yet. Nothing writes the listener's utterances to the graph so far (`scripts/seed_demo_meetings.py` loads the demo meetings directly), and the web app still runs on its bundled demo data. [The architecture notes](docs/ARCHITECTURE.md) have the component diagram, the data flows and the graph schema.
 
+## Screenshots
+
+The web app running on its bundled demo meetings (`npm run dev`, 1440 × 900).
+
+<p align="center">
+  <img src="docs/images/meeting-room.png" width="860"
+       alt="Meeting room: four speaker lanes showing when Priya, Rahul, Meera and Arjun spoke, the transcript below, and decisions extracted by Gemma 4 on the right">
+  <br><em>The meeting room: who spoke when, the transcript, and what Gemma 4 extracted.</em>
+</p>
+
+<table>
+  <tr>
+    <td width="50%"><img src="docs/images/ask-drawer.png"
+         alt="Ask drawer answering 'What did Priya commit to?' with two cited moments from the meetings"></td>
+    <td width="50%"><img src="docs/images/graph.png"
+         alt="Graph page showing a meeting's speakers, utterances, decisions, action items and topics as a force-directed graph"></td>
+  </tr>
+  <tr>
+    <td><em>Ask: answers cite the exact lines, and each quote plays.</em></td>
+    <td><em>The graph: what FalkorDB stores for a meeting.</em></td>
+  </tr>
+</table>
+
 ## Quick start
 
 You need Node 20.19 or 22.12 and later for the web app, [uv](https://docs.astral.sh/uv/) for the Python backend (it installs Python 3.12), and Docker or Colima for the graph database. If a step fails, see [the troubleshooting guide](docs/TROUBLESHOOTING.md).
