@@ -9,7 +9,7 @@ import { timecode, when } from "../lib/format";
 import { usePageTitle } from "../lib/pageTitle";
 import { errorText, titleMap, useMeetings } from "../components/ask/meetingData";
 import { meetingPath, useJump } from "../components/ask/useJump";
-import { useLiveRefresh } from "../components/ask/useLiveRefresh";
+import { useLiveRefresh } from "../hooks/useLiveRefresh";
 import GraphView from "../components/graph/GraphView";
 import KindSwatch from "../components/graph/KindSwatch";
 import { KIND_ORDER, kindStyle, nodeSpeakerIndex, truncate } from "../components/graph/graphStyle";

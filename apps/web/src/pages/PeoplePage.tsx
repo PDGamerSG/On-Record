@@ -7,7 +7,7 @@ import { duration } from "../lib/format";
 import { usePageTitle } from "../lib/pageTitle";
 import EvidenceQuote from "../components/ask/EvidenceQuote";
 import { errorText, titleMap, useMeetings } from "../components/ask/meetingData";
-import { useLiveRefresh } from "../components/ask/useLiveRefresh";
+import { useLiveRefresh } from "../hooks/useLiveRefresh";
 import "./memoryPages.css";
 import "./PeoplePage.css";
 

@@ -222,7 +222,7 @@ All rows are served only by `wsw_brain.documents.app` (G6).
 | NFR-016 | Input validation | Bound and validate questions, uploads and images. | Implemented | `apps/api/wsw_brain/brain/agent_api.py:13-17`, `apps/api/wsw_brain/documents/api.py:114-121` | Test |
 | NFR-017 | Security | Protect mutating routes with a token, limits and allowed hosts; restrict CORS. | Planned: no authentication; documents CORS is `*` | `.env.example:56-61`, `apps/api/wsw_brain/documents/app.py:22-24` | Inspection |
 | NFR-027 | Security | Send hosted API keys only in headers or the SDK, never in URLs. | Partial: `GemmaClient` puts the Gemini key in `?key=` (benchmark only, G7) | `apps/api/wsw_brain/brain/gemma.py:239` | Inspection |
-| NFR-018 | Accessibility | Dialogs use `role="dialog"`, trap focus and close on Escape. | Implemented | `apps/web/src/components/ask/useFocusTrap.ts:1-2` | Demonstration |
+| NFR-018 | Accessibility | Dialogs use `role="dialog"`, trap focus and close on Escape. | Implemented | `apps/web/src/hooks/useFocusTrap.ts:1-2` | Demonstration |
 | NFR-019 | Accessibility | Keyboard access: `/`, Ctrl/Cmd+K, Space for talkback, skip link. | Implemented | `apps/web/src/components/shell/AppShell.tsx:143` | Demonstration |
 | NFR-020 | Accessibility | Respect `prefers-reduced-motion`. | Implemented | `apps/web/src/styles/base.css:335-340` | Demonstration |
 | NFR-021 | Accessibility | Announce dynamic content (`aria-live`, `role="alert"`, `aria-sort`). | Implemented | `apps/web/src/pages/CommitmentsPage.tsx:186` | Demonstration |

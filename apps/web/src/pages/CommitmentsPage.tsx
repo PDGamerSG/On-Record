@@ -10,7 +10,7 @@ import { timecode, when } from "../lib/format";
 import { usePageTitle } from "../lib/pageTitle";
 import { errorText, loadDetails, utteranceIndex, utteranceStart } from "../components/ask/meetingData";
 import { useJump, meetingPath } from "../components/ask/useJump";
-import { useLiveRefresh } from "../components/ask/useLiveRefresh";
+import { useLiveRefresh } from "../hooks/useLiveRefresh";
 import { useSpeakerColour } from "../components/meeting/stripCache";
 import "./memoryPages.css";
 import "./CommitmentsPage.css";

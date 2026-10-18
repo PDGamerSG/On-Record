@@ -10,7 +10,7 @@ import { usePageTitle } from "../lib/pageTitle";
 import EvidenceQuote from "../components/ask/EvidenceQuote";
 import { errorText, loadDetails, titleMap, trackName, useMeetings, utteranceIndex } from "../components/ask/meetingData";
 import { meetingPath, useJump } from "../components/ask/useJump";
-import { useLiveRefresh } from "../components/ask/useLiveRefresh";
+import { useLiveRefresh } from "../hooks/useLiveRefresh";
 import "./memoryPages.css";
 import "./DecisionsPage.css";
 

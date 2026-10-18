@@ -5,7 +5,7 @@ import { ChatCircleIcon, CheckSquareIcon, GraphIcon, MagnifyingGlassIcon, Microp
 import { toggleTheme, useTheme } from "../lib/theme";
 import { duration, when } from "../lib/format";
 import { useMeetings } from "./ask/meetingData";
-import { useFocusTrap } from "./ask/useFocusTrap";
+import { useFocusTrap } from "../hooks/useFocusTrap";
 import { meetingPath } from "./ask/useJump";
 import "./CommandPalette.css";
 

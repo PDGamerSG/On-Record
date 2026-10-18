@@ -6,7 +6,7 @@ import type ForceGraph from "react-force-graph-2d";
 import type { ForceGraphMethods, LinkObject, NodeObject } from "react-force-graph-2d";
 import type { GraphNode, Subgraph } from "../../api/types";
 import { isHollow, kindStyle, nodeSpeakerIndex, readPalette, toneColor, traceShape, truncate } from "./graphStyle";
-import { useReducedMotion } from "./useReducedMotion";
+import { useReducedMotion } from "../../hooks/useReducedMotion";
 import { onThemeChange } from "../../lib/theme";
 import "./graph.css";
 

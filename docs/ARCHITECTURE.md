@@ -101,7 +101,7 @@ The web client (`src/api/events.ts`) currently parses each frame's `data:` line 
 **Browser.** `hub` (`src/api/events.ts`) is the app's single `EventSource` on `/api/events?since_id=<last id seen>`. It opens on the first subscription and never opens in demo mode. After an error, it reconnects with exponential backoff from 0.5 s to 10 s and resumes from the last id. Components subscribe with `useBusEvents(handler, filter)`.
 
 - **Meeting room.** `useMeetingRoom` loads the meeting once over REST, then turns each event into an action for `roomReducer` (`components/meeting/meetingState.ts`). The reducer is a pure function that merges utterances by sequence number, applies renames and merges, and marks new insights so they can be highlighted. After a reconnect, the hook fetches any utterances it missed with `utterancesAfter(lastSeq)`.
-- **Other pages.** These use `useLiveRefresh` (`components/ask/useLiveRefresh.ts`), which refetches the page's data 700 ms after the last relevant event.
+- **Other pages.** These use `useLiveRefresh` (`hooks/useLiveRefresh.ts`), which refetches the page's data 700 ms after the last relevant event.
 
 **Window events.** Components that are far apart in the component tree also signal each other with `CustomEvent`s on `window`:
 

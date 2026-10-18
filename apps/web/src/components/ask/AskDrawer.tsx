@@ -5,7 +5,7 @@ import { PlusIcon, PaperPlaneRightIcon, XIcon } from "@phosphor-icons/react";
 import { api } from "../../api/client";
 import type { AskResult, ClientAction, Health } from "../../api/types";
 import { timecode } from "../../lib/format";
-import { prefersReducedMotion } from "../graph/useReducedMotion";
+import { prefersReducedMotion } from "../../hooks/useReducedMotion";
 import AskExchange from "./AskExchange";
 import { askErrorText, NOT_CAUGHT } from "./askFormat";
 import {
@@ -24,7 +24,7 @@ import { speak, stopSpeaking, ttsSupported } from "./speech";
 import Suggestions from "./Suggestions";
 import Switch from "./Switch";
 import Talkback, { type TalkbackVisual } from "./Talkback";
-import { isActivatable, isTypingTarget, useFocusTrap } from "./useFocusTrap";
+import { isActivatable, isTypingTarget, useFocusTrap } from "../../hooks/useFocusTrap";
 import { useJump, useOpenMeeting } from "./useJump";
 import { useVoiceQuestion } from "./useVoiceQuestion";
 import "./ask.css";

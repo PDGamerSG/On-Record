@@ -39,7 +39,7 @@ Components that are far apart in the tree signal each other with `CustomEvent`s 
 | `wsw:ask-open` | none | Opens the Ask drawer | `components/ask/AskDrawer.tsx` |
 | `wsw:ask` | `{ question }` | Opens the Ask drawer and asks the question | `components/ask/AskDrawer.tsx` |
 | `wsw:palette-open` | none | Opens the command palette (⌘K) | `components/CommandPalette.tsx` |
-| `wsw:refresh` | `"action_items"`, `"decisions"` or `"meeting"` | Refetches that data; the Ask drawer sends it after an answer changes something | `components/ask/useLiveRefresh.ts` |
+| `wsw:refresh` | `"action_items"`, `"decisions"` or `"meeting"` | Refetches that data; the Ask drawer sends it after an answer changes something | `hooks/useLiveRefresh.ts` |
 | `wsw:theme` | `"light"` or `"dark"` | Sent by `setTheme()` so canvas and WebGL art can repaint; subscribe with `onThemeChange()` or `useTheme()` | `lib/theme.ts` |
 
 ## 3D assets

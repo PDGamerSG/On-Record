@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
-import { useBusEvents } from "../../api/events";
-import type { BusEvent } from "../../api/types";
+import { useBusEvents } from "../api/events";
+import type { BusEvent } from "../api/types";
 
 interface LiveRefreshOptions {
   /** Bus events that should trigger a refetch. */
