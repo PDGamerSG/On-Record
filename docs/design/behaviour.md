@@ -8,6 +8,23 @@ This document shows how the main flows of On Record behave at run time, as the c
 
 The structure behind these flows is in the [software design specification](SDS.md) and the [data model](data-model.md). Requirement IDs are in the [SRS](../requirements/SRS.md). The typed meeting Ask sequence is already drawn in [docs/ARCHITECTURE.md, "Asking a question"](../ARCHITECTURE.md#asking-a-question) and is not repeated here.
 
+## Contents
+
+| Diagram | Type | Status |
+| --- | --- | --- |
+| [Meeting capture](#meeting-capture) | Sequence | Partial |
+| [Spoken question](#spoken-question) | Sequence | Planned |
+| [Document ingest](#document-ingest) | Sequence | Implemented (documents app) |
+| [Document Ask with translation and speech](#document-ask-with-translation-and-speech) | Sequence | Implemented (documents app) |
+| [Extraction cycle](#extraction-cycle) | Activity | Partial |
+| [Document ingestion](#document-ingestion) | Activity | Implemented |
+| [Ask with no-evidence fallback](#ask-with-no-evidence-fallback) | Activity | Implemented for documents, Partial for meetings |
+| [Meeting](#meeting) | State | Partial |
+| [Action item](#action-item) | State | Partial |
+| [Decision](#decision) | State | Partial |
+| [Document ingest job](#document-ingest-job) | State | Implemented |
+| [ModelGate slot](#modelgate-slot) | State | Implemented |
+
 ## Sequence diagrams
 
 ### Meeting capture
