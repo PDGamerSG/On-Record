@@ -194,7 +194,7 @@ sequenceDiagram
   Drawer->>User: Shows the answer and its quotes, reads it aloud if enabled
 ```
 
-The agent keeps the last six question-and-answer pairs of each session in memory; it does not write `Turn` nodes. Its `actions` list is always empty, and its `timings` keys are `retrieval_ms`, `model_ms` and `total_ms`. Before the drawer can use the agent, two gaps need closing: the drawer posts to `/api/ask` rather than `/api/agent/ask`, and spoken questions have no server route.
+The request's `k` (1 to 20, default 8) is how many fused hits the agent retrieves as evidence; `question` can be up to 2000 characters. The agent keeps the last six question-and-answer pairs of each session in memory; it does not write `Turn` nodes. Its `actions` list is always empty, and its `timings` keys are `retrieval_ms`, `model_ms` and `total_ms`. Before the drawer can use the agent, two gaps need closing: the drawer posts to `/api/ask` rather than `/api/agent/ask`, and spoken questions have no server route.
 
 ## Graph schema
 
