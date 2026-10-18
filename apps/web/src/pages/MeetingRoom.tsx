@@ -251,12 +251,14 @@ function RoomReady({ id, room, meeting }: { id: string; room: MeetingRoomApi; me
                 </span>
               )}
               {!live && <span className="room-state">Ended</span>}
-              {startedAt > 0 && <span className="room-fact">{when(startedAt)}</span>}
-              {!live && <span className="room-fact">{duration(shownDuration)}</span>}
-              <span className="room-fact">
-                {state.speakers.length} {state.speakers.length === 1 ? "speaker" : "speakers"}
+              <span className="room-facts">
+                {startedAt > 0 && <span className="room-fact">{when(startedAt)}</span>}
+                {!live && <span className="room-fact">{duration(shownDuration)}</span>}
+                <span className="room-fact">
+                  {state.speakers.length} {state.speakers.length === 1 ? "speaker" : "speakers"}
+                </span>
+                {meeting.source !== "demo" && <span className="room-fact">{meeting.source === "upload" ? "Uploaded recording" : "Recorded live"}</span>}
               </span>
-              {meeting.source !== "demo" && <span className="room-fact">{meeting.source === "upload" ? "Uploaded recording" : "Recorded live"}</span>}
             </div>
           </div>
           <div className="room-side">

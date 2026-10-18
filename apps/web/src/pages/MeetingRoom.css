@@ -90,12 +90,23 @@
   font-size: var(--fs-sm);
   font-variant-numeric: tabular-nums;
 }
-/* facts read as one line, separated by quiet dots */
+/* facts read as one line, separated by quiet dots. Every fact leads with its dot; the group starts
+   one lead to the left and clips that strip, so whichever fact opens a line (the first, or one that
+   wrapped on a phone) loses its dot */
+.room-facts {
+  --fact-lead: 23px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  row-gap: inherit;
+  margin-left: calc(-1 * var(--fact-lead));
+  clip-path: inset(0 0 0 var(--fact-lead));
+}
 .room-fact {
   display: inline-flex;
   align-items: center;
 }
-.room-fact + .room-fact::before {
+.room-fact::before {
   content: "";
   width: 3px;
   height: 3px;
