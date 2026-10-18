@@ -23,7 +23,7 @@ export interface Speaker {
   label: string; // "Speaker 1"
   name: string | null;
   person_id: string | null;
-  color_idx: number;
+  color_idx: number; // 0..7 palette slot, set when the speaker first appears; renames keep it
   utterance_count: number;
   talk_time_s: number;
 }
@@ -31,7 +31,7 @@ export interface Speaker {
 export interface Utterance {
   id: string;
   meeting_id: string;
-  seq: number;
+  seq: number; // 0-based order in the meeting; the cursor for api.utterancesAfter()
   speaker: string; // track
   speaker_name: string | null;
   t_start: number; // seconds from meeting start
@@ -59,7 +59,7 @@ export interface ActionItem {
   text: string;
   owner: string | null; // display name or label, like Decision.proposed_by
   owner_track: string | null; // "S2", when the owner is one of the meeting's speakers
-  due: string | null;
+  due: string | null; // free text as spoken ("Friday"), not a date
   status: "open" | "done";
   created_at: number; // epoch ms
   done_at: number | null; // epoch ms
@@ -90,7 +90,7 @@ export interface Hit {
   t_start: number; // seconds from meeting start
   t_end: number; // seconds from meeting start
   text: string;
-  score: number;
+  score: number; // higher = better; a ranking score, not a probability
   via: "fulltext" | "vector" | "graph" | "recent";
 }
 
@@ -169,7 +169,7 @@ export interface WhoKnows {
 export type Stats = Record<string, number>;
 
 export interface BusEvent<T = unknown> {
-  id: number;
+  id: number; // increases with every event; the since_id cursor for reconnecting
   type:
     | "meeting.started"
     | "meeting.ended"
