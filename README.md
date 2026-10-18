@@ -6,6 +6,8 @@ This repository is being assembled in feature-sized PRs from [Who Said What Brai
 
 The display name lives in `brand.json`. `.env.example` lists the configuration the application will use; keep local values in an ignored `.env` file.
 
+[The architecture notes](docs/ARCHITECTURE.md) explain how the web app, the API and the graph fit together. [The troubleshooting guide](docs/TROUBLESHOOTING.md) covers common setup problems.
+
 See [the source notes](docs/UPSTREAM.md) for the original snapshot and attribution. The code is licensed under [Apache 2.0](LICENSE).
 
 ## Web app
