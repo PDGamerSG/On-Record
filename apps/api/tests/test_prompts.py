@@ -3,24 +3,24 @@
 from __future__ import annotations
 
 import ast
+import importlib
 from pathlib import Path
 
 import pytest
 
 import wsw_brain
-from wsw_brain.brain import agent, extract, summary
 from wsw_brain.brain.llm import UNTRUSTED_NOTE
-from wsw_brain.documents import answer, vision
 
-# Keyed by where each prompt is defined, so the discovery test below can tell them apart by name.
+# Prompts that carry outside material, by where they are defined. Their values are looked up from those
+# modules, so each name is checked against the prompt it names.
 PROMPTS = {
-    "wsw_brain.brain.agent._SYSTEM_PROMPT": agent._SYSTEM_PROMPT,
-    "wsw_brain.brain.extract.SYSTEM_PROMPT": extract.SYSTEM_PROMPT,
-    "wsw_brain.brain.summary.SYSTEM_PROMPT": summary.SYSTEM_PROMPT,
-    "wsw_brain.documents.answer.ANSWER_SYSTEM": answer.ANSWER_SYSTEM,
-    "wsw_brain.documents.answer.ANSWER_WITH_MEETINGS_SYSTEM": answer.ANSWER_WITH_MEETINGS_SYSTEM,
-    "wsw_brain.documents.answer.SUMMARY_SYSTEM": answer.SUMMARY_SYSTEM,
-    "wsw_brain.documents.vision.VISION_PROMPT": vision.VISION_PROMPT,
+    "wsw_brain.brain.agent._SYSTEM_PROMPT",
+    "wsw_brain.brain.extract.SYSTEM_PROMPT",
+    "wsw_brain.brain.summary.SYSTEM_PROMPT",
+    "wsw_brain.documents.answer.ANSWER_SYSTEM",
+    "wsw_brain.documents.answer.ANSWER_WITH_MEETINGS_SYSTEM",
+    "wsw_brain.documents.answer.SUMMARY_SYSTEM",
+    "wsw_brain.documents.vision.VISION_PROMPT",
 }
 
 # Constants named like prompts that are not model instructions: EmbeddingGemma's task prefixes.
@@ -52,15 +52,21 @@ def _prompt_constants() -> set[str]:
     return names
 
 
+def _value(qualified: str) -> str:
+    module, _, name = qualified.rpartition(".")
+    return getattr(importlib.import_module(module), name)
+
+
 def test_every_prompt_constant_is_guarded_or_exempt() -> None:
-    """A new prompt fails here until it is added to PROMPTS (ending with UNTRUSTED_NOTE) or NOT_INSTRUCTIONS."""
+    """A new prompt fails here until it is listed in PROMPTS, where the test below checks that it ends with
+    UNTRUSTED_NOTE, or in NOT_INSTRUCTIONS."""
     found = _prompt_constants()
-    assert set(PROMPTS) <= found and NOT_INSTRUCTIONS <= found  # neither list names a prompt that is gone
-    assert sorted(found - set(PROMPTS) - NOT_INSTRUCTIONS) == []
+    assert PROMPTS <= found and NOT_INSTRUCTIONS <= found  # neither list names a prompt that is gone
+    assert sorted(found - PROMPTS - NOT_INSTRUCTIONS) == []
 
 
 @pytest.mark.parametrize("name", sorted(PROMPTS))
 def test_prompt_marks_outside_material_as_untrusted(name: str) -> None:
-    prompt = PROMPTS[name].rstrip()
+    prompt = _value(name).rstrip()
     assert prompt.endswith(UNTRUSTED_NOTE)
     assert prompt.count(UNTRUSTED_NOTE) == 1
