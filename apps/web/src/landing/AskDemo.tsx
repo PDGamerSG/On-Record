@@ -1,3 +1,5 @@
+// The landing page's "Ask it out loud" section: a scripted three-question conversation run through the
+// demo Ask engine (demoApi.ask), with citations that play on the record.
 import { useEffect, useEffectEvent, useRef, useState } from "react";
 import { CheckIcon, CircleNotchIcon, MicrophoneIcon, PlayIcon, ArrowCounterClockwiseIcon } from "@phosphor-icons/react";
 import { demoApi } from "../api/demo/demoApi";

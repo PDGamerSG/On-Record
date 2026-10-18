@@ -1,3 +1,5 @@
+// Commitments (/commitments): action items across meetings, grouped by owner and filtered to open, done or
+// all, with a done toggle and the evidence to play.
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { PlayIcon } from "@phosphor-icons/react";

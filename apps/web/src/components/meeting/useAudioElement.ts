@@ -1,3 +1,5 @@
+// The meeting room's <audio> element as a hook: a callback ref, play state, seeking and a live position
+// for animation frames.
 import { useCallback, useEffect, useRef, useState } from "react";
 
 export interface AudioElementState {

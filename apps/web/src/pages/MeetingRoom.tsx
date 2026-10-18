@@ -1,3 +1,5 @@
+// The meeting room (/m/:id): speaker lanes, transcript, insights and the audio transport for one meeting,
+// and live capture for a live meeting.
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { ArrowLeftIcon, CircleNotchIcon, DatabaseIcon, MicrophoneIcon, StopIcon, WarningCircleIcon } from "@phosphor-icons/react";

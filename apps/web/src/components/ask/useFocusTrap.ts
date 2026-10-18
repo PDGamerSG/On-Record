@@ -1,3 +1,5 @@
+// Focus helpers for dialogs (the Ask drawer, the command palette): a focus trap that only the topmost
+// dialog holds, and checks for when a key press belongs to a text field or a control.
 import { useEffect, type RefObject } from "react";
 
 const FOCUSABLE = [

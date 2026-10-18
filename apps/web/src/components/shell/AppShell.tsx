@@ -1,3 +1,5 @@
+// The frame around every app page (all but the landing): the top bar and navigation dock, which opens into
+// a drawer that Escape or the backdrop closes, and the page itself.
 import { useEffect, useState, type MouseEvent, type ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {

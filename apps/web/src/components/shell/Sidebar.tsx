@@ -1,3 +1,4 @@
+// The earlier sidebar layout. Nothing imports it since the left-rail redesign; AppShell.tsx draws the rail.
 import { useEffect, useLayoutEffect, useRef, type CSSProperties } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {

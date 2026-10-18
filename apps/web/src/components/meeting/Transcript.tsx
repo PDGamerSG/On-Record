@@ -1,3 +1,4 @@
+// The meeting transcript: follows live speech or playback, and flashes a line someone jumped to.
 import { memo, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { ArrowDownIcon } from "@phosphor-icons/react";
 import type { Utterance } from "../../api/types";

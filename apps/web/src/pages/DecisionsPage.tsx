@@ -1,3 +1,5 @@
+// Decisions (/decisions): each current decision with the earlier decisions it replaced, and the evidence
+// quotes behind them.
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { PlayIcon } from "@phosphor-icons/react";
