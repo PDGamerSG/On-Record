@@ -14,7 +14,9 @@ from ..contracts import Embedder
 log = logging.getLogger(__name__)
 
 RRF_K = 60  # the usual reciprocal-rank fusion constant; larger values narrow the gap between top ranks
-SPACE_CHECK_TTL_S = 600.0  # how long a meeting's "vectors match this embedder" verdict is trusted
+# How long a meeting's "vectors match this embedder" verdict is trusted. It can only change if the meeting
+# is re-embedded while the process runs, and each re-check costs an embedding and a KNN query.
+SPACE_CHECK_TTL_S = 600.0
 SPACE_CHECKS_PER_QUERY = 2  # meetings checked per question; each check costs one embedding and one KNN query
 SELF_MATCH_MIN = 0.95  # an utterance re-embedded now must find its stored vector at least this close
 _RECENT = re.compile(
@@ -145,6 +147,10 @@ class Retriever:
         return kept
 
     def _self_match(self, hit: dict[str, Any]) -> bool | None:
+        """Re-embed the hit's text and look for its stored copy among the 5 nearest vectors in its meeting.
+        True when that copy scores SELF_MATCH_MIN or better, False when it scores lower (the meeting was
+        embedded by another embedder), and None (no verdict, the hit is kept) for texts under three words,
+        embedding or search failures, and a copy missing from the results."""
         uid, text = hit.get("utterance_id"), str(hit.get("text") or "")
         if not uid or len(text.split()) < 3:
             return None
@@ -176,6 +182,9 @@ class Retriever:
         return found
 
     def _known_names(self, meeting_id: str | None) -> list[str]:
+        """People and speaker names to look for in a question, reloaded at most every names_ttl_s seconds
+        (one people query, plus one meeting query when scoped). A speaker named in the meantime can take
+        that long to match. A failed load is logged and caches what it got, since names are only a boost."""
         cached = self._names.get(meeting_id)
         now = time.monotonic()
         if cached and now - cached[0] < self.names_ttl_s:
