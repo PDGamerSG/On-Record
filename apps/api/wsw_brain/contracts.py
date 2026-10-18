@@ -169,6 +169,39 @@ def _require_evidence(value: object, field: str) -> None:
         raise ValueError(f"{field} must be a list of non-empty strings")
 
 
+def _require_entities(value: object) -> list[dict[str, str]]:
+    if not isinstance(value, list) or any(not isinstance(entity, dict) for entity in value):
+        raise ValueError("Insights.entities must be a list of dictionaries")
+    normalised: list[dict[str, str]] = []
+    for entity in value:
+        _require_text(entity.get("name"), "Insights.entities.name")
+        clean_entity = dict(entity)
+        clean_entity["name"] = _clean_text(entity["name"])
+        if "kind" in entity:
+            _require_text(entity["kind"], "Insights.entities.kind")
+            clean_entity["kind"] = _clean_text(entity["kind"]).lower()
+        normalised.append(clean_entity)
+    return normalised
+
+
+def _require_mentions(value: object) -> dict[str, list[str]]:
+    if not isinstance(value, dict):
+        raise ValueError("Insights.mentions must be a dictionary")  # noqa: TRY004 - contract validation uses ValueError
+    normalised: dict[str, list[str]] = {}
+    for utterance_id, names in value.items():
+        _require_text(utterance_id, "Insights.mentions.utterance_id")
+        if not isinstance(names, list) or any(not isinstance(name, str) or not name.strip() for name in names):
+            raise ValueError("Insights.mentions values must be lists of non-empty strings")
+        clean_id = utterance_id.strip()
+        clean_names = [_clean_text(name) for name in names]
+        normalised[clean_id] = clean_names
+    return normalised
+
+
+def _clean_text(value: str) -> str:
+    return " ".join(value.split())
+
+
 @dataclass
 class Insights:
     decisions: list[DecisionDraft] = field(default_factory=list)
@@ -186,6 +219,8 @@ class Insights:
             raise ValueError("Insights.action_items must be a list of ActionItemDraft values")
         if not isinstance(self.topics, list) or any(not isinstance(topic, str) or not topic.strip() for topic in self.topics):
             raise ValueError("Insights.topics must be a list of non-empty strings")
+        self.entities = _require_entities(self.entities)
+        self.mentions = _require_mentions(self.mentions)
 
     def is_empty(self) -> bool:
         return not (self.decisions or self.action_items or self.topics or self.entities)
