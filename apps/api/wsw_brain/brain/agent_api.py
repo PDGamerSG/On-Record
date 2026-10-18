@@ -35,9 +35,10 @@ class AskResponse(BaseModel):
 
 def create_router(agent: MeetingAgent) -> APIRouter:
     """Build the agent router around an already configured agent instance."""
-    router = APIRouter(prefix="/api/agent", tags=["agent"])
+    router = APIRouter(tags=["agent"])
 
-    @router.post("/ask", response_model=AskResponse)
+    @router.post("/api/agent/ask", response_model=AskResponse)
+    @router.post("/api/ask", response_model=AskResponse, include_in_schema=False)
     async def ask(body: AskRequest) -> AskResponse:
         result = await agent.ask(
             body.question,

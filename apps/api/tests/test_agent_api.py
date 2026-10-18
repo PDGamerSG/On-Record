@@ -40,6 +40,18 @@ def test_agent_router_returns_grounded_answer_contract():
     assert agent.calls == [("When is the launch?", "s1", "m1", 4)]
 
 
+def test_agent_router_exposes_web_compatibility_alias() -> None:
+    agent = StubAgent()
+    app = FastAPI()
+    app.include_router(create_router(agent))
+
+    response = TestClient(app).post("/api/ask", json={"question": "When is the launch?"})
+
+    assert response.status_code == 200
+    assert response.json()["answer"] == "The launch is Friday [u:m1:u00001]"
+    assert agent.calls == [("When is the launch?", "default", None, 8)]
+
+
 def test_agent_router_rejects_blank_questions():
     app = FastAPI()
     app.include_router(create_router(StubAgent()))
