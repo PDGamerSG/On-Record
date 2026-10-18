@@ -67,6 +67,9 @@ export default function GraphView({ data, label, onSelect, selectedId = null, hi
   sizeRef.current = size;
   const [hoverId, setHoverId] = useState<string | null>(null);
   const [zoomPct, setZoomPct] = useState(100);
+  // What a screen reader hears after a zoom key or button: the readout itself also moves while the layout settles
+  // and on every wheel tick, so it is not a live region.
+  const [zoomNote, setZoomNote] = useState("");
   // canvas colours come from the tokens, so re-read them when the theme switches
   const [palette, setPalette] = useState(readPalette);
   useEffect(() => onThemeChange(() => setPalette(readPalette())), []);
@@ -231,10 +234,16 @@ export default function GraphView({ data, label, onSelect, selectedId = null, hi
     (factor: number) => {
       const fg = fgRef.current;
       if (!fg) return;
-      fg.zoom(Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, fg.zoom() * factor)), reduced ? 0 : 240);
+      const k = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, fg.zoom() * factor));
+      fg.zoom(k, reduced ? 0 : 240);
+      setZoomNote(`Zoom ${Math.round(k * 100)} percent`);
     },
     [reduced],
   );
+  const fitByReader = () => {
+    fit(reduced ? 0 : 400);
+    setZoomNote("Fitted the graph to the view");
+  };
 
   const onZoom = useCallback(({ k }: { k: number }) => {
     const pct = Math.round(k * 100);
@@ -263,7 +272,7 @@ export default function GraphView({ data, label, onSelect, selectedId = null, hi
     if (e.metaKey || e.ctrlKey || e.altKey) return;
     if (e.key === "+" || e.key === "=") zoomBy(ZOOM_STEP);
     else if (e.key === "-" || e.key === "_") zoomBy(1 / ZOOM_STEP);
-    else if (e.key === "0") fit(reduced ? 0 : 400);
+    else if (e.key === "0") fitByReader();
     else return;
     e.preventDefault();
   };
@@ -331,13 +340,16 @@ export default function GraphView({ data, label, onSelect, selectedId = null, hi
           <button type="button" onClick={() => zoomBy(ZOOM_STEP)} disabled={zoomPct >= MAX_ZOOM * 100} aria-label="Zoom in" title="Zoom in (+)">
             <PlusIcon aria-hidden="true" />
           </button>
-          <span className="gv__zoom-pct tc" aria-live="polite" aria-label={`Zoom ${zoomPct} percent`}>
+          <span className="gv__zoom-pct tc" aria-hidden="true">
             {zoomPct}%
+          </span>
+          <span className="visually-hidden" aria-live="polite">
+            {zoomNote}
           </span>
           <button type="button" onClick={() => zoomBy(1 / ZOOM_STEP)} disabled={zoomPct <= MIN_ZOOM * 100} aria-label="Zoom out" title="Zoom out (−)">
             <MinusIcon aria-hidden="true" />
           </button>
-          <button type="button" className="gv__zoom-fit" onClick={() => fit(reduced ? 0 : 400)} aria-label="Fit the graph to the view" title="Fit to view (0)">
+          <button type="button" className="gv__zoom-fit" onClick={fitByReader} aria-label="Fit the graph to the view" title="Fit to view (0)">
             <FrameCornersIcon aria-hidden="true" />
           </button>
         </div>

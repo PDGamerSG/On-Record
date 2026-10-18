@@ -53,7 +53,12 @@ const AskExchange = forwardRef<HTMLLIElement, AskExchangeProps>(function AskExch
           <p className="ask-a__wait">
             <CircleNotchIcon aria-hidden="true" className="ask-spin" />
             <span>{waiting?.stage ?? "Working…"}</span>
-            {waiting ? <span className="tc">{timecode(waiting.elapsed)}</span> : null}
+            {/* the conversation is a polite live region, so a ticking timer here would be read out every second */}
+            {waiting ? (
+              <span className="tc" aria-hidden="true">
+                {timecode(waiting.elapsed)}
+              </span>
+            ) : null}
           </p>
         ) : null}
 
