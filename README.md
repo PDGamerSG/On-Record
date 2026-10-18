@@ -2,7 +2,7 @@
 
 A meeting assistant that connects what was said to the person who said it.
 
-This repository is being assembled in feature-sized PRs from [Who Said What Brain](https://github.com/Hydra-Of-Malice/hack-october-who-said-what-brain). It currently includes shared Python contracts, graph storage and queries, audio decoding and transcription, text embeddings, hybrid meeting retrieval, local and hosted text model adapters, and the web interface. Live recording, the assistant, and the HTTP server follow in separate branches.
+This repository is being assembled in feature-sized PRs from [Who Said What Brain](https://github.com/Hydra-Of-Malice/hack-october-who-said-what-brain). It currently includes shared Python contracts, graph storage and queries, audio decoding and transcription, text embeddings, hybrid meeting retrieval, local and hosted text model adapters, the web interface, and a small HTTP entrypoint.
 
 The display name lives in `brand.json`. `.env.example` lists the configuration the application will use; keep local values in an ignored `.env` file.
 
@@ -29,7 +29,17 @@ uv sync --project apps/api --frozen
 uv run --project apps/api python -c "from wsw_brain.brand import product_name; print(product_name())"
 ```
 
-The package uses Python 3.12. It currently provides configuration, shared data contracts, and an in-process event bus. The HTTP server arrives in a later PR; until then the web app runs on bundled demo data.
+The package uses Python 3.12. It provides configuration, shared data contracts, an in-process event bus, and the HTTP application entrypoint.
+
+## HTTP API
+
+Start the dependency-free API shell locally with:
+
+```bash
+uv run --project apps/api uvicorn wsw_brain.app:app --reload
+```
+
+`GET /healthz` returns `{"status":"ok"}` for process health checks. `GET /api/status` returns the product identity without connecting to FalkorDB or loading a model. Feature routes can be mounted on the same app as they are added.
 
 ## Offline text embeddings
 
