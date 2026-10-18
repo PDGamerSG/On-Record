@@ -1,6 +1,6 @@
 // The frame around every app page (all but the landing): the top bar and navigation dock, which opens into
 // a drawer that Escape or the backdrop closes, and the page itself.
-import { useEffect, useState, type FocusEvent, type MouseEvent, type PointerEvent, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type FocusEvent, type MouseEvent, type PointerEvent, type ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
   CheckSquareIcon,
@@ -123,13 +123,15 @@ function useDockTip(railOpen: boolean) {
   };
 }
 
-function useRailData(): RailData {
+/** The rail's counts and lists. refresh() refetches them; only the newest request's answer is kept. */
+function useRailData(): RailData & { refresh: () => void } {
   const [data, setData] = useState<RailData>(EMPTY_RAIL);
+  const latest = useRef(0);
 
-  useEffect(() => {
-    let alive = true;
+  const refresh = useCallback(() => {
+    const request = ++latest.current;
     Promise.allSettled([api.meetings(), api.actionItems({ status: "open" }), api.decisions(), api.people()]).then(([meetings, commitments, decisions, people]) => {
-      if (!alive) return;
+      if (request !== latest.current) return;
       setData({
         meetings: meetings.status === "fulfilled" ? meetings.value : [],
         commitments: commitments.status === "fulfilled" ? commitments.value : [],
@@ -138,12 +140,13 @@ function useRailData(): RailData {
         loaded: true,
       });
     });
-    return () => {
-      alive = false;
-    };
   }, []);
 
-  return data;
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
+
+  return { ...data, refresh };
 }
 
 /** An open commitment in the rail, ruled in its owner's colour in that meeting. */
@@ -170,6 +173,12 @@ export default function AppShell({ children }: { children: ReactNode }) {
   const { pathname } = useLocation();
   const scrolled = useScrolled();
   const railData = useRailData();
+  // the rail only shows its counts and lists when it is open, so that is when they need to be current: a commitment
+  // ticked on another page should not still be listed
+  const openRail = () => {
+    railData.refresh();
+    setRailOpen(true);
+  };
   const [railOpen, setRailOpen] = useState(false);
   const dockTip = useDockTip(railOpen);
 
@@ -204,7 +213,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
 
   const handleSearch = () => {
     if (!railOpen) {
-      setRailOpen(true);
+      openRail();
       return;
     }
     openPalette();
@@ -219,7 +228,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
       <header className={`shell-bar${scrolled ? " is-scrolled" : ""}`} {...dockTip.handlers}>
         <div className="shell-bar-inner" onScroll={dockTip.hide}>
           <div className="shell-brand-row">
-            <button type="button" className="shell-dock-brand" onClick={() => setRailOpen(true)} aria-label="Open navigation">
+            <button type="button" className="shell-dock-brand" onClick={openRail} aria-label="Open navigation">
               <ProductMark size={30} />
             </button>
             <Link to="/" className="shell-brand" aria-label={`${brand.name} home`}>
