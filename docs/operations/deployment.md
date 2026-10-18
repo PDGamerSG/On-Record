@@ -45,7 +45,7 @@ flowchart LR
   oreg -- "ollama pull" --> ollama
 ```
 
-Sources: docker-compose.yml:3-16, apps/web/vite.config.ts:6-16, apps/api/wsw_brain/cli.py:24-31, apps/api/wsw_brain/documents/app.py:1-25, apps/api/wsw_brain/config.py:25-26, apps/api/wsw_brain/config.py:88-93, apps/api/wsw_brain/brain/embed.py:24-40, scripts/gemma.sh:32-35, .env.example:19.
+Sources: docker-compose.yml:3-16, apps/web/vite.config.ts:6-16, apps/api/wsw_brain/cli.py:24-31, apps/api/wsw_brain/documents/app.py:1-25, apps/api/wsw_brain/config.py:25-26, apps/api/wsw_brain/config.py:88-93, apps/api/wsw_brain/brain/embed.py:24-40, apps/api/scripts/gemma.sh:32-35, .env.example:19.
 
 The main API on `main` does not mount the documents router, and the documents app does not serve the status or event routes ([ARCHITECTURE.md](../ARCHITECTURE.md), "What is not in the repository yet"). Both default to port 8000, so a developer runs one of them on 8000, or moves one with `--port` and points the dev proxy at it with `WSW_API_URL` (apps/web/vite.config.ts:6).
 
@@ -73,7 +73,7 @@ Start it with `docker compose up -d --wait falkordb` (README.md:102). Port clash
 | Web dev server | `cd apps/web && npm run dev` | 5173 | Proxies `/api` and `/ws` to `WSW_API_URL`, default `http://127.0.0.1:8000` (apps/web/vite.config.ts:6-16; README.md:73) |
 | Main API | `uv run --project apps/api python -m wsw_brain.cli` | 8000 | Options `--host` (default `127.0.0.1`), `--port` (default 8000), `--reload` (apps/api/wsw_brain/cli.py:24-26); runs `wsw_brain.app:app` under Uvicorn (apps/api/wsw_brain/cli.py:31; README.md:153) |
 | Documents app | `uv run --project apps/api uvicorn wsw_brain.documents.app:app --port 8000` | 8000 | Serves only `/api/documents`; adds CORS headers from `WSW_CORS_ORIGINS` (apps/api/wsw_brain/documents/app.py:1-7, apps/api/wsw_brain/documents/app.py:22-25; README.md:275) |
-| Ollama (optional) | `./scripts/gemma.sh` | 11434 | Starts Ollama, waits up to 30 s for `/api/tags`, pulls the model if missing (scripts/gemma.sh:16-35); see [LOCAL_GEMMA.md](../LOCAL_GEMMA.md) |
+| Ollama (optional) | `./apps/api/scripts/gemma.sh` | 11434 | Starts Ollama, waits up to 30 s for `/api/tags`, pulls the model if missing (apps/api/scripts/gemma.sh:16-35); see [LOCAL_GEMMA.md](../LOCAL_GEMMA.md) |
 
 When the web app cannot reach a server that answers `/api/health`, it falls back to its bundled demo meetings (apps/web/src/api/mode.ts:3). See [TROUBLESHOOTING.md](../TROUBLESHOOTING.md) under "The app shows demo meetings, not my data".
 
@@ -86,7 +86,7 @@ Every `WSW_*` setting, its default and the code that reads it is listed in [CONF
 | Model | From | Into | Trigger |
 |---|---|---|---|
 | EmbeddingGemma-300m ONNX (`onnx-community/embeddinggemma-300m-ONNX`) | Hugging Face Hub, `snapshot_download` with patterns `onnx/model_quantized.onnx*`, `tokenizer*`, `*.json` | `WSW_MODELS_DIR/<repo with / replaced by -->` | First call to `get_embedder()` when the files are missing (apps/api/wsw_brain/brain/embed.py:20, apps/api/wsw_brain/brain/embed.py:24-40; .env.example:41) |
-| Gemma 4 for Ollama (`gemma4:12b-it-qat` by default) | Ollama registry, `ollama pull` | Ollama's own model store, not `WSW_MODELS_DIR` | `scripts/gemma.sh` (scripts/gemma.sh:8, scripts/gemma.sh:32-35) |
+| Gemma 4 for Ollama (`gemma4:12b-it-qat` by default) | Ollama registry, `ollama pull` | Ollama's own model store, not `WSW_MODELS_DIR` | `apps/api/scripts/gemma.sh` (apps/api/scripts/gemma.sh:8, apps/api/scripts/gemma.sh:32-35) |
 | Speaker model `speaker_embedding_en.onnx` and `silero_vad.onnx` | Not recorded in the repository | Read from `WSW_MODELS_DIR` | No download code (apps/api/wsw_brain/listen/factory.py:12-20) |
 | faster-whisper `small` | Decided by the faster-whisper library [unverified] | Not set by repository code | No production caller (apps/api/wsw_brain/listen/asr.py:77-85) |
 

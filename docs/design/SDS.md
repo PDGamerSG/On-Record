@@ -148,7 +148,7 @@ classDiagram
 
 Sources: apps/api/wsw_brain/graph/store.py:76-114; apps/api/wsw_brain/brain/retrieve.py:74; apps/api/wsw_brain/brain/agent.py:27; apps/api/wsw_brain/brain/extract.py:666; apps/api/wsw_brain/brain/llm.py:67, apps/api/wsw_brain/brain/llm.py:203, apps/api/wsw_brain/brain/llm.py:341, apps/api/wsw_brain/brain/llm.py:567, apps/api/wsw_brain/brain/llm.py:751, apps/api/wsw_brain/brain/llm.py:796; apps/api/wsw_brain/brain/embed.py:43, apps/api/wsw_brain/brain/embed.py:140; apps/api/wsw_brain/ingest/pipeline.py:55-66; apps/api/wsw_brain/events.py:50.
 
-A second Gemma client, `GemmaClient` and `FakeGemmaClient` (apps/api/wsw_brain/brain/gemma.py:81, apps/api/wsw_brain/brain/gemma.py:273), is not in the diagram. It is separate from the `LLM` adapters in apps/api/wsw_brain/brain/llm.py and is constructed only by scripts/bench_gemma.py:27-37 and tests. Its `make_client` factory has no production caller (apps/api/wsw_brain/brain/gemma.py:307).
+A second Gemma client, `GemmaClient` and `FakeGemmaClient` (apps/api/wsw_brain/brain/gemma.py:81, apps/api/wsw_brain/brain/gemma.py:273), is not in the diagram. It is separate from the `LLM` adapters in apps/api/wsw_brain/brain/llm.py and is constructed only by apps/api/scripts/bench_gemma.py:28-38 and tests. Its `make_client` factory has no production caller (apps/api/wsw_brain/brain/gemma.py:307).
 
 ### 3.3 Documents
 

@@ -104,13 +104,13 @@ What stays local:
 | faster-whisper | Audio, local inference (no production caller) | apps/api/wsw_brain/listen/asr.py:77-85 |
 | FalkorDB | Meetings, utterances, documents, vectors | docker-compose.yml:5, docker-compose.yml:9 |
 
-Model downloads from Hugging Face and the Ollama registry carry no user data (apps/api/wsw_brain/brain/embed.py:24-40; scripts/gemma.sh:32-35). A fully local setup is `WSW_LLM_PROVIDER=ollama` with no Gemini or Sarvam key, but document upload still needs Sarvam Document AI: without `SARVAM_API_KEY` the upload returns 503 (apps/api/wsw_brain/routes/documents.py:86).
+Model downloads from Hugging Face and the Ollama registry carry no user data (apps/api/wsw_brain/brain/embed.py:24-40; apps/api/scripts/gemma.sh:32-35). A fully local setup is `WSW_LLM_PROVIDER=ollama` with no Gemini or Sarvam key, but document upload still needs Sarvam Document AI: without `SARVAM_API_KEY` the upload returns 503 (apps/api/wsw_brain/routes/documents.py:86).
 
 ## API key handling
 
 - Keys come only from environment variables or `.env` (apps/api/wsw_brain/config.py:35, apps/api/wsw_brain/config.py:38, apps/api/wsw_brain/config.py:41). `.env.example` tells operators to keep the Sarvam key server-side (.env.example:29). The web app has no key settings; only `VITE_API_BASE` and `VITE_DEMO` are built into the bundle (apps/web/src/api/base.ts:2, apps/web/src/api/mode.ts:14).
 - Sarvam: `api-subscription-key` header (apps/api/wsw_brain/brain/llm.py:773, apps/api/wsw_brain/sarvam.py:75, apps/api/wsw_brain/documents/sarvam.py:68). OpenAI-compatible: Bearer header (apps/api/wsw_brain/brain/llm.py:594). Gemini: passed to the SDK (apps/api/wsw_brain/brain/llm.py:356).
-- `GemmaClient` sends the Gemini key as `?key=` in the URL (apps/api/wsw_brain/brain/gemma.py:239), though its error messages leave the URL out (apps/api/wsw_brain/brain/gemma.py:267). It is only used by `scripts/bench_gemma.py`.
+- `GemmaClient` sends the Gemini key as `?key=` in the URL (apps/api/wsw_brain/brain/gemma.py:239), though its error messages leave the URL out (apps/api/wsw_brain/brain/gemma.py:267). It is only used by `apps/api/scripts/bench_gemma.py`.
 - Gap: keys sit in plain text in `.env`; there is no secret store or rotation.
 
 ## Prompt-injection mitigations

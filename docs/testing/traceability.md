@@ -85,8 +85,8 @@ NFR-014 is counted as Partial: it is Implemented for documents but Partial for t
 | FR-058 | Implemented | [SDS](../design/SDS.md) | `apps/api/wsw_brain/app.py:22-39` | apps/api/tests/test_app.py; apps/api/tests/test_cli.py |
 | FR-059 | Planned | [SDS](../design/SDS.md) | `apps/api/wsw_brain/config.py:55` | None |
 | FR-063 | Partial (unwired, G7) | [SDS](../design/SDS.md) | `apps/api/wsw_brain/brain/gemma.py:1-337` | apps/api/tests/test_gemma.py |
-| FR-064 | Implemented | [SDS](../design/SDS.md) | `scripts/bench_gemma.py:1-125` | apps/api/tests/test_bench_gemma.py |
-| FR-065 | Implemented | [SDS](../design/SDS.md) | `scripts/gemma.sh:1-40` | None |
+| FR-064 | Implemented | [SDS](../design/SDS.md) | `apps/api/scripts/bench_gemma.py:1-127` | apps/api/tests/test_bench_gemma.py |
+| FR-065 | Implemented | [SDS](../design/SDS.md) | `apps/api/scripts/gemma.sh:1-40` | None |
 | NFR-001 | Planned (claim only) | [Architecture](../architecture/README.md) | `apps/web/src/landing/LinerNotes.tsx:20-25` | None |
 | NFR-002 | Planned (claim only) | [Architecture](../architecture/README.md) | `apps/web/src/landing/LinerNotes.tsx:14-18` | apps/api/tests/test_session.py and apps/api/tests/test_speakers.py use a two-speaker fixture but do not assert these figures |
 | NFR-003 | Implemented | [Architecture](../architecture/README.md) | `apps/api/wsw_brain/brain/llm.py:58-164` | apps/api/tests/test_model_gate.py; apps/api/tests/test_summary.py (apps/api/tests/test_summary.py:129) |
@@ -114,6 +114,6 @@ NFR-014 is counted as Partial: it is Implemented for documents but Partial for t
 | NFR-023 | Partial (not run in CI) | [Architecture](../architecture/README.md) | `apps/web/package.json:6-11` | None |
 | NFR-024 | Partial (hand-kept web mirror) | [Architecture](../architecture/README.md) | `apps/api/wsw_brain/contracts.py:1-13` | apps/api/tests/test_contracts.py |
 | NFR-025 | Implemented | [Architecture](../architecture/README.md) | `apps/api/pyproject.toml:6` | apps/api/tests/test_graph.py |
-| NFR-028 | Implemented | [Architecture](../architecture/README.md) | `scripts/bench_gemma.py:63-88` | apps/api/tests/test_bench_gemma.py |
+| NFR-028 | Implemented | [Architecture](../architecture/README.md) | `apps/api/scripts/bench_gemma.py:64-89` | apps/api/tests/test_bench_gemma.py |
 
 Rows: 93 (65 FR, 28 NFR). Rows follow the order of the SRS, so FR-060 to FR-065 and NFR-026 to NFR-028 appear within their sections.

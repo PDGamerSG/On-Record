@@ -1,6 +1,6 @@
 """Write a 12-page demo PDF: Kitepost's self-serve pricing policy, as drafted after the pricing review.
 
-    uv run --project apps/api python scripts/make_demo_document.py [out.pdf]
+    uv run --project apps/api python apps/api/scripts/make_demo_document.py [out.pdf]
 
 The policy states the Starter terms agreed in the "Self-serve pricing review" demo meeting (4,999 rupees,
 1,500 shipments). The later "Self-serve launch sync" meeting changed Starter to 3,999 rupees with 1,000
@@ -15,7 +15,7 @@ import sys
 import textwrap
 from pathlib import Path
 
-DEFAULT_OUT = Path(__file__).resolve().parents[1] / "data" / "kitepost-pricing-policy.pdf"
+DEFAULT_OUT = Path(__file__).resolve().parents[3] / "data" / "kitepost-pricing-policy.pdf"
 
 PAGES: list[tuple[str, list[str]]] = [
     ("Kitepost Self-Serve Pricing Policy", [

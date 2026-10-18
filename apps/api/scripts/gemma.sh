@@ -3,7 +3,7 @@
 # and optionally send one prompt to it.
 set -euo pipefail
 
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 cd "$ROOT_DIR"
 MODEL="${WSW_OLLAMA_MODEL:-gemma4:12b-it-qat}"
 OLLAMA_URL="${WSW_OLLAMA_URL:-http://127.0.0.1:11434}"

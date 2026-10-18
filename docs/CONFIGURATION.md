@@ -17,8 +17,8 @@ Some defaults in the code differ from the values in `.env.example`. The tables b
 
 | Variable | Default | What it controls | Read by |
 | --- | --- | --- | --- |
-| `WSW_FALKORDB_URL` | `falkor://127.0.0.1:6379` | FalkorDB connection URL. Use `falkors://` for TLS, and `falkor://default:<password>@<host>:<port>` for a hosted database | Document API, `scripts/seed_demo_meetings.py`, graph tests |
-| `WSW_GRAPH` | `wsw_demo` | Name of the graph that holds meetings and documents | Document API, `scripts/seed_demo_meetings.py` |
+| `WSW_FALKORDB_URL` | `falkor://127.0.0.1:6379` | FalkorDB connection URL. Use `falkors://` for TLS, and `falkor://default:<password>@<host>:<port>` for a hosted database | Document API, `apps/api/scripts/seed_demo_meetings.py`, graph tests |
+| `WSW_GRAPH` | `wsw_demo` | Name of the graph that holds meetings and documents | Document API, `apps/api/scripts/seed_demo_meetings.py` |
 | `WSW_DATA_DIR` | `data/` | Folder for runtime files; `audio/` inside it is created at startup | Created by `settings()`; *nothing else reads it yet* |
 | `WSW_MODELS_DIR` | `models/` | Where downloaded model files are kept | `brain/embed.py`, `listen/factory.py` |
 
@@ -97,7 +97,7 @@ Each model endpoint gets a `ModelGate` that limits concurrent generations, so a 
 | --- | --- | --- | --- |
 | `WSW_CORS_ORIGINS` | `*` (`.env.example`: empty) | Comma-separated origins allowed to call the API from another site. Empty adds no CORS headers, so only same-origin requests work; `*` allows any origin | `documents/app.py` |
 | `WSW_EXTRACT_EVERY` | `6` | How many new utterances of a meeting trigger the next extraction of decisions and action items | `ingest/pipeline.py` |
-| `WSW_SEED_DEMO` | `true` (`.env.example`: `false`) | Load the demo meetings automatically | *Not read yet*; `scripts/seed_demo_meetings.py` loads them by hand |
+| `WSW_SEED_DEMO` | `true` (`.env.example`: `false`) | Load the demo meetings automatically | *Not read yet*; `apps/api/scripts/seed_demo_meetings.py` loads them by hand |
 
 `.env.example` also lists `WSW_ADMIN_TOKEN`, `WSW_CREATE_LIMIT` and `WSW_ALLOWED_HOSTS` for the access controls of the upcoming meeting API. `Settings` doesn't define them yet, so they are ignored.
 

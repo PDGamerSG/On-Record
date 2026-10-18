@@ -1,6 +1,6 @@
 """Load the web app's two bundled demo meetings into FalkorDB, so document answers can cite them.
 
-    uv run --project apps/api python scripts/seed_demo_meetings.py
+    uv run --project apps/api python apps/api/scripts/seed_demo_meetings.py
 
 Writes meetings, speaker names, utterances (with embeddings from the configured embedder) and summaries.
 Re-running replaces the same meetings. Extracted decisions and action items are not written.
@@ -16,7 +16,7 @@ from wsw_brain.config import settings
 from wsw_brain.contracts import Utterance
 from wsw_brain.graph import GraphStore
 
-FIXTURES = Path(__file__).resolve().parents[1] / "apps" / "web" / "src" / "api" / "demo" / "fixtures.json"
+FIXTURES = Path(__file__).resolve().parents[3] / "apps" / "web" / "src" / "api" / "demo" / "fixtures.json"
 
 
 def main() -> None:

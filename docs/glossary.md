@@ -45,7 +45,7 @@ Terms used across the On Record code and documentation, with the file that defin
 | Saaras | Sarvam speech-recognition model (`saaras:v4`) for Indian and code-mixed speech | `apps/api/wsw_brain/listen/sarvam_asr.py:1-9`; `apps/api/wsw_brain/config.py:72` |
 | Seconds vs epoch ms | Meeting-relative times are seconds; wall-clock times are epoch ms; event `ts` is epoch seconds | `apps/api/wsw_brain/contracts.py:10-11` |
 | Session | `session_id` grouping Ask turns; history is kept in agent memory, or `Turn` nodes | `apps/api/wsw_brain/brain/agent.py:36`; `apps/api/wsw_brain/brain/agent.py:100-103`; `apps/api/wsw_brain/graph/cypher.py:591-603` |
-| Smoke benchmark (gemma-smoke-v1) | Five-case structured-output corpus for checking Gemma JSON replies; "not a quality benchmark" | `benchmarks/gemma_smoke.json:2-3` |
+| Smoke benchmark (gemma-smoke-v1) | Five-case structured-output corpus for checking Gemma JSON replies; "not a quality benchmark" | `apps/api/benchmarks/gemma_smoke.json:2-3` |
 | Speaker confidence | How sure the listener is about who spoke (not transcription confidence), 0-1 | `apps/web/src/api/types.ts:40`; `apps/api/wsw_brain/contracts.py:46` |
 | Speaker label | Display form "Speaker N" of a track | `apps/api/wsw_brain/graph/text.py:86-88` |
 | Speaker track | Meeting-scoped voice label `S1`, `S2`, … assigned by clustering | `apps/api/wsw_brain/contracts.py:42`; `apps/api/wsw_brain/listen/speakers.py:264` |

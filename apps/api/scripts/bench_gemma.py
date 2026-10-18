@@ -14,6 +14,7 @@ from time import perf_counter
 from typing import Any
 
 from pydantic import BaseModel
+
 from wsw_brain.brain.gemma import FakeGemmaClient, GemmaClient
 
 
@@ -100,11 +101,12 @@ def run_benchmark(corpus_path: Path, *, provider: str, model: str, output_path: 
 
 
 def main(argv: list[str] | None = None) -> int:
+    benchmarks = Path(__file__).resolve().parents[1] / "benchmarks"
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--provider", choices=("fake", "ollama", "gemini", "openai"), default="fake")
     parser.add_argument("--model", default=None)
-    parser.add_argument("--corpus", type=Path, default=Path("benchmarks/gemma_smoke.json"))
-    parser.add_argument("--out", type=Path, default=Path("benchmarks/results/latest.json"))
+    parser.add_argument("--corpus", type=Path, default=benchmarks / "gemma_smoke.json")
+    parser.add_argument("--out", type=Path, default=benchmarks / "results" / "latest.json")
     args = parser.parse_args(argv)
     defaults = {
         "fake": "gemma4:12b-it-qat",

@@ -153,12 +153,12 @@ flowchart LR
   emb["get_embedder: GemmaEmbedder or HashEmbedder"]
   retr --> emb
   gemma["gemma.GemmaClient, make_client"]
-  bench["scripts/bench_gemma.py"] --> gemma
+  bench["apps/api/scripts/bench_gemma.py"] --> gemma
 ```
 
 *C4 level 3, components of `brain`. `GemmaClient` is a separate client used only by the benchmark script.*
 
-Sources: apps/api/wsw_brain/routes/agent.py:36; apps/api/wsw_brain/brain/agent.py:14-27; apps/api/wsw_brain/brain/retrieve.py:74; apps/api/wsw_brain/brain/extract.py:666; apps/api/wsw_brain/brain/summary.py:9-11; apps/api/wsw_brain/brain/llm.py:67, apps/api/wsw_brain/brain/llm.py:856-891; apps/api/wsw_brain/brain/embed.py:43, apps/api/wsw_brain/brain/embed.py:140, apps/api/wsw_brain/brain/embed.py:174; apps/api/wsw_brain/brain/gemma.py:81, apps/api/wsw_brain/brain/gemma.py:307; scripts/bench_gemma.py:27-37.
+Sources: apps/api/wsw_brain/routes/agent.py:36; apps/api/wsw_brain/brain/agent.py:14-27; apps/api/wsw_brain/brain/retrieve.py:74; apps/api/wsw_brain/brain/extract.py:666; apps/api/wsw_brain/brain/summary.py:9-11; apps/api/wsw_brain/brain/llm.py:67, apps/api/wsw_brain/brain/llm.py:856-891; apps/api/wsw_brain/brain/embed.py:43, apps/api/wsw_brain/brain/embed.py:140, apps/api/wsw_brain/brain/embed.py:174; apps/api/wsw_brain/brain/gemma.py:81, apps/api/wsw_brain/brain/gemma.py:307; apps/api/scripts/bench_gemma.py:28-38.
 
 ### 5.3 Level 3: `graph` components
 
@@ -251,7 +251,7 @@ Only local development is described in the repository. Hosting of https://onreco
 | Python process | `python -m wsw_brain.cli` runs Uvicorn with `wsw_brain.app:app` | default `127.0.0.1:8000` | apps/api/wsw_brain/cli.py:24-31 |
 | Python process (optional) | Documents app `wsw_brain.documents.app:app` | operator's choice [unverified] | apps/api/wsw_brain/documents/app.py:21 |
 | Node.js | Vite dev server, proxies `/api` and `/ws` to `WSW_API_URL` | `:5173`, target default `http://127.0.0.1:8000` | apps/web/vite.config.ts:6-16 |
-| Local model server (optional) | Ollama, started by `scripts/gemma.sh` | `WSW_OLLAMA_URL` | scripts/gemma.sh:1-40 |
+| Local model server (optional) | Ollama, started by `apps/api/scripts/gemma.sh` | `WSW_OLLAMA_URL` | apps/api/scripts/gemma.sh:1-40 |
 
 ## 8. Cross-cutting concepts
 

@@ -36,7 +36,7 @@ flowchart TB
   db -. "live updates (SSE)" .-> web
 ```
 
-Dashed links are designed but not connected yet. Nothing writes the listener's utterances or the extractor's insights to the graph so far (`scripts/seed_demo_meetings.py` loads the demo meetings directly), and the web app still runs on its bundled demo data. [The architecture notes](docs/ARCHITECTURE.md) have the component diagram, the data flows and the graph schema.
+Dashed links are designed but not connected yet. Nothing writes the listener's utterances or the extractor's insights to the graph so far (`apps/api/scripts/seed_demo_meetings.py` loads the demo meetings directly), and the web app still runs on its bundled demo data. [The architecture notes](docs/ARCHITECTURE.md) have the component diagram, the data flows and the graph schema.
 
 ## Screenshots
 
@@ -90,8 +90,8 @@ uv run --project apps/api python -c "from wsw_brain.brand import product_name; p
 The brain package can run Gemma 4 through Ollama without a hosted API key. The helper starts Ollama and pulls the configured model on first use:
 
 ```bash
-./scripts/gemma.sh
-uv run --project apps/api python scripts/bench_gemma.py --provider fake
+./apps/api/scripts/gemma.sh
+uv run --project apps/api python apps/api/scripts/bench_gemma.py --provider fake
 ```
 
 Use `--provider ollama` for a live local benchmark. See [the local Gemma guide](docs/LOCAL_GEMMA.md) for provider settings, model choices, and report fields.
@@ -125,7 +125,7 @@ CI does not check the web app yet; run `npm run lint` and `npm run build` in `ap
 | `apps/web/scripts/` | Builds the demo data and, with Blender, the 3D landing assets |
 | `apps/api/wsw_brain/` | The Python package: `contracts`, `config`, `events`, `graph`, `listen`, `brain`, `documents`, and the HTTP `app`, `event_stream` and `cli` launcher |
 | `apps/api/tests/` | The pytest suite; `fixtures/` holds small synthetic ONNX models |
-| `scripts/` | Loads the demo meetings into the graph and generates a demo PDF |
+| `apps/api/scripts/`, `apps/api/benchmarks/` | Load the demo meetings into the graph, generate a demo PDF, start local Gemma and run its smoke benchmark |
 | `docs/` | The documentation listed below |
 | `brand.json` | The display name, tagline and event details |
 | `.env.example` | Every setting, with example values. Copy it to `.env`, which git ignores |
@@ -292,8 +292,8 @@ cd apps/web && npm run dev    # the Documents page proxies /api to port 8000
 To try the meeting check with the bundled demo data, load the two demo meetings and generate a 12-page pricing policy. The policy still states the Starter terms that the later demo meeting changed. Its 12 pages are sent to Document AI as two parts:
 
 ```bash
-uv run --project apps/api python scripts/seed_demo_meetings.py
-uv run --project apps/api python scripts/make_demo_document.py    # writes data/kitepost-pricing-policy.pdf
+uv run --project apps/api python apps/api/scripts/seed_demo_meetings.py
+uv run --project apps/api python apps/api/scripts/make_demo_document.py    # writes data/kitepost-pricing-policy.pdf
 ```
 
 Upload the PDF on the Documents page. Then ask "What does the Starter plan cost?" with meetings included.

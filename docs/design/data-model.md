@@ -187,7 +187,7 @@ All relationship writes use `MERGE` except `HAS_CHUNK`, which uses `CREATE` afte
 | Full-text | `DocChunk.text` | apps/api/wsw_brain/documents/store.py:30 |
 | Vector, cosine | `DocChunk.embedding` | apps/api/wsw_brain/documents/store.py:34-38 |
 
-The vector dimension is the embedder's `dim`, passed to `ensure_schema`: `GraphStore.ensure_schema(embedder.dim)` from the seed script (scripts/seed_demo_meetings.py:26) and `DocumentStore.ensure_schema(self.embedder.dim)` during ingestion (apps/api/wsw_brain/documents/ingest.py:133). The embedder sets `dim` to the smaller of `WSW_EMBED_DIM` (default 768, apps/api/wsw_brain/config.py:60) and the model's native size (apps/api/wsw_brain/brain/embed.py:104); the hashing fallback uses `WSW_EMBED_DIM` directly (apps/api/wsw_brain/brain/embed.py:186). If an `Utterance.embedding` index already exists with another dimension, `GraphStore.ensure_schema` raises `GraphError` (apps/api/wsw_brain/graph/store.py:219-226). `DocumentStore` has no such check, but rejects a chunk vector of the wrong length (apps/api/wsw_brain/documents/store.py:221-224).
+The vector dimension is the embedder's `dim`, passed to `ensure_schema`: `GraphStore.ensure_schema(embedder.dim)` from the seed script (apps/api/scripts/seed_demo_meetings.py:26) and `DocumentStore.ensure_schema(self.embedder.dim)` during ingestion (apps/api/wsw_brain/documents/ingest.py:133). The embedder sets `dim` to the smaller of `WSW_EMBED_DIM` (default 768, apps/api/wsw_brain/config.py:60) and the model's native size (apps/api/wsw_brain/brain/embed.py:104); the hashing fallback uses `WSW_EMBED_DIM` directly (apps/api/wsw_brain/brain/embed.py:186). If an `Utterance.embedding` index already exists with another dimension, `GraphStore.ensure_schema` raises `GraphError` (apps/api/wsw_brain/graph/store.py:219-226). `DocumentStore` has no such check, but rejects a chunk vector of the wrong length (apps/api/wsw_brain/documents/store.py:221-224).
 
 ## Id formats
 
@@ -267,7 +267,7 @@ flowchart LR
     LLM -- "answers, vectors" --> P
 ```
 
-Sources: apps/api/wsw_brain/documents/app.py:21-25, apps/api/wsw_brain/routes/documents.py:159-287, apps/api/wsw_brain/documents/ingest.py:133-157, scripts/seed_demo_meetings.py:22-42, apps/api/wsw_brain/app.py:44, apps/api/wsw_brain/ingest/pipeline.py:209-447.
+Sources: apps/api/wsw_brain/documents/app.py:21-25, apps/api/wsw_brain/routes/documents.py:159-287, apps/api/wsw_brain/documents/ingest.py:133-157, apps/api/scripts/seed_demo_meetings.py:22-42, apps/api/wsw_brain/app.py:44, apps/api/wsw_brain/ingest/pipeline.py:209-447.
 
 *DFD level 1: the processes inside the API and which of them read or write each part of the graph.*
 
@@ -303,6 +303,6 @@ flowchart TB
     P5 -. "save_turn" .-> D4
 ```
 
-Sources: apps/api/wsw_brain/routes/documents.py:159-194, apps/api/wsw_brain/routes/documents.py:240-262, apps/api/wsw_brain/documents/ingest.py:87-157, apps/api/wsw_brain/documents/answer.py:60-118, apps/api/wsw_brain/listen/file_pipeline.py:27-81, apps/api/wsw_brain/ingest/pipeline.py:118-143, apps/api/wsw_brain/ingest/pipeline.py:334-423, apps/api/wsw_brain/graph/store.py:461, apps/api/wsw_brain/graph/store.py:889-896, scripts/seed_demo_meetings.py:26-42.
+Sources: apps/api/wsw_brain/routes/documents.py:159-194, apps/api/wsw_brain/routes/documents.py:240-262, apps/api/wsw_brain/documents/ingest.py:87-157, apps/api/wsw_brain/documents/answer.py:60-118, apps/api/wsw_brain/listen/file_pipeline.py:27-81, apps/api/wsw_brain/ingest/pipeline.py:118-143, apps/api/wsw_brain/ingest/pipeline.py:334-423, apps/api/wsw_brain/graph/store.py:461, apps/api/wsw_brain/graph/store.py:889-896, apps/api/scripts/seed_demo_meetings.py:26-42.
 
-Process 1 and 2 run only under the standalone documents app (apps/api/wsw_brain/documents/app.py:25); the main app lists `documents` as a feature but does not serve `/api/documents` (apps/api/wsw_brain/app.py:32). Process 2 reads meeting lines through the shared retriever when `include_meetings` is set (apps/api/wsw_brain/documents/answer.py:93). Because process 4 is not wired, the only meeting data in a running graph is what the seed script writes: meetings, speakers, names, utterances and summaries, without decisions or action items (scripts/seed_demo_meetings.py:6).
+Process 1 and 2 run only under the standalone documents app (apps/api/wsw_brain/documents/app.py:25); the main app lists `documents` as a feature but does not serve `/api/documents` (apps/api/wsw_brain/app.py:32). Process 2 reads meeting lines through the shared retriever when `include_meetings` is set (apps/api/wsw_brain/documents/answer.py:93). Because process 4 is not wired, the only meeting data in a running graph is what the seed script writes: meetings, speakers, names, utterances and summaries, without decisions or action items (apps/api/scripts/seed_demo_meetings.py:6).

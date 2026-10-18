@@ -113,7 +113,7 @@ The workflow has read-only contents permission and cancels superseded runs on th
 | `IngestPipeline` is tested only with an in-memory store, not against FalkorDB, and no test starts it from an entrypoint | The wiring gap (no entrypoint constructs it) is not detected | FR-060 to FR-062, NFR-026 |
 | No test of Gemma native-audio transcription (apps/api/wsw_brain/brain/gemma.py:169-186) and no voice route to test | Spoken questions are unverified | FR-014, FR-030 |
 | Model-backed listener tests are expected to skip in CI | Listener regressions may pass CI | FR-001, FR-007 to FR-010, NFR-004 |
-| `scripts/gemma.sh`, access controls and key placement have no automated checks | Verified by inspection only | FR-065, NFR-017, NFR-027 |
+| `apps/api/scripts/gemma.sh`, access controls and key placement have no automated checks | Verified by inspection only | FR-065, NFR-017, NFR-027 |
 | The FalkorDB 6.0.x engine is not exercised; CI uses the image pinned in docker-compose.yml:4 | Compatibility rests on code comments | NFR-025 |
 | The hand-kept web type mirror (apps/web/src/api/types.ts:1) has no contract test | Drift between server and client shapes | NFR-024 |
 

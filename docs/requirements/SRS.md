@@ -46,7 +46,7 @@ Four facts limit what is reachable today. Rows below refer to them by these labe
 - **G1.** The main app mounts only the SSE stream, three status routes and, when injected, the agent. It has no meeting routes, no voice routes and no WebSocket (`apps/api/wsw_brain/app.py:14-41`).
 - **G2/G3.** The web app probes `/api/health`, which no server serves, so it runs on demo data unless forced (`apps/web/src/api/mode.ts:25-27`). It posts questions to `/api/ask` (`apps/web/src/api/client.ts:94`), while the agent is mounted at `/api/agent/ask` only when injected (`apps/api/wsw_brain/app.py:19-20`, `apps/api/wsw_brain/app.py:44`).
 - **G4.** `IngestPipeline` (`apps/api/wsw_brain/ingest/pipeline.py:55`, PR #75) is the only production caller of the graph insight writer, the extractor and the summariser, and the only production publisher of bus events. No entrypoint constructs it: not `apps/api/wsw_brain/app.py`, not `apps/api/wsw_brain/cli.py`, not any script ("No HTTP route starts the pipeline yet", `README.md:346`).
-- **G7.** The PR #76 `GemmaClient` (`apps/api/wsw_brain/brain/gemma.py:81`) is used only by `scripts/bench_gemma.py:17` and tests. The server selects models through `get_llm()` (`apps/api/wsw_brain/brain/llm.py:891`).
+- **G7.** The PR #76 `GemmaClient` (`apps/api/wsw_brain/brain/gemma.py:81`) is used only by `apps/api/scripts/bench_gemma.py:18` and tests. The server selects models through `get_llm()` (`apps/api/wsw_brain/brain/llm.py:891`).
 
 Two more apply to single features: SSE frames carry only the payload, while the client expects a whole event (G5, `apps/api/wsw_brain/routes/event_stream.py:22-23`, `apps/web/src/api/events.ts:94`), and documents are served only by `apps/api/wsw_brain/documents/app.py:21-25` (G6).
 
@@ -61,7 +61,7 @@ Meeting capture and listening, speaker attribution, transcription, extraction an
 | Meeting participant (organiser) | Starts or uploads a meeting, names speakers | `apps/web/src/components/meeting/StartMeeting.tsx:28` |
 | Any user | Asks typed or spoken questions | `apps/web/src/components/ask/AskDrawer.tsx:296` |
 | Team member or lead | Reviews commitments, decisions, people and the graph | `apps/web/src/App.tsx:43-46` |
-| Operator or developer | Configures providers, runs the API, benchmarks Gemma | `apps/api/wsw_brain/cli.py:11-31`, `scripts/bench_gemma.py:1-125` |
+| Operator or developer | Configures providers, runs the API, benchmarks Gemma | `apps/api/wsw_brain/cli.py:11-31`, `apps/api/scripts/bench_gemma.py:1-127` |
 
 ### 2.4 Constraints
 
@@ -112,7 +112,7 @@ Requirement text is abridged; the cited code holds the full behaviour and limits
 | FR-016 | Fall back to cue-phrase extraction and report the reason. | Partial: as FR-015 | `apps/api/wsw_brain/brain/extract.py:698-715` | Test |
 | FR-017 | Mark a decision superseded by a later one from any meeting; a restatement does not supersede. | Partial: reached only through the pipeline (G4) | `apps/api/wsw_brain/graph/store.py:555-578` | Test |
 | FR-018 | Store insights in one locked, deduplicated write and return only new items. | Partial: called by the unwired pipeline (G4) | `apps/api/wsw_brain/graph/store.py:461-665` | Test |
-| FR-019 | Summarise a meeting in at most 80 words, with a heuristic fallback. | Partial: pipeline unwired; only the seed script stores summaries | `apps/api/wsw_brain/brain/summary.py:15-123`, `scripts/seed_demo_meetings.py:44-45` | Test |
+| FR-019 | Summarise a meeting in at most 80 words, with a heuristic fallback. | Partial: pipeline unwired; only the seed script stores summaries | `apps/api/wsw_brain/brain/summary.py:15-123`, `apps/api/scripts/seed_demo_meetings.py:44-45` | Test |
 | FR-060 | Run live extraction every `WSW_EXTRACT_EVERY` (6) utterances over windows of up to 14, without repeating restated items, publishing `insight.created`. | Partial: pipeline unwired (G4) | `apps/api/wsw_brain/ingest/pipeline.py:373-447` | Test |
 | FR-061 | On meeting end, flush, mark ended, run a final extraction and summary, publish `meeting.ended`; idempotent. | Partial: unwired; end route not served | `apps/api/wsw_brain/ingest/pipeline.py:186-240` | Test |
 
@@ -194,8 +194,8 @@ All rows are served only by `wsw_brain.documents.app` (G6).
 | FR-058 | Expose `/healthz`, `/api/status`, `/api/capabilities`; start with Uvicorn from the CLI. | Implemented (`/api/capabilities` lists `documents`, which the main app does not mount) | `apps/api/wsw_brain/app.py:22-39`, `apps/api/wsw_brain/cli.py:11-31` | Test |
 | FR-059 | Use the declared question-audio, ASR, seed and access-control settings. | Planned: declared but unread (`WSW_EXTRACT_EVERY` is now read, see FR-060) | `apps/api/wsw_brain/config.py:63-69`, `.env.example:56-61` | Inspection |
 | FR-063 | Provide a provider-neutral `GemmaClient` (Ollama, Gemini REST, OpenAI-compatible) with schema-validated JSON, health check and native-audio transcription. | Partial: used only by the benchmark and tests (G7) | `apps/api/wsw_brain/brain/gemma.py:1-337` | Test |
-| FR-064 | Provide a repeatable structured-output smoke benchmark over `gemma-smoke-v1` (5 cases). | Implemented (developer CLI) | `scripts/bench_gemma.py:1-125`, `benchmarks/gemma_smoke.json:1-31` | Test |
-| FR-065 | Provide `scripts/gemma.sh` to start Ollama and pull the Gemma model. | Implemented (developer script) | `scripts/gemma.sh:1-40` | Inspection |
+| FR-064 | Provide a repeatable structured-output smoke benchmark over `gemma-smoke-v1` (5 cases). | Implemented (developer CLI) | `apps/api/scripts/bench_gemma.py:1-127`, `apps/api/benchmarks/gemma_smoke.json:1-31` | Test |
+| FR-065 | Provide `apps/api/scripts/gemma.sh` to start Ollama and pull the Gemma model. | Implemented (developer script) | `apps/api/scripts/gemma.sh:1-40` | Inspection |
 
 **Functional requirement totals:** 65 (Implemented 26, Partial 35, Planned 4).
 
@@ -207,7 +207,7 @@ All rows are served only by `wsw_brain.documents.app` (G6).
 | NFR-002 | Accuracy | Speaker attribution 100%/100%, diarization error 0.0%/0.3%, WER 3.2%/3.1%, with the caveat "synthetic voices, so treat accuracy as an upper bound". | Planned (claim only) [unverified provenance] | `apps/web/src/landing/LinerNotes.tsx:14-18`, `apps/web/src/landing/LinerNotes.tsx:105-107` | Demonstration |
 | NFR-003 | Performance | Bound model calls: 2 slots, 6 waiting, 90 s wait; priority work first. | Implemented | `apps/api/wsw_brain/brain/llm.py:58-164` | Test |
 | NFR-004 | Resources | Bound listener memory and backlog (300 s queue, 2 files, 2 h). | Partial: library only (G4) | `apps/api/wsw_brain/listen/session.py:11-17` | Test |
-| NFR-005 | Privacy, local-first | Run without sending meeting data off the machine (Ollama, faster-whisper, CPU embeddings, fake LLM, FalkorDB in Docker). | Partial: local text path works; listener and ingest unwired; documents need Sarvam | `apps/api/wsw_brain/brain/llm.py:875-887`, `scripts/gemma.sh:1-40` | Test |
+| NFR-005 | Privacy, local-first | Run without sending meeting data off the machine (Ollama, faster-whisper, CPU embeddings, fake LLM, FalkorDB in Docker). | Partial: local text path works; listener and ingest unwired; documents need Sarvam | `apps/api/wsw_brain/brain/llm.py:875-887`, `apps/api/scripts/gemma.sh:1-40` | Test |
 | NFR-006 | Privacy | Send data only to the configured provider; Sarvam key only to its base URL; bind to loopback by default. | Implemented | `apps/api/wsw_brain/documents/sarvam.py:52`, `apps/api/wsw_brain/cli.py:24`, `docker-compose.yml:5` | Inspection |
 | NFR-007 | Cost | Need no paid service for the core text path; hosted services are opt-in by key. Prices are not recorded in the repository. | Implemented | `apps/api/wsw_brain/brain/llm.py:856-887`, `apps/api/wsw_brain/brain/embed.py:182-186` | Test |
 | NFR-008 | Reliability, fallbacks | Degrade retrieval gracefully when a source or the vector index fails. | Implemented | `apps/api/wsw_brain/brain/retrieve.py:209-218` | Test |
@@ -230,7 +230,7 @@ All rows are served only by `wsw_brain.documents.app` (G6).
 | NFR-023 | Maintainability | Type-check and lint the web app in the checks. | Partial: CI does not run them; no web tests | `apps/web/package.json:6-11` | Inspection |
 | NFR-024 | Maintainability | Define shared shapes once and mirror them; keep Cypher in one module. | Partial: hand-kept mirror, some docstrings out of date | `apps/web/src/api/types.ts:1-2`, `apps/api/wsw_brain/contracts.py:275` | Inspection |
 | NFR-025 | Portability | Python 3.12-3.13, locked dependencies, FalkorDB 4.x and 6.0.x, Windows. | Implemented (6.0.x asserted in comments only) [unverified by CI] | `apps/api/pyproject.toml:6`, `.github/workflows/checks.yml:35` | Inspection |
-| NFR-028 | Reproducibility | Versioned smoke corpus and a report recording corpus, time, Python, provider and model. | Implemented | `scripts/bench_gemma.py:63-88` | Test |
+| NFR-028 | Reproducibility | Versioned smoke corpus and a report recording corpus, time, Python, provider and model. | Implemented | `apps/api/scripts/bench_gemma.py:64-89` | Test |
 
 **Quality requirement totals:** 28 (Implemented 16, Partial 9, Planned 3).
 
