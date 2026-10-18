@@ -1,9 +1,10 @@
 /* Ask drawer: conversation on the surface, the voice controls on a darker "transport" strip below. */
 
+/* above the desktop dock (80), so the dock dims and can't be clicked behind the drawer; below the palette */
 .ask-scrim {
   position: fixed;
   inset: 0;
-  z-index: 60;
+  z-index: 82;
   background: rgb(var(--shade) / 0.22);
   backdrop-filter: blur(2px);
   -webkit-backdrop-filter: blur(2px);
@@ -20,7 +21,7 @@
   top: 0;
   right: 0;
   bottom: 0;
-  z-index: 61;
+  z-index: 83;
   display: flex;
   flex-direction: column;
   width: min(var(--drawer-w), 100vw);
