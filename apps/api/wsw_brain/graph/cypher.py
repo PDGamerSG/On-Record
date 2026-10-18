@@ -226,6 +226,8 @@ MERGE (a)-[:ASSIGNED_TO]->(s)
 def write_utterances(with_embeddings: bool) -> str:
     """One UNWIND batch: Meeting/Speaker/Utterance + HAS_SPEAKER, HAS_UTTERANCE, SPOKEN_BY. A rewritten
     utterance that changed speaker loses its stale SPOKEN_BY edge."""
+    # Cypher has no conditional SET. FOREACH over a one-item list sets the embedding, and over an empty list
+    # does nothing, so an utterance without an embedding gets no property and stays out of the vector index.
     embedding = (
         "FOREACH (e IN CASE WHEN r.embedding IS NULL THEN [] ELSE [r.embedding] END |"
         " SET u.embedding = vecf32(e))\n"
@@ -325,7 +327,7 @@ def _scan_source(by_meeting: bool) -> str:
     match = "MATCH (u:Utterance {meeting_id: $meeting_id})" if by_meeting else "MATCH (u:Utterance)"
     return (
         f"{match}\n"
-        "WITH u LIMIT $scan_limit\n"
+        "WITH u LIMIT $scan_limit\n"  # before matching: only the first $scan_limit utterances are searched
         "WITH u, size([t IN $terms WHERE toLower(u.text) CONTAINS t]) AS matched\n"
         "WHERE matched > 0\n"
         "WITH u, toFloat(matched) AS score ORDER BY score DESC LIMIT $k"

@@ -62,8 +62,12 @@ log = logging.getLogger(__name__)
 SOURCES = ("mic", "upload", "demo")
 ITEM_STATUSES = ("open", "done")
 ENTITY_KINDS = ("product", "customer", "vendor", "org", "other")
+# Minimum word overlap (Jaccard, 0 to 1) between a draft's supersedes_text and an earlier active decision for
+# that decision to be marked superseded. Below it, nothing is superseded.
 SUPERSEDE_MIN_JACCARD = 0.3
-FULLTEXT_SCAN_LIMIT = 2000  # utterances examined by the CONTAINS fallback
+# Utterances examined by the CONTAINS fallback when RediSearch rejects a query. The LIMIT applies before
+# matching (cypher._scan_source), so in a larger graph or meeting the rest are never searched.
+FULLTEXT_SCAN_LIMIT = 2000
 WHO_KNOWS_POOL = 300  # full-text hits grouped by who_knows
 _SLUG_KINDS = ("Topic", "Entity", "Person")  # ids are bare slugs; prefixed in subgraph output to stay unique
 _KIND_ORDER = {k: i for i, k in enumerate(
@@ -134,9 +138,14 @@ class GraphStore:
                     try:
                         self._db = FalkorDB.from_url(
                             _prefer_ipv4_loopback(self.url),
+                            # Seconds to open a connection, and to wait for a reply. The reply wait is well
+                            # above the local server's 20 s TIMEOUT_MAX (docker-compose.yml), so it only
+                            # fires on a dead link.
                             socket_connect_timeout=3,
                             socket_timeout=60,
-                            health_check_interval=30,
+                            health_check_interval=30,  # ping a connection idle this long before reusing it
+                            # Retry a dropped connection twice, backing off exponentially (50 ms base,
+                            # 0.5 s cap).
                             retry=Retry(ExponentialBackoff(cap=0.5, base=0.05), 2),
                         )
                     except redis.exceptions.RedisError as exc:
@@ -307,6 +316,12 @@ class GraphStore:
         }
 
     def delete_meeting(self, meeting_id: str) -> bool:
+        """Delete a meeting and everything scoped to it. Returns False when there was no such meeting.
+
+        The order matters. Meeting-scoped nodes go first, and DETACH DELETE removes their edges, including
+        SUPERSEDES edges from this meeting's decisions. Decisions in other meetings that nothing supersedes
+        any more then become active again. Last, Topic, Entity and Person nodes left with no incoming edges
+        are removed; that check counts edges, so it has to run after the deletes."""
         params = {"meeting_id": meeting_id}
         with self._write_lock:
             for label in ("Utterance", "Speaker", "Decision", "ActionItem"):
@@ -498,6 +513,9 @@ class GraphStore:
             key = normalise(text)
             if not key:
                 continue
+            # The id is a hash of the normalised text (lowercase, no punctuation), so extracting the same
+            # decision again finds the existing node instead of adding a duplicate. It is per meeting: the
+            # same text in another meeting is a separate decision.
             did = f"{meeting_id}:d-{short_hash(key)}"
             if any(r["id"] == did for r in rows):
                 continue
@@ -567,7 +585,7 @@ class GraphStore:
             key = normalise(text)
             if not key:
                 continue
-            aid = f"{meeting_id}:a-{short_hash(key)}"
+            aid = f"{meeting_id}:a-{short_hash(key)}"  # same scheme as decision ids
             if any(r["id"] == aid for r in rows):
                 continue
             owner_name, owner_track, owner_sid, owner_said = _resolve_owner(draft.owner, speakers, persons)
@@ -801,7 +819,8 @@ class GraphStore:
             raise ValueError(f"query vector has {len(values)} dims; the vector index expects {self._embed_dim}")
         k = _clamp(k, 1, 500)
         by_meeting = meeting_id is not None
-        # KNN runs before the meeting filter, so over-fetch when filtering.
+        # KNN runs before the meeting filter, so over-fetch when filtering: 10x k neighbours across all
+        # meetings (100 to 1000). A meeting with few close matches in that window can return fewer than k.
         params: dict[str, Any] = {"vector": values, "k": k, "knn": min(max(k * 10, 100), 1000) if by_meeting else k}
         if by_meeting:
             params["meeting_id"] = meeting_id
