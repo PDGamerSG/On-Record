@@ -41,10 +41,11 @@ flowchart LR
 | `wsw_brain/config.py` | `Settings`, read from `WSW_*` environment variables and `.env` |
 | `wsw_brain/events.py` | The in-process event bus behind the live updates stream |
 | `wsw_brain/graph/` | `GraphStore` and every Cypher statement it runs (`cypher.py`) |
-| `wsw_brain/listen/` | Audio decoding and resampling, and speech recognition (faster-whisper, Sarvam Saaras) |
+| `wsw_brain/listen/` | Audio decoding and resampling, speech recognition (faster-whisper, Sarvam Saaras), and the listener: `LiveSession` turns an audio stream into speaker-attributed utterances |
 | `wsw_brain/brain/` | Text embeddings, hybrid retrieval, and the text model adapters (Ollama, Gemini, OpenAI-compatible, Sarvam, fake) |
 | `wsw_brain/documents/` | Document upload, digitising, chunking, search and answers |
-| `wsw_brain/app.py` | The HTTP application entrypoint |
+| `wsw_brain/app.py`, `cli.py` | The HTTP application (`create_app()`), and the launcher that runs it with Uvicorn |
+| `wsw_brain/event_stream.py` | `GET /api/events`: the event bus as Server-Sent Events |
 
 In development, Vite serves the web app on port 5173 and proxies `/api` and `/ws` to `WSW_API_URL` (default `http://127.0.0.1:8000`). For an API hosted elsewhere, build the web app with `VITE_API_BASE` set to its origin.
 
@@ -52,12 +53,13 @@ In development, Vite serves the web app on port 5173 and proxies `/api` and `/ws
 
 The repository is being assembled in feature-sized PRs, so several things the web app calls have no server yet:
 
-- `wsw_brain.app:app` serves only `GET /healthz` and `GET /api/status`.
+- `wsw_brain.app:app`, started with `python -m wsw_brain.cli`, serves `GET /healthz`, `GET /api/status`, `GET /api/capabilities` and the `GET /api/events` stream.
 - `wsw_brain.documents.app:app` serves only `/api/documents/*`. The web app on `main` has no Documents page yet.
-- No server provides the meeting routes listed in `apps/web/src/api/client.ts` (`/api/health`, `/api/meetings`, `/api/ask`, …), the `/api/events` stream or the audio WebSocket.
-- The listener and the assistant exist only as contracts in `contracts.py`. The listener turns captured audio into speaker-attributed utterances. The assistant answers questions with tool calls and returns an `AskResult`.
+- No server provides the meeting routes listed in `apps/web/src/api/client.ts` (`/api/health`, `/api/meetings`, `/api/ask`, …) or the audio WebSocket.
+- The listener (`listen/session.py`) runs as a library: `listen/pipeline.py` feeds it an audio file as if it were streamed, but no route connects it to the browser yet.
+- The assistant exists only as the `AskResult` contract in `contracts.py`. It will answer questions with tool calls.
 
-As a result, the web app's meeting views always run on the bundled demo data today. The live sections below describe what the client expects from the server.
+The web app decides its mode with `/api/health`, which no server answers yet, so its meeting views always run on the bundled demo data today. The live sections below describe what the client expects from the server.
 
 ## Demo mode and live mode
 
@@ -80,6 +82,10 @@ The server pushes changes to the browser over **Server-Sent Events (SSE)**, a on
 ```json
 {"id": 42, "type": "utterance.created", "meeting_id": "m1", "ts": 1760000000.5, "data": {}}
 ```
+
+`GET /api/events` (`wsw_brain/event_stream.py`) sends each event as one SSE frame. The id goes on the `id:` line and the type on the `event:` line, and the `data:` line carries only `data` as JSON; `meeting_id` and `ts` are not sent. When no event has arrived for 15 s, the endpoint sends a `: keep-alive` comment.
+
+The web client (`src/api/events.ts`) currently parses each frame's `data:` line as the whole event object, so the two sides have to be reconciled before live mode can work.
 
 | Type | `data` | Used by |
 | --- | --- | --- |
@@ -120,7 +126,7 @@ The browser has two separate audio pipelines. Both produce 16 kHz mono 16-bit PC
 3. Frames are sent as binary messages on `/ws/meetings/{id}/audio`. The server replies with JSON: `{"type": "status", "state": "listening" | "processing", …}` or `{"type": "error", "detail": …}`.
 4. Stopping sends `{"type": "stop"}` to end the meeting, or `{"type": "stop", "end": false}` to keep it live. The client then waits up to 1.5 s for buffered audio to drain. If more than 4 MB of audio is waiting to send (about two minutes), the link is treated as down.
 
-Transcribed utterances come back over the SSE stream as `utterance.created`, not over the socket. A recorded file can be sent instead with `POST /api/meetings/upload`, where `pace` is `fast` or `realtime`. On the server, `listen/audio.py` decodes and resamples. `listen/asr.py` (faster-whisper) and `listen/sarvam_asr.py` (Saaras, for Indian languages and code-mixed speech) transcribe.
+Transcribed utterances come back over the SSE stream as `utterance.created`, not over the socket. A recorded file can be sent instead with `POST /api/meetings/upload`, where `pace` is `fast` or `realtime`. On the server, `listen/audio.py` decodes and resamples. `LiveSession` (`listen/session.py`) finds speech with Silero VAD, splits it where the voice changes, and assigns each part a speaker track (`listen/speakers.py`). `listen/asr.py` (faster-whisper) or `listen/sarvam_asr.py` (Saaras, for Indian languages and code-mixed speech) then transcribes it.
 
 ### Spoken questions
 
