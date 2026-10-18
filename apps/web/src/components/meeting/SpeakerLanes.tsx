@@ -123,6 +123,7 @@ export default function SpeakerLanes(props: Props) {
         // Tab moves between lanes and the arrow keys move within them.
         const tabId = lane.list.some((u) => u.id === roving[lane.speaker.track]) ? roving[lane.speaker.track] : lane.list[0]?.id;
         return lane.list.map((u, bi) => {
+          // Under 0.5 the listener isn't sure who spoke: the block is faded and its label says "speaker uncertain".
           const unsure = u.confidence < 0.5;
           const cls = ["lane-block", fresh.has(u.id) && "is-fresh", u.id === activeId && "is-active", unsure && "is-unsure"]
             .filter(Boolean)

@@ -103,6 +103,7 @@ export function useMeetingRoom(id: string): MeetingRoomApi {
       const action = toAction(e);
       if (action) dispatch(action);
     },
+    // meeting.* events carry the meeting itself as data (a MeetingSummary), so they also match on data.id.
     (e) => e.meeting_id === id || (e.type.startsWith("meeting.") && (e.data as Data | null)?.id === id),
   );
 
