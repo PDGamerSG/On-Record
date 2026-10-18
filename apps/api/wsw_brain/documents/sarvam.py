@@ -45,6 +45,7 @@ class DigitisedPart:
     pages: list[Page]
     pages_failed: int = 0
     timings: dict[str, float] = field(default_factory=dict)
+    visual_description: str = ""  # Gemma 4's description of an uploaded image, if one was made
 
 
 class SarvamDocAI:

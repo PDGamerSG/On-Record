@@ -11,12 +11,14 @@ import logging
 import time
 import uuid
 from collections.abc import Callable
+from dataclasses import replace
 from typing import Any, Protocol
 
 from ..contracts import LLM, Embedder
 from ..graph.text import slug
 from .split import SARVAM_MAX_PAGES, Chunk, DocumentError, DocumentPart, Page, chunk_pages, split_document
 from .store import DocumentStore
+from .vision import describe_image, supports_images
 
 log = logging.getLogger(__name__)
 
@@ -72,6 +74,16 @@ class DocumentIngestor:
             raise DocumentError(f"the document has {total} pages; the limit is {self.max_total_pages}")
         return parts
 
+    async def _with_visual_description(self, part: DocumentPart, result: Any, report: Progress, doc_id: str) -> Any:
+        description = await _visual_description(self.llm, part)
+        if not description:
+            return result
+        report({"stage": "vision", "doc_id": doc_id, "part": part.index, "model": self.llm.model})
+        pages = list(result.pages)
+        first = pages[0] if pages else Page(1, "")
+        pages[0] = Page(first.number, f"{first.text}\n\n## What the image shows (Gemma 4)\n\n{description}".strip())
+        return replace(result, pages=pages, visual_description=description)
+
     async def ingest(
         self,
         filename: str,
@@ -100,6 +112,8 @@ class DocumentIngestor:
             nonlocal done
             async with gate:
                 result = await self.digitiser.digitise(part.filename, part.data, part.content_type, language)
+                if part.content_type.startswith("image/") and supports_images(self.llm):
+                    result = await self._with_visual_description(part, result, report, doc_id)
             done += 1
             report({"stage": "digitise", "doc_id": doc_id, "part": part.index, "done": done, "parts": len(parts),
                     "first_page": part.first_page, "last_page": part.last_page})
@@ -148,6 +162,7 @@ class DocumentIngestor:
         return {
             "doc_id": doc_id,
             "title": title,
+            "visual": [p.index for p, r in results if getattr(r, "visual_description", "")],
             "pages": total_pages,
             "chunks": len(chunks),
             "summary": summary,
@@ -166,6 +181,14 @@ class DocumentIngestor:
             ],
             "total_s": round(time.perf_counter() - started, 2),
         }
+
+
+async def _visual_description(llm: LLM, part: DocumentPart) -> str:
+    try:
+        return await describe_image(llm, part.data, part.content_type)
+    except Exception as exc:  # noqa: BLE001 - the OCR text is still stored without the description
+        log.warning("Gemma 4 could not describe %s: %r", part.filename, exc)
+        return ""
 
 
 def _source_pages(results: list[tuple[DocumentPart, Any]]) -> list[Page]:

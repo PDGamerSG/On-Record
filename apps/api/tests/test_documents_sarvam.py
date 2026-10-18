@@ -170,3 +170,22 @@ def test_select_llm_routes_sarvam():
     assert select_llm(auto, probe=lambda *a: None).provider == "sarvam"
     with pytest.raises(LLMError, match="SARVAM_API_KEY"):
         select_llm(Settings(_env_file=None, WSW_LLM_PROVIDER="sarvam"))
+
+
+@pytest.mark.asyncio
+async def test_sarvam_llm_sends_image_parts_and_reads_json_hints_from_them():
+    requests = []
+
+    def handler(request):
+        requests.append(request)
+        return httpx.Response(200, json={"choices": [{"message": {"content": "A chart."}}]})
+
+    llm = SarvamLLM("key", transport=httpx.MockTransport(handler), base_url=BASE)
+    assert llm.supports_images is True
+    assert SarvamLLM("key", "sarvam-105b").supports_images is False
+    parts = [{"type": "text", "text": "Describe as JSON."},
+             {"type": "image_url", "image_url": {"url": "data:image/png;base64,AAAA"}}]
+    await llm.chat([{"role": "user", "content": parts}], json_mode=True)
+    payload = json.loads(requests[0].content)
+    assert payload["messages"][0]["content"] == parts
+    assert "response_format" not in payload

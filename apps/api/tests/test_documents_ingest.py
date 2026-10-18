@@ -165,3 +165,38 @@ async def test_answers_can_combine_meetings_and_documents(docs):
     assert [c["meeting_id"] for c in answer["meeting_citations"]] == ["m-pay"]
     assert answer["meeting_citations"][0]["meeting_date"]
     assert "[u:m9:u99999]" not in answer["answer"] and answer["citations"]
+
+
+class VisionLLM(EchoLLM):
+    supports_images = True
+
+    async def chat(self, messages, **kwargs):
+        content = messages[-1]["content"]
+        if isinstance(content, list):
+            assert content[1]["image_url"]["url"].startswith("data:image/png;base64,")
+            return LLMResult("- Arrow from Pricing to Billing\n- Owner: Arjun, due Friday", [], self.model,
+                             self.provider, 1.0)
+        return await super().chat(messages, **kwargs)
+
+
+class ImageDigitiser:
+    async def digitise(self, filename, data, content_type, language="en-IN"):
+        return DigitisedPart(job_id="job-img", status="completed", pages=[Page(1, "Pricing  Billing")])
+
+
+@pytest.mark.asyncio
+async def test_image_uploads_get_a_gemma_description(docs):
+    png = b"\x89PNG\r\n\x1a\n" + b"0" * 64
+    events = []
+    ingestor = DocumentIngestor(docs, HashEmbedder(64), ImageDigitiser(), llm=VisionLLM())
+
+    result = await ingestor.ingest("whiteboard.png", png, summarise=False, on_progress=events.append)
+
+    assert result["visual"] == [0]
+    assert any(e["stage"] == "vision" for e in events)
+    chunks = docs.get_document(result["doc_id"])["chunks"]
+    described = [c for c in chunks if c["heading"] == "What the image shows (Gemma 4)"]
+    assert described and "Owner: Arjun" in described[0]["text"]
+    plain = await DocumentIngestor(docs, HashEmbedder(64), ImageDigitiser(), llm=EchoLLM()).ingest(
+        "whiteboard.png", png, summarise=False)
+    assert plain["visual"] == []

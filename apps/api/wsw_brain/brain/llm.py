@@ -690,6 +690,15 @@ class OpenAICompatLLM:
         return {"role": role, "content": message.get("content") or ""}
 
 
+def _text_of(content: Any) -> str:
+    """Text of a message whose content is a string or a list of OpenAI-style content parts."""
+    if isinstance(content, str):
+        return content
+    if isinstance(content, list):
+        return " ".join(part.get("text", "") for part in content if isinstance(part, dict))
+    return ""
+
+
 class SarvamLLM(OpenAICompatLLM):
     """Gemma 4 31B (model "gemma4") or another Sarvam-served model through Sarvam's v2 chat completions.
 
@@ -713,6 +722,8 @@ class SarvamLLM(OpenAICompatLLM):
         super().__init__(base_url, None, model, transport=transport)
         self.url = f"{base_url.rstrip('/')}/v2/chat/completions"
         self._headers = {"api-subscription-key": api_key.strip()}
+        # Gemma 4 31B accepts inline images (base64 data URIs in image_url content parts).
+        self.supports_images = model == "gemma4"
 
     async def chat(
         self,
@@ -723,9 +734,7 @@ class SarvamLLM(OpenAICompatLLM):
         temperature: float = 0.2,
         max_tokens: int = 800,
     ) -> LLMResult:
-        prompt_asks_for_json = any(
-            isinstance(m.get("content"), str) and "json" in m["content"].lower() for m in messages
-        )
+        prompt_asks_for_json = any("json" in _text_of(m.get("content")).lower() for m in messages)
         return await super().chat(
             messages,
             tools=tools,

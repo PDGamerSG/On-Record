@@ -137,6 +137,7 @@ Teams also decide things in contracts, specs and policies. The `wsw_brain.docume
 
 1. **Split.** Sarvam Document AI accepts at most 10 pages per job. `split_document` cuts a PDF into consecutive parts of up to 10 pages; a ZIP of page images is split the same way. A PNG or JPEG image is processed as a single page. Each part records the source pages it covers.
 2. **Digitise.** `SarvamDocAI` sends the parts to Sarvam Vision in parallel, waits for each job, and reads the per-page layout blocks. Running headers and page numbers are dropped, and tables become `cell | cell` rows. Page numbers are shifted back to the original document.
+   For an uploaded PNG or JPEG (a whiteboard photo, slide or chart), Gemma 4 31B also looks at the image and describes what the text alone misses: boxes and arrows, chart trends, owners and dates. The description is stored as a section of that page, so it can be searched and cited.
 3. **Chunk and embed.** Passages follow section headings, keep their page range, and are embedded with the configured embedder (EmbeddingGemma by default).
 4. **Store and search.** `(:Document)-[:HAS_CHUNK]->(:DocChunk)` nodes get their own full-text and vector indexes. `DocumentRetriever` fuses both with reciprocal-rank fusion.
 5. **Ask.** `answer_question` has Gemma 4 answer only from retrieved passages and cite them as `[d:<chunk id>]`. Citations to passages that were not retrieved are removed. Each document also gets a short Gemma 4 summary of its deadlines, owners and obligations.
