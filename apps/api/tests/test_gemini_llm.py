@@ -254,6 +254,7 @@ def test_gemini_user_images_become_inline_data_parts(mime: str):
     [
         (_image_message("https://example.com/board.png"), "data URIs"),
         (_image_message("data:image/gif;base64,R0lGODlh"), "data URIs"),
+        ({"role": "user", "content": [{"type": "image_url", "image_url": "not-an-object"}]}, "data URIs"),
         ({"role": "user", "content": [{"type": "input_audio", "input_audio": {}}]}, "input_audio"),
     ],
 )

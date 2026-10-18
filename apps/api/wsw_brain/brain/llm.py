@@ -495,7 +495,9 @@ def _user_parts(content: Any) -> list[Any]:
         if kind == "text":
             parts.append(types.Part.from_text(text=item.get("text") or ""))
         elif kind == "image_url":
-            match = _DATA_URI.match((item.get("image_url") or {}).get("url") or "")
+            image_url = item.get("image_url")
+            url = image_url.get("url") if isinstance(image_url, dict) else None
+            match = _DATA_URI.match(url or "")
             if match is None:
                 raise ValueError("only base64 PNG or JPEG data URIs are supported for images")
             data = base64.b64decode(match["data"], validate=True)
