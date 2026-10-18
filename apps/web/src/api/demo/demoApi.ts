@@ -168,7 +168,8 @@ function subgraph(q: { meeting_id?: string; utterance_ids?: string[] }): Subgrap
     }
     let prev: string | null = null;
     for (const u of utts) {
-      add({ id: u.id, label: u.text.length > 64 ? `${u.text.slice(0, 62)}…` : u.text, kind: "Utterance", speaker: u.speaker, t_start: u.t_start });
+      // the real API sends meeting_id on Utterance nodes; the details panel needs it for Play and Open meeting
+      add({ id: u.id, label: u.text.length > 64 ? `${u.text.slice(0, 62)}…` : u.text, kind: "Utterance", speaker: u.speaker, t_start: u.t_start, meeting_id: mid });
       link(mid, u.id, "HAS_UTTERANCE");
       link(u.id, `${mid}:${u.speaker}`, "SPOKEN_BY");
       if (prev && !only) link(prev, u.id, "NEXT");
