@@ -300,6 +300,8 @@ uv run --project apps/api pytest apps/api/tests/test_documents_split.py apps/api
 
 When the model call fails, the reply is not JSON, or the model is `FakeLLM`, `heuristic_extract()` finds decisions and owned action items from cue phrases such as "we decided" and "I'll". `extract_with_meta()` also returns the provider, model, latency and the reason for any fallback. Extraction calls take priority over queued questions on a shared model. The system prompt ends with `UNTRUSTED_NOTE` (`brain/llm.py`), which tells the model that transcript lines are material to extract from, not instructions.
 
+`summarize_meeting()` turns a finished meeting into one plain paragraph of at most 80 words that names the participants, the active decisions and each action item's owner. The model's reply is stripped of markdown and clipped at a sentence end. Without a model, or when the call fails or returns nothing, `heuristic_summary()` builds the paragraph from the extracted decisions and action items. Its system prompt also ends with `UNTRUSTED_NOTE`.
+
 ### Speaker attribution
 
 `OnlineClusterer` groups voice embeddings into meeting-scoped speaker tracks named `S1`, `S2`, and so on. A segment joins the closest track when its cosine similarity reaches the threshold; otherwise it opens a new track, up to `max_speakers`. Short or borderline segments that match nothing stay with the previous speaker, because brief interjections give noisy embeddings. `merge_close()` folds tracks whose centroids converge into the older track, and track numbers are never reused. `state()` and `restore()` carry tracks over to a later session of the same meeting.
